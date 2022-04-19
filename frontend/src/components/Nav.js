@@ -9,16 +9,10 @@ const Nav = () => {
     <div>
       <ul>
         <li>
-          <NavLink to="/contact">Contact Us</NavLink>
+          <NavLink to="/">Home</NavLink>
         </li>
         {loginContext.isLoggedIn ? (
           <>
-            <li>
-              <NavLink to="/account">View Account Number</NavLink>
-            </li>
-            <li>
-              <NavLink to="/balance">View Account Balance</NavLink>
-            </li>
             <li>
               <NavLink to="/account-settings">Account Settings</NavLink>
             </li>

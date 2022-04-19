@@ -16,7 +16,6 @@ function App() {
   return (
     <LoginContext.Provider value={{ isLoggedIn, setIsLoggedIn }}>
       <BrowserRouter>
-        <h1>My Bank</h1>
         <Nav />
         <Switch>
           <Route path="/login">

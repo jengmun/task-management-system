@@ -3,19 +3,19 @@ const argon2 = require("argon2");
 const db = require("../modules/db");
 const router = express.Router();
 
-// Middleware to handle admin auth
-router.use("/", (req, res, next) => {
-  if (!req.session.isAdmin) {
-    res.json("Unauthorised administrator!");
-    return;
-  }
-  next();
-});
+// ------------- Middleware -------------
+// router.use("/", (req, res, next) => {
+//   if (!req.session.isAdmin) {
+//     res.json("Unauthorised administrator!");
+//     return;
+//   }
+//   next();
+// });
 
 // ------------- Routes -------------
 
 router.get("/all-users", (req, res) => {
-  db.query("SELECT username FROM accounts", (err, result) => {
+  db.query("SELECT * FROM accounts", (err, result) => {
     res.json(result);
   });
 });
@@ -34,9 +34,19 @@ router.post("/create-account", async (req, res) => {
   }
 
   const hashedPassword = await argon2.hash(password);
+
   db.query(
-    "INSERT INTO accounts (username, password, email, user_group) VALUES (?, ?, ?, ?)",
-    [username, hashedPassword, email, group],
+    "INSERT INTO accounts (username, password, email) VALUES (?, ?, ?)",
+    [username, hashedPassword, email],
+    (err, result) => {
+      if (err) throw err;
+      res.json(result);
+    }
+  );
+
+  db.query(
+    "INSERT INTO accounts_groups (user_group, username, group_name) VALUES (?, ?, ?)",
+    [`${username}_${group}`, username, group],
     (err, result) => {
       if (err) throw err;
       res.json(result);
@@ -45,12 +55,9 @@ router.post("/create-account", async (req, res) => {
 });
 
 router.post("/update-details", async (req, res) => {
-  const { field, username } = req.body;
-  let { details } = req.body;
+  const { username, email, group } = req.body;
+  const password = await argon2.hash(req.body.password);
 
-  if (field === "password") {
-    details = await argon2.hash(details);
-  }
   db.query(
     "UPDATE accounts SET ?? = ? WHERE username = ?",
     [field, details, username],
@@ -61,13 +68,13 @@ router.post("/update-details", async (req, res) => {
   );
 });
 
-router.post("/disable-user", (req, res) => {
+router.post("/toggle-status", (req, res) => {
   db.query(
-    'UPDATE accounts SET status = "Disabled" WHERE username = ?',
-    req.body.username,
+    "UPDATE accounts SET status = ? WHERE username = ?",
+    [req.body.status, req.body.username],
     (err, result) => {
       if (err) throw err;
-      res.json("User disabled");
+      res.json(`Status changed to ${req.body.status}`);
     }
   );
 });

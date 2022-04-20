@@ -4,13 +4,13 @@ const db = require("../modules/db");
 const router = express.Router();
 
 // Middleware to handle login
-router.use("/", (req, res, next) => {
-  if (req.path !== "/login" && !req.session.isLoggedIn) {
-    res.json("User is not logged in!");
-    return;
-  }
-  next();
-});
+// router.use("/", (req, res, next) => {
+//   if (req.path !== "/login" && !req.session.isLoggedIn) {
+//     res.json("User is not logged in!");
+//     return;
+//   }
+//   next();
+// });
 
 // ------------- Routes -------------
 
@@ -43,21 +43,28 @@ router.get("/logout", (req, res) => {
   res.json("Logged out");
 });
 
-router.post("/update-details", async (req, res) => {
-  const { field, username } = req.body;
-  let { details } = req.body;
-
-  if (field === "password") {
-    details = await argon2.hash(details);
-  }
+router.get("/:username", (req, res) => {
   db.query(
-    "UPDATE accounts SET ?? = ? WHERE username = ?",
-    [field, details, username],
+    "SELECT * FROM accounts WHERE username = ?",
+    [req.params.username],
     (err, result) => {
-      if (err) throw err;
       res.json(result);
     }
   );
+});
+
+router.post("/update-details", async (req, res) => {
+  const { username, email } = req.body;
+  const password = await argon2.hash(req.body.password);
+
+  // db.query(
+  //   "UPDATE accounts SET ?? = ? WHERE username = ?",
+  //   [field, details, username],
+  //   (err, result) => {
+  //     if (err) throw err;
+  //     res.json(result);
+  //   }
+  // );
 });
 
 module.exports = router;

@@ -1,6 +1,6 @@
 const express = require("express");
 const argon2 = require("argon2");
-const db = require("../modules/db");
+const { db, database } = require("../modules/db");
 const router = express.Router();
 
 // ------------- Middleware -------------
@@ -15,7 +15,16 @@ const router = express.Router();
 // ------------- Routes -------------
 
 router.get("/all-users", (req, res) => {
-  db.query("SELECT * FROM accounts", (err, result) => {
+  db.query(
+    "SELECT * FROM accounts LEFT JOIN accounts_groups ON accounts.username = accounts_groups.username;",
+    (err, result) => {
+      res.json(result);
+    }
+  );
+});
+
+router.get("/all-groups", (req, res) => {
+  db.query(`SELECT * FROM ${database}.groups`, (err, result) => {
     res.json(result);
   });
 });
@@ -58,14 +67,14 @@ router.post("/update-details", async (req, res) => {
   const { username, email, group } = req.body;
   const password = await argon2.hash(req.body.password);
 
-  db.query(
-    "UPDATE accounts SET ?? = ? WHERE username = ?",
-    [field, details, username],
-    (err, result) => {
-      if (err) throw err;
-      res.json(result);
-    }
-  );
+  // db.query(
+  //   "UPDATE accounts SET ?? = ? WHERE username = ?",
+  //   [field, details, username],
+  //   (err, result) => {
+  //     if (err) throw err;
+  //     res.json(result);
+  //   }
+  // );
 });
 
 router.post("/toggle-status", (req, res) => {

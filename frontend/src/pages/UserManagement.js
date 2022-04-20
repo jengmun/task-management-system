@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from "react";
-import handleCreateNewUser from "../hooks/handleCreateNewUser";
-import handleUpdateDetails from "../hooks/handleUpdateDetails";
+import handleGetRequest from "../hooks/handleGetRequest";
 
 const UserManagement = () => {
   // Fetch all users
@@ -120,9 +119,9 @@ const UserManagement = () => {
       />
       <input
         type="submit"
-        onClick={() =>
-          handleCreateNewUser(newUsername, newPassword, newEmail, newGroup)
-        }
+        // onClick={() =>
+        //   handleCreateNewUser(newUsername, newPassword, newEmail, newGroup)
+        // }
       />
 
       <h1>Update user information</h1>
@@ -149,7 +148,7 @@ const UserManagement = () => {
       />
       <input
         type="submit"
-        onClick={() => handleUpdateDetails("password", user, changePassword)}
+        // onClick={() => handleUpdateDetails("password", user, changePassword)}
       />
 
       <h1>Update email information</h1>
@@ -161,7 +160,7 @@ const UserManagement = () => {
       />
       <input
         type="submit"
-        onClick={() => handleUpdateDetails("email", user, updateEmail)}
+        // onClick={() => handleUpdateDetails("email", user, updateEmail)}
       />
 
       <h1>Disable user</h1>

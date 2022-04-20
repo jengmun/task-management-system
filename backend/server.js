@@ -1,7 +1,7 @@
 const express = require("express");
 const session = require("express-session");
 const cors = require("cors");
-const db = require("./modules/db");
+const { db } = require("./modules/db");
 
 const app = express();
 const port = 5000;

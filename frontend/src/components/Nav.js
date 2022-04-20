@@ -1,6 +1,7 @@
 import React, { useContext } from "react";
 import { NavLink } from "react-router-dom";
 import LoginContext from "../context/login-context";
+import handleGetRequest from "../hooks/handleGetRequest";
 
 const Nav = () => {
   const loginContext = useContext(LoginContext);
@@ -14,15 +15,13 @@ const Nav = () => {
         {loginContext.isLoggedIn ? (
           <>
             <li>
-              <NavLink to="/account-settings">Account Settings</NavLink>
+              <NavLink to="/profile">Profile</NavLink>
             </li>
             <li>
               <NavLink
                 to="/"
-                onClick={async () => {
-                  await fetch("http://localhost:5000/logout", {
-                    credentials: "include",
-                  });
+                onClick={() => {
+                  handleGetRequest("user/logout");
                   loginContext.setIsLoggedIn("");
                 }}
               >
@@ -35,9 +34,10 @@ const Nav = () => {
             <NavLink to="/login">Login</NavLink>
           </li>
         )}
-        {loginContext.isLoggedIn.admin ? (
+        {console.log(loginContext.isLoggedIn)}
+        {loginContext.isLoggedIn.account_type === "Admin" ? (
           <li>
-            <NavLink to="/user">User Management</NavLink>
+            <NavLink to="/admin/user-management">User Management</NavLink>
           </li>
         ) : (
           ""

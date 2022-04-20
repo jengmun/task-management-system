@@ -1,5 +1,6 @@
 import { useContext, useState } from "react";
 import LoginContext from "../context/login-context";
+import handlePostRequest from "../hooks/handlePostRequest";
 
 const Login = () => {
   const loginContext = useContext(LoginContext);
@@ -7,21 +8,10 @@ const Login = () => {
   const [password, setPassword] = useState(null);
 
   const handleLogin = async () => {
-    try {
-      const res = await fetch("http://localhost:5000/login", {
-        method: "POST",
-        body: JSON.stringify({ username: username, password: password }),
-        headers: {
-          "Content-Type": "application/json",
-        },
-        credentials: "include",
-      });
-      const data = await res.json();
-      if (data) {
-        loginContext.setIsLoggedIn(data);
-      }
-    } catch (error) {
-      console.error(error);
+    const data = await handlePostRequest("user/login", { username, password });
+    console.log(data);
+    if (data) {
+      loginContext.setIsLoggedIn(data);
     }
   };
 
@@ -40,6 +30,7 @@ const Login = () => {
         onChange={(e) => setPassword(e.target.value)}
       />
       <input type="submit" onClick={handleLogin} />
+      <h3>Don't have an account? Please reach out to your administrator.</h3>
     </div>
   );
 };

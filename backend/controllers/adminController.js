@@ -14,10 +14,14 @@ const router = express.Router();
 
 // ------------- Routes -------------
 
-router.get("/all-users", (req, res) => {
+router.get("/all-users", async (req, res) => {
   db.query(
-    "SELECT * FROM accounts LEFT JOIN accounts_groups ON accounts.username = accounts_groups.username;",
+    "SELECT accounts.username, email, account_type, status, GROUP_CONCAT(user_group) AS user_group, GROUP_CONCAT(group_name) AS group_name FROM accounts LEFT JOIN accounts_groups ON accounts.username = accounts_groups.username GROUP BY username;",
     (err, result) => {
+      for (const user of result) {
+        user.user_group = user.user_group.split(",");
+        user.group_name = user.group_name.split(",");
+      }
       res.json(result);
     }
   );
@@ -30,7 +34,7 @@ router.get("/all-groups", (req, res) => {
 });
 
 router.post("/create-account", async (req, res) => {
-  const { username, password, email, group } = req.body;
+  const { username, password, email, groups } = req.body;
 
   // Password validation
   if (
@@ -44,28 +48,33 @@ router.post("/create-account", async (req, res) => {
 
   const hashedPassword = await argon2.hash(password);
 
-  db.query(
-    "INSERT INTO accounts (username, password, email) VALUES (?, ?, ?)",
-    [username, hashedPassword, email],
-    (err, result) => {
-      if (err) throw err;
-      res.json(result);
-    }
-  );
+  let values = ``;
+  for (let i = 0; i < groups.length; i++) {
+    values += `("${username}_${groups[i].value}", "${username}", "${groups[i].value}")`;
 
-  db.query(
-    "INSERT INTO accounts_groups (user_group, username, group_name) VALUES (?, ?, ?)",
-    [`${username}_${group}`, username, group],
-    (err, result) => {
-      if (err) throw err;
-      res.json(result);
+    if (i !== groups.length - 1) {
+      values += ", ";
     }
-  );
+  }
+
+  try {
+    db.query("BEGIN");
+    db.query(
+      "INSERT INTO accounts (username, password, email) VALUES (?, ?, ?)",
+      [username, hashedPassword, email]
+    );
+    db.query("INSERT INTO accounts_groups VALUES " + values);
+    db.query("COMMIT");
+  } catch (error) {
+    db.query("ROLLBACK");
+  }
 });
 
 router.post("/update-details", async (req, res) => {
-  const { username, email, group } = req.body;
-  const password = await argon2.hash(req.body.password);
+  const { username, email } = req.body;
+  let { group } = req.body;
+  // const password = await argon2.hash(req.body.password);
+  console.log(req.body);
 
   // db.query(
   //   "UPDATE accounts SET ?? = ? WHERE username = ?",

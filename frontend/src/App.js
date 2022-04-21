@@ -8,6 +8,7 @@ import Login from "./pages/Login";
 import UserManagement from "./pages/UserManagement";
 import CreateUser from "./pages/CreateUser";
 import Profile from "./pages/Profile";
+import ResetPassword from "./pages/ResetPassword";
 
 function App() {
   const [isLoggedIn, setIsLoggedIn] = useState("");
@@ -25,12 +26,17 @@ function App() {
             {isLoggedIn.username ? <Profile /> : <Redirect to="/" />}
           </Route>
           <Route path="/admin/user-management">
-            {isLoggedIn.admin ? <UserManagement /> : <Redirect to="/" />}
+            {isLoggedIn.account_type === "Admin" ? (
+              <UserManagement />
+            ) : (
+              <Redirect to="/" />
+            )}
           </Route>
           <Route path="/admin/create-user">
             <CreateUser />
-            {/* {isLoggedIn.admin ? <CreateUser /> : <Redirect to="/" />} */}
+            {/* {isLoggedIn.account_type === "Admin"  ? <CreateUser /> : <Redirect to="/" />} */}
           </Route>
+          <Route path="/reset-password" component={ResetPassword} />
         </Switch>
       </BrowserRouter>
     </LoginContext.Provider>

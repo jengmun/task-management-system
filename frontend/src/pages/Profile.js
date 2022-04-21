@@ -9,8 +9,6 @@ const Profile = () => {
   const [updateEmail, setUpdateEmail] = useState("");
 
   const handleEmailChange = () => {
-    console.log(updateEmail);
-    console.log(loginContext.isLoggedIn.email);
     if (updateEmail === loginContext.isLoggedIn.email) {
       console.log("No change in email");
       return;
@@ -19,6 +17,7 @@ const Profile = () => {
       username: loginContext.isLoggedIn.username,
       email: updateEmail,
     });
+    loginContext.isLoggedIn.email = updateEmail;
   };
 
   // ------------ Update password ------------
@@ -52,13 +51,20 @@ const Profile = () => {
   return (
     <div>
       <h1>Account management</h1>
-
+      <label htmlFor="username">Username</label>
+      <input
+        id="username"
+        name="username"
+        defaultValue={loginContext.isLoggedIn.username}
+        readOnly
+      />
       <h1>Update email information</h1>
+
       <label htmlFor="update-email">Email</label>
       <input
         id="update-email"
         name="update-email"
-        value={loginContext.isLoggedIn.email}
+        defaultValue={loginContext.isLoggedIn.email}
         onChange={(e) => setUpdateEmail(e.target.value)}
       />
       <button onClick={() => handleEmailChange()}>Update</button>

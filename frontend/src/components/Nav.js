@@ -34,7 +34,6 @@ const Nav = () => {
             <NavLink to="/login">Login</NavLink>
           </li>
         )}
-        {console.log(loginContext.isLoggedIn)}
         {loginContext.isLoggedIn.account_type === "Admin" ? (
           <li>
             <NavLink to="/admin/user-management">User Management</NavLink>

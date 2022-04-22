@@ -66,16 +66,6 @@ router.get("/logout", (req, res) => {
   res.json("Logged out");
 });
 
-router.get("/:username", (req, res) => {
-  db.query(
-    "SELECT * FROM accounts WHERE username = ?",
-    [req.params.username],
-    (err, result) => {
-      res.json(result);
-    }
-  );
-});
-
 router.post("/update-email", async (req, res) => {
   const { username, email } = req.body;
 
@@ -112,6 +102,35 @@ router.post("/update-password", async (req, res) => {
   );
 });
 
-router.get("/reset-password", (req, res) => {});
+router.get("/reset-password", (req, res) => {
+  // Generate password
+  const numbers = "0123456789";
+  const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
+  const specials = "~!@-#$%^&*";
+  const all = numbers + chars + specials;
+
+  let password = "";
+  const passwordLength = Math.floor(Math.random() * 3) + 5;
+
+  password += numbers[Math.floor(Math.random() * numbers.length)];
+  password += chars[Math.floor(Math.random() * chars.length)];
+  password += specials[Math.floor(Math.random() * specials.length)];
+  for (let i = 1; i <= passwordLength; i++) {
+    password += all[Math.floor(Math.random() * all.length)];
+  }
+
+  console.log(password);
+  res.send(password);
+});
+
+router.get("/:username", (req, res) => {
+  db.query(
+    "SELECT * FROM accounts WHERE username = ?",
+    [req.params.username],
+    (err, result) => {
+      res.json(result);
+    }
+  );
+});
 
 module.exports = router;

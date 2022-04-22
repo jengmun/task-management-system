@@ -71,30 +71,53 @@ router.post("/create-account", async (req, res) => {
 });
 
 router.post("/update-details", async (req, res) => {
-  const { username, email } = req.body;
-  let { group } = req.body;
-  // const password = await argon2.hash(req.body.password);
-  console.log(req.body);
-
-  // db.query(
-  //   "UPDATE accounts SET ?? = ? WHERE username = ?",
-  //   [field, details, username],
-  //   (err, result) => {
-  //     if (err) throw err;
-  //     res.json(result);
-  //   }
-  // );
-});
-
-router.post("/toggle-status", (req, res) => {
+  const { username, email, status } = req.body;
   db.query(
-    "UPDATE accounts SET status = ? WHERE username = ?",
-    [req.body.status, req.body.username],
+    "UPDATE accounts SET email = ?, status = ? WHERE username = ?",
+    [email, status, username],
     (err, result) => {
       if (err) throw err;
-      res.json(`Status changed to ${req.body.status}`);
+      res.json(result);
     }
   );
+});
+
+router.post("/update-groups", async (req, res) => {
+  let { username, currentGroups, oldGroups } = req.body;
+  const toDelete = [];
+
+  for (let i = 0; i < oldGroups.length; i++) {
+    for (let j = 0; j < currentGroups.length; j++) {
+      if (oldGroups[i] === currentGroups[j].value) {
+        currentGroups.splice(j, 1);
+        break;
+      } else if (j === currentGroups.length - 1) {
+        toDelete.push(oldGroups[i]);
+      }
+    }
+  }
+
+  for (const group of currentGroups) {
+    db.query(
+      "INSERT INTO accounts_groups VALUES (?, ?, ?)",
+      [`${username}_${group.value}`, username, group.value],
+      (err, result) => {
+        if (err) throw err;
+      }
+    );
+  }
+
+  for (const group of toDelete) {
+    db.query(
+      "DELETE FROM accounts_groups WHERE user_group = ?",
+      [`${username}_${group}`],
+      (err, result) => {
+        if (err) throw err;
+      }
+    );
+  }
+
+  res.json("Updated groups");
 });
 
 module.exports = router;

@@ -18,7 +18,11 @@ const UserManagement = () => {
   const fetchAllGroups = async () => {
     const data = await handleGetRequest("admin/all-groups");
     if (data) {
-      setAllGroups(data);
+      const options = [];
+      for (const group of data) {
+        options.push({ value: group.group_name, label: group.group_name });
+      }
+      setAllGroups(options);
     }
   };
 
@@ -47,7 +51,14 @@ const UserManagement = () => {
         </thead>
         <tbody>
           {allUsers.map((user) => {
-            return <User data={user} groups={allGroups} />;
+            user.formatted_groups = [];
+            for (let i = 0; i < user.group_name.length; i++) {
+              user.formatted_groups.push({
+                value: user.group_name[i],
+                label: user.group_name[i],
+              });
+            }
+            return <User data={user} options={allGroups} />;
           })}
         </tbody>
       </table>
@@ -58,100 +69,101 @@ const UserManagement = () => {
 export default UserManagement;
 
 const User = (props) => {
-  const [email, setEmail] = useState(props.data.email);
+  console.log(props);
+  // Dataset as per database
+  const [userData, setUserData] = useState(props.data);
+
+  // Dataset as per React - to be displayed
+  const [reactData, setReactData] = useState(props.data);
 
   const [readOnly, setReadOnly] = useState(true);
-  const toggleReadOnly = () => {
+
+  const handleEditUser = () => {
     setReadOnly(!readOnly);
-    // setEmail
-    // setGroup
-    // setStatus()
   };
 
-  // Formatting for React-Select
-  const options = [];
-  for (const group of props.groups) {
-    options.push({ value: group.group_name, label: group.group_name });
-  }
-
-  const currentGroup = [];
-  for (const group of props.data.group_name) {
-    currentGroup.push({ value: group, label: group });
-  }
-
-  const [selected, setSelected] = useState(currentGroup);
-
-  // Toggle active status
-  const [status, setStatus] = useState(props.data.status);
-
-  const handleUpdateStatus = () => {
-    if (status === "Active") {
-      setStatus("Inactive");
-    } else {
-      setStatus("Active");
-    }
+  const handleCancelChanges = () => {
+    setReadOnly(!readOnly);
+    setReactData(userData);
   };
 
   // to amend name to isActive instead
 
   // To submit update
   const handleUpdateUser = () => {
-    handlePostRequest("admin/update-details", {
-      username: props.data.username,
-      email: email,
-      group: currentGroup,
-    });
-
-    if (props.data.status !== status) {
-      handlePostRequest("admin/toggle-status", {
-        username: props.data.username,
-        status: status,
+    if (
+      reactData.email !== userData.email ||
+      reactData.status !== userData.status
+    ) {
+      handlePostRequest("admin/update-details", {
+        username: reactData.username,
+        email: reactData.email,
+        status: reactData.status,
       });
     }
+
+    if (reactData.formatted_groups !== userData.formatted_groups) {
+      handlePostRequest("admin/update-groups", {
+        username: reactData.username,
+        currentGroups: reactData.formatted_groups,
+        oldGroups: userData.group_name,
+      });
+    }
+
+    setReadOnly(!readOnly);
+    setUserData(reactData);
   };
 
   return (
     <tr>
       <td>
         <input
-          defaultValue={props.data.username}
+          defaultValue={userData.username}
           readOnly
           style={{ backgroundColor: readOnly ? "grey" : "white" }}
         />
       </td>
       <td>
         <input
-          defaultValue={props.data.email}
+          value={reactData.email}
           readOnly={readOnly}
           style={{ backgroundColor: readOnly ? "grey" : "white" }}
           onChange={(e) => {
-            setEmail(e.target.value);
+            setReactData({ ...reactData, email: e.target.value });
           }}
         />
+        {/* WEIRD!!! */}
       </td>
       <td>
         {readOnly ? (
-          <input
-            defaultValue={props.data.group_name}
-            readOnly={readOnly}
-            style={{ backgroundColor: readOnly ? "grey" : "white" }}
-          />
+          reactData.formatted_groups.map((group) => {
+            return <div>{group.value}</div>;
+          })
         ) : (
           <Dropdown
-            preselected={selected}
-            options={options}
+            preselected={reactData.formatted_groups}
+            options={props.options}
             callback={(e) => {
-              setSelected(e);
+              setReactData({ ...reactData, formatted_groups: e });
             }}
           ></Dropdown>
         )}
       </td>
       <td>
+        {console.log(reactData)}
         {readOnly ? (
-          <p>{status}</p>
+          <div>{reactData.status}</div>
         ) : (
-          <button disabled={readOnly} onClick={handleUpdateStatus}>
-            {status === "Active" ? "Inactive" : "Active"}
+          <button
+            onClick={() => {
+              if (reactData.status === "Active") {
+                setReactData({ ...reactData, status: "Inactive" });
+              } else {
+                setReactData({ ...reactData, status: "Active" });
+              }
+            }}
+          >
+            {reactData.status === "Active" ? "Inactive" : "Active"}
           </button>
         )}
       </td>
@@ -160,11 +172,11 @@ const User = (props) => {
       </td>
       <td>
         {readOnly ? (
-          <button onClick={toggleReadOnly}>Edit</button>
+          <button onClick={handleEditUser}>Edit</button>
         ) : (
           <>
             <button onClick={handleUpdateUser}>Save</button>
-            <button onClick={toggleReadOnly}>Cancel</button>
+            <button onClick={handleCancelChanges}>Cancel</button>
           </>
         )}
       </td>

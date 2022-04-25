@@ -9,14 +9,14 @@ const UserManagement = () => {
   const [allGroups, setAllGroups] = useState([]);
 
   const fetchAllUsers = async () => {
-    const data = await handleGetRequest("admin/all-users");
+    const data = await handleGetRequest("user/all-users");
     if (data) {
       setAllUsers(data);
     }
   };
 
   const fetchAllGroups = async () => {
-    const data = await handleGetRequest("admin/all-groups");
+    const data = await handleGetRequest("user/all-groups");
     if (data) {
       const options = [];
       for (const group of data) {
@@ -33,7 +33,7 @@ const UserManagement = () => {
 
   return (
     <div>
-      <NavLink to="/">
+      <NavLink to="/admin/create-group">
         <button>Create New Group</button>
       </NavLink>
       <NavLink to="/admin/create-user">
@@ -95,7 +95,7 @@ const User = (props) => {
       reactData.email !== userData.email ||
       reactData.status !== userData.status
     ) {
-      handlePostRequest("admin/update-details", {
+      handlePostRequest("user/update-details", {
         username: reactData.username,
         email: reactData.email,
         status: reactData.status,
@@ -103,7 +103,7 @@ const User = (props) => {
     }
 
     if (reactData.formatted_groups !== userData.formatted_groups) {
-      handlePostRequest("admin/update-groups", {
+      handlePostRequest("user/update-groups", {
         username: reactData.username,
         currentGroups: reactData.formatted_groups,
         oldGroups: userData.group_name,
@@ -112,6 +112,17 @@ const User = (props) => {
 
     setReadOnly(!readOnly);
     setUserData(reactData);
+  };
+
+  const [passwordReset, setPasswordReset] = useState(false);
+
+  const handleResetPassword = () => {
+    handlePostRequest("user/admin-password-reset", {
+      username: reactData.username,
+      email: reactData.email,
+    });
+    setPasswordReset(true);
+    console.log(reactData.email);
   };
 
   return (
@@ -168,7 +179,9 @@ const User = (props) => {
         )}
       </td>
       <td>
-        <button>Reset password</button>
+        <button onClick={handleResetPassword} disabled={passwordReset}>
+          {passwordReset ? "Password resetted" : "Reset password"}
+        </button>
       </td>
       <td>
         {readOnly ? (

@@ -18,9 +18,7 @@ app.use(express.json());
 // Controllers
 
 const userController = require("./controllers/userController");
-const adminController = require("./controllers/adminController");
 app.use("/user", userController);
-app.use("/admin", adminController);
 
 // Connect to port and DB
 

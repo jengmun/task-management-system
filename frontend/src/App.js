@@ -9,6 +9,8 @@ import UserManagement from "./pages/UserManagement";
 import CreateUser from "./pages/CreateUser";
 import Profile from "./pages/Profile";
 import ResetPassword from "./pages/ResetPassword";
+import ForgotPassword from "./pages/ForgotPassword";
+import CreateNewGroup from "./pages/CreateNewGroup";
 
 function App() {
   const [isLoggedIn, setIsLoggedIn] = useState("");
@@ -18,13 +20,17 @@ function App() {
       <BrowserRouter>
         <Nav />
         <Switch>
+          {/* USER ROUTES */}
           <Route exact path="/" component={Home} />
           <Route path="/login">
             {isLoggedIn.username ? <Redirect to="/" /> : <Login />}
           </Route>
+          <Route path="/forgot-password" component={ForgotPassword} />
+          <Route path="/reset-password/:username" component={ResetPassword} />
           <Route path="/profile">
             {isLoggedIn.username ? <Profile /> : <Redirect to="/" />}
           </Route>
+          {/* ADMIN ROUTES */}
           <Route path="/admin/user-management">
             {isLoggedIn.account_type === "Admin" ? (
               <UserManagement />
@@ -33,10 +39,19 @@ function App() {
             )}
           </Route>
           <Route path="/admin/create-user">
-            <CreateUser />
-            {/* {isLoggedIn.account_type === "Admin"  ? <CreateUser /> : <Redirect to="/" />} */}
+            {isLoggedIn.account_type === "Admin" ? (
+              <CreateUser />
+            ) : (
+              <Redirect to="/" />
+            )}
           </Route>
-          <Route path="/reset-password" component={ResetPassword} />
+          <Route path="/admin/create-group">
+            {isLoggedIn.account_type === "Admin" ? (
+              <CreateNewGroup />
+            ) : (
+              <Redirect to="/" />
+            )}
+          </Route>
         </Switch>
       </BrowserRouter>
     </LoginContext.Provider>

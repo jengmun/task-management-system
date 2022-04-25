@@ -10,7 +10,7 @@ const Login = () => {
 
   const handleLogin = async () => {
     const data = await handlePostRequest("user/login", { username, password });
-    console.log(data);
+
     if (data) {
       loginContext.setIsLoggedIn(data);
     }
@@ -31,7 +31,7 @@ const Login = () => {
         onChange={(e) => setPassword(e.target.value)}
       />
       <input type="submit" onClick={handleLogin} />
-      <NavLink to="/reset-password">
+      <NavLink to="/forgot-password">
         <p>Forgot password</p>
       </NavLink>
 

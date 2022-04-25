@@ -8,7 +8,7 @@ const CreateUser = () => {
   const [allGroups, setAllGroups] = useState([]);
 
   const fetchAllGroups = async () => {
-    const data = await handleGetRequest("admin/all-groups");
+    const data = await handleGetRequest("user/all-groups");
     if (data) {
       setAllGroups(data);
     }
@@ -20,20 +20,27 @@ const CreateUser = () => {
 
   // ------------- Submit form -------------
   const [selectedGroups, setSelectedGroups] = useState([]);
+  const [message, setMessage] = useState("");
 
   const options = [];
   for (const group of allGroups) {
     options.push({ value: group.group_name, label: group.group_name });
   }
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    handlePostRequest("admin/create-account", {
+    const data = await handlePostRequest("user/create-account", {
       username: e.target.username.value,
       password: e.target.password.value,
       email: e.target.email.value,
       groups: selectedGroups,
     });
+    setMessage(data);
+
+    e.target.username.value = "";
+    e.target.password.value = "";
+    e.target.email.value = "";
+    setSelectedGroups([]);
   };
 
   return (
@@ -50,6 +57,7 @@ const CreateUser = () => {
         <Dropdown options={options} callback={setSelectedGroups} />
         <button>Submit</button>
       </form>
+      <p>{message}</p>
     </div>
   );
 };

@@ -1,23 +1,51 @@
-import React from "react";
+import { useParams } from "react-router-dom";
+import handlePostRequest from "../hooks/handlePostRequest";
 
 const ResetPassword = () => {
+  const params = useParams();
+
+  const handlePasswordChange = async (e) => {
+    e.preventDefault();
+
+    // Step 1 - check that both passwords match
+    if (e.target.updatePassword.value !== e.target.confirmPassword.value) {
+      console.log("Passwords do not match");
+      return;
+    }
+
+    // Step 2 - check that new password matches format
+    if (
+      !e.target.confirmPassword.value.match(
+        /^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[0-9])(?=.*?[#?!@$%^&*-])\S{8,10}$/
+      )
+    ) {
+      console.log("Invalid password format");
+      return;
+    }
+
+    // Step 3 - submit password update request
+    const result = await handlePostRequest(
+      `user/user-password-reset/${params.username}`,
+      {
+        password: e.target.confirmPassword.value,
+        oldPassword: e.target.oldPassword.value,
+      }
+    );
+    console.log(result);
+  };
+
   return (
-    <div>
+    <form onSubmit={handlePasswordChange}>
       <h1>Change password</h1>
-      <label htmlFor="update-password">Password</label>
-      <input
-        id="update-password"
-        name="update-password"
-        // onChange={(e) => setChangePassword(e.target.value)}
-      />
-      <label htmlFor="confirm-password">Re-enter Password</label>
-      <input
-        id="confirm-password"
-        name="confirm-password"
-        // onChange={(e) => setConfirmPassword(e.target.value)}
-      />
-      {/* <button onClick={() => handlePasswordChange()}>Update password</button> */}
-    </div>
+
+      <label htmlFor="oldPassword">Current Password</label>
+      <input id="oldPassword" name="oldPassword" />
+      <label htmlFor="updatePassword">New Password</label>
+      <input id="updatePassword" name="updatePassword" />
+      <label htmlFor="confirmPassword">Re-enter New Password</label>
+      <input id="confirmPassword" name="confirmPassword" />
+      <button>Update password</button>
+    </form>
   );
 };
 

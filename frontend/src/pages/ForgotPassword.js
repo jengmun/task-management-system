@@ -1,13 +1,16 @@
+import { useState } from "react";
 import handlePostRequest from "../hooks/handlePostRequest";
 
 const ResetPassword = () => {
-  const handleResetPassword = (e) => {
+  const [message, setMessage] = useState("");
+  const handleResetPassword = async (e) => {
     e.preventDefault();
 
-    handlePostRequest("admin-password-reset", {
+    const data = await handlePostRequest("user/admin-password-reset", {
       username: e.target.username.value,
       email: e.target.email.value,
     });
+    setMessage(data);
   };
 
   return (
@@ -21,6 +24,7 @@ const ResetPassword = () => {
       <input id="email" name="email" />
 
       <button>Submit</button>
+      <p>{message}</p>
     </form>
   );
 };

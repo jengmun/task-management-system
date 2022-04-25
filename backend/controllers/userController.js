@@ -56,7 +56,7 @@ router.post("/login", (req, res) => {
       }
     );
   } catch (error) {
-    console.log(error);
+    res.json(error);
   }
 });
 
@@ -79,7 +79,7 @@ router.get("/logout", checkLoggedIn, (req, res) => {
 //       }
 //     );
 //   } catch (error) {
-//     console.log(error);
+//     res.json(error);
 //   }
 // });
 
@@ -96,7 +96,7 @@ router.post("/update-email", checkLoggedIn, async (req, res) => {
       }
     );
   } catch (error) {
-    console.log(error);
+    res.json(error);
   }
 });
 
@@ -116,7 +116,7 @@ router.get("/all-users", checkAdmin, async (req, res) => {
       }
     );
   } catch (error) {
-    console.log(error);
+    res.json(error);
   }
 });
 
@@ -126,7 +126,7 @@ router.get("/all-groups", checkAdmin, (req, res) => {
       res.json(result);
     });
   } catch (error) {
-    console.log(error);
+    res.json(error);
   }
 });
 
@@ -181,7 +181,7 @@ router.post("/update-details", checkAdmin, async (req, res) => {
       }
     );
   } catch (error) {
-    console.log(error);
+    res.json(error);
   }
 });
 
@@ -223,7 +223,7 @@ router.post("/update-groups", checkAdmin, async (req, res) => {
 
     res.json("Updated groups");
   } catch (error) {
-    console.log(error);
+    res.json(error);
   }
 });
 
@@ -238,7 +238,7 @@ router.post("/create-groups", checkAdmin, (req, res) => {
       }
     );
   } catch (error) {
-    console.log(error);
+    res.json(error);
   }
 });
 
@@ -263,27 +263,51 @@ const generatePassword = () => {
 };
 
 router.post("/admin-password-reset", async (req, res) => {
-  const password = generatePassword();
-  const link = `http://localhost:3000/reset-password/${req.body.username}`;
-  emailNewPassword(
-    req.body.email,
-    "Your password has been resetted",
-    `
+  try {
+    const validUser = await new Promise((resolve, reject) => {
+      db.query(
+        "SELECT * FROM accounts WHERE username = ? AND email = ?",
+        [req.body.username, req.body.email],
+        (err, results) => {
+          if (err) throw err;
+          resolve(results);
+        }
+      );
+    });
+
+    if (!validUser.length) {
+      res.json("No valid user found!");
+      return;
+    }
+
+    const password = generatePassword();
+    const link = `http://localhost:3000/reset-password/${req.body.username}`;
+
+    emailNewPassword(
+      req.body.email,
+      "Your password has been resetted",
+      `
       <h3>Your password has been resetted.</h3>
       <p>Your temporary password is: <b>${password}</b></p>
       <a href=${link}>Click to change your password</a>
       <p>Or copy and paste the URL in your browser:</p>
       <a href=${link}>${link}</a>
       `
-  );
+    );
 
-  const hashedPassword = await argon2.hash(password);
+    const hashedPassword = await argon2.hash(password);
 
-  db.query("UPDATE accounts SET password = ? WHERE username = ?", [
-    hashedPassword,
-    req.body.username,
-  ]);
-  res.json(password);
+    db.query(
+      "UPDATE accounts SET password = ? WHERE username = ? AND email = ? ",
+      [hashedPassword, req.body.username, req.body.email],
+      (err, result) => {
+        if (err) throw err;
+        res.json("Password successfully resetted");
+      }
+    );
+  } catch (error) {
+    res.json(error);
+  }
 });
 
 // For users who forgot their password / had their passwords reset by the administrator
@@ -330,7 +354,6 @@ router.post("/user-password-reset/:username", async (req, res) => {
       }
     );
   } catch (error) {
-    console.log(error);
     res.json("Error resetting password");
   }
 });
@@ -359,7 +382,7 @@ router.post("/user-update-password", checkLoggedIn, async (req, res) => {
       }
     );
   } catch (error) {
-    console.log(error);
+    res.json(error);
   }
 });
 

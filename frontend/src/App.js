@@ -10,7 +10,7 @@ import CreateUser from "./pages/CreateUser";
 import Profile from "./pages/Profile";
 import ResetPassword from "./pages/ResetPassword";
 import ForgotPassword from "./pages/ForgotPassword";
-import CreateNewGroup from "./pages/CreateNewGroup";
+import GroupManagement from "./pages/GroupManagement";
 
 function App() {
   const [isLoggedIn, setIsLoggedIn] = useState("");
@@ -45,9 +45,9 @@ function App() {
               <Redirect to="/" />
             )}
           </Route>
-          <Route path="/admin/create-group">
+          <Route path="/admin/group-management">
             {isLoggedIn.account_type === "Admin" ? (
-              <CreateNewGroup />
+              <GroupManagement />
             ) : (
               <Redirect to="/" />
             )}

@@ -13,33 +13,36 @@ const Nav = () => {
           <NavLink to="/">Home</NavLink>
         </li>
         {loginContext.isLoggedIn ? (
-          <>
-            <li>
-              <NavLink to="/profile">Profile</NavLink>
-            </li>
-            <li>
-              <NavLink
-                to="/"
-                onClick={() => {
-                  handleGetRequest("user/logout");
-                  loginContext.setIsLoggedIn("");
-                }}
-              >
-                Logout
-              </NavLink>
-            </li>
-          </>
+          <li>
+            <NavLink to="/profile">Profile</NavLink>
+          </li>
         ) : (
           <li>
             <NavLink to="/login">Login</NavLink>
           </li>
         )}
-        {loginContext.isLoggedIn.account_type === "Admin" ? (
+        {loginContext.isLoggedIn.account_type === "Admin" && (
+          <>
+            <li>
+              <NavLink to="/admin/user-management">User Management</NavLink>
+            </li>
+            <li>
+              <NavLink to="/admin/group-management">Group Management</NavLink>
+            </li>
+          </>
+        )}
+        {loginContext.isLoggedIn && (
           <li>
-            <NavLink to="/admin/user-management">User Management</NavLink>
+            <NavLink
+              to="/"
+              onClick={() => {
+                handleGetRequest("user/logout");
+                loginContext.setIsLoggedIn("");
+              }}
+            >
+              Logout
+            </NavLink>
           </li>
-        ) : (
-          ""
         )}
       </ul>
     </div>

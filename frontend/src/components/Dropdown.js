@@ -8,8 +8,8 @@ const Dropdown = (props) => {
         value={props.preselected}
         options={props.options}
         components={makeAnimated()}
-        closeMenuOnSelect={false}
-        isMulti
+        closeMenuOnSelect={props.closeMenuOnSelect}
+        isMulti={props.multi}
         onChange={(e) => {
           props.callback(e);
         }}

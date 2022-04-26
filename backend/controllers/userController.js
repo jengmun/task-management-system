@@ -34,6 +34,7 @@ router.post("/login", (req, res) => {
           // Step 3 - check if valid password
           if (argon2Match) {
             req.session.isLoggedIn = true;
+            res.cookie("isLoggedIn", true);
           } else {
             res.json("Invalid password");
             return;
@@ -42,8 +43,10 @@ router.post("/login", (req, res) => {
           // Step 4 - check if admin
           if (result[0].account_type === "Admin") {
             req.session.isAdmin = true;
+            res.cookie("isAdmin", true);
           } else {
             req.session.isAdmin = false;
+            res.cookie("isAdmin", false);
           }
 
           // Step 5 - return data
@@ -61,8 +64,9 @@ router.post("/login", (req, res) => {
 });
 
 router.get("/logout", checkLoggedIn, (req, res) => {
-  req.session.isLoggedIn = false;
-  req.session.isAdmin = false;
+  req.session.destroy();
+  res.clearCookie("isLoggedIn");
+  res.clearCookie("isAdmin");
   res.json("Logged out");
 });
 
@@ -109,6 +113,7 @@ router.get("/all-users", checkAdmin, async (req, res) => {
       (err, result) => {
         if (err) throw err;
         for (const user of result) {
+          console.log(user);
           user.user_group = user.user_group.split(",");
           user.group_name = user.group_name.split(",");
         }
@@ -125,6 +130,21 @@ router.get("/all-groups", checkAdmin, (req, res) => {
     db.query(`SELECT * FROM ${database}.groups`, (err, result) => {
       res.json(result);
     });
+  } catch (error) {
+    res.json(error);
+  }
+});
+
+router.post("/groups-users", checkAdmin, async (req, res) => {
+  try {
+    db.query(
+      "SELECT accounts.username, email, account_type, status FROM accounts INNER JOIN accounts_groups ON accounts.username = accounts_groups.username WHERE accounts_groups.group_name = ?;",
+      req.body.group,
+      (err, result) => {
+        if (err) throw err;
+        res.json(result);
+      }
+    );
   } catch (error) {
     res.json(error);
   }
@@ -185,6 +205,7 @@ router.post("/update-details", checkAdmin, async (req, res) => {
   }
 });
 
+// User management
 router.post("/update-groups", checkAdmin, async (req, res) => {
   try {
     let { username, currentGroups, oldGroups } = req.body;
@@ -235,6 +256,38 @@ router.post("/create-groups", checkAdmin, (req, res) => {
       (err, result) => {
         if (err) throw err;
         res.json("Group created!");
+      }
+    );
+  } catch (error) {
+    res.json(error);
+  }
+});
+
+router.post("/add-group-member", checkAdmin, (req, res) => {
+  const { username, group } = req.body;
+  try {
+    db.query(
+      "INSERT INTO accounts_groups VALUES (?, ?, ?)",
+      [`${username}_${group}`, username, group],
+      (err, result) => {
+        if (err) throw err;
+        res.json("Added");
+      }
+    );
+  } catch (error) {
+    res.json(error);
+  }
+});
+
+router.post("/remove-group-member", checkAdmin, (req, res) => {
+  const { username, group } = req.body;
+  try {
+    db.query(
+      "DELETE FROM accounts_groups WHERE user_group = ?",
+      [`${username}_${group}`],
+      (err, result) => {
+        if (err) throw err;
+        res.json("Removed");
       }
     );
   } catch (error) {

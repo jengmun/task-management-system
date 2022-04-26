@@ -7,27 +7,30 @@ const Nav = () => {
   const loginContext = useContext(LoginContext);
 
   return (
-    <div>
-      <ul>
+    <div className="prose">
+      <ul className="list-none p-0">
         <li>
-          <NavLink to="/">Home</NavLink>
+          <NavButton link="/" text="Home" />
         </li>
         {loginContext.isLoggedIn ? (
           <li>
-            <NavLink to="/profile">Profile</NavLink>
+            <NavButton link="/profile" text="Profile" />
           </li>
         ) : (
           <li>
-            <NavLink to="/login">Login</NavLink>
+            <NavButton link="/login" text="Login" />
           </li>
         )}
         {loginContext.isLoggedIn.account_type === "Admin" && (
           <>
             <li>
-              <NavLink to="/admin/user-management">User Management</NavLink>
+              <NavButton link="/admin/user-management" text="User Management" />
             </li>
             <li>
-              <NavLink to="/admin/group-management">Group Management</NavLink>
+              <NavButton
+                link="/admin/group-management"
+                text="Group Management"
+              />
             </li>
           </>
         )}
@@ -35,12 +38,13 @@ const Nav = () => {
           <li>
             <NavLink
               to="/"
+              style={{ textDecoration: "none" }}
               onClick={() => {
                 handleGetRequest("user/logout");
                 loginContext.setIsLoggedIn("");
               }}
             >
-              Logout
+              <button className="btn">Logout</button>
             </NavLink>
           </li>
         )}
@@ -50,3 +54,11 @@ const Nav = () => {
 };
 
 export default Nav;
+
+const NavButton = (props) => {
+  return (
+    <NavLink to={props.link} style={{ textDecoration: "none" }}>
+      <button className="btn">{props.text}</button>
+    </NavLink>
+  );
+};

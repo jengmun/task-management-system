@@ -6,7 +6,7 @@ const Home = () => {
   const loginContext = useContext(LoginContext);
 
   return (
-    <div>
+    <div className="prose">
       {loginContext.isLoggedIn ? (
         "Welcome to your dashboard"
       ) : (
@@ -14,7 +14,7 @@ const Home = () => {
           <h1>Welcome</h1>
           <h3>To start</h3>
           <NavLink to="/login">
-            <button>Login</button>
+            <button className="btn btn-primary">Login</button>
           </NavLink>
         </>
       )}

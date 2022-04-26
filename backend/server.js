@@ -1,6 +1,7 @@
 const express = require("express");
 const session = require("express-session");
 const cors = require("cors");
+const cookieParser = require("cookie-parser");
 const { db } = require("./modules/db");
 
 const app = express();
@@ -14,6 +15,7 @@ app.use(
   })
 );
 app.use(express.json());
+app.use(cookieParser());
 
 // Controllers
 
@@ -36,5 +38,3 @@ db.connect((err) => {
 app.listen(port, () => {
   console.log(`Connected to http://localhost:${port}`);
 });
-
-// app.use(urlencoded()); // Setup the body parser to handle form submits

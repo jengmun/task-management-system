@@ -13,7 +13,7 @@ const Home = () => {
         <>
           <h1>Welcome</h1>
           <h3>To start</h3>
-          <NavLink to="/login">
+          <NavLink to="/login" style={{ textDecoration: "none" }}>
             <button className="btn btn-primary">Login</button>
           </NavLink>
         </>

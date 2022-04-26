@@ -1,7 +1,7 @@
 import { useState } from "react";
 import handlePostRequest from "../hooks/handlePostRequest";
 
-const CreateNewGroup = () => {
+const CreateNewGroup = (props) => {
   const [message, setMessage] = useState("");
   const handleCreateGroup = async (e) => {
     e.preventDefault();
@@ -10,6 +10,7 @@ const CreateNewGroup = () => {
       group: e.target.groupName.value,
     });
     setMessage(result);
+    props.fetchAllGroups();
   };
   return (
     <form onSubmit={handleCreateGroup}>

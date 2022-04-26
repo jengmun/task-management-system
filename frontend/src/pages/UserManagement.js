@@ -7,11 +7,13 @@ import handlePostRequest from "../hooks/handlePostRequest";
 const UserManagement = () => {
   const [allUsers, setAllUsers] = useState([]);
   const [allGroups, setAllGroups] = useState([]);
+  const [filterUsers, setFilterUsers] = useState([]);
 
   const fetchAllUsers = async () => {
     const data = await handleGetRequest("user/all-users");
     if (data) {
       setAllUsers(data);
+      setFilterUsers(data);
     }
   };
 
@@ -31,14 +33,24 @@ const UserManagement = () => {
     fetchAllGroups();
   }, []);
 
+  const handleFilterUsers = (e) => {
+    const filteredArr = allUsers.filter((user) => {
+      return (
+        user.username.includes(e.target.value) ||
+        user.email.includes(e.target.value) ||
+        user.status.includes(e.target.value)
+      );
+    });
+    setFilterUsers(filteredArr);
+  };
+
   return (
     <div>
-      <NavLink to="/admin/create-group">
-        <button>Create New Group</button>
-      </NavLink>
       <NavLink to="/admin/create-user">
         <button>Create New User</button>
       </NavLink>
+      <label>Filter</label>
+      <input onChange={handleFilterUsers} />
       <table>
         <thead>
           <tr>
@@ -50,7 +62,7 @@ const UserManagement = () => {
           </tr>
         </thead>
         <tbody>
-          {allUsers.map((user) => {
+          {filterUsers.map((user, index) => {
             user.formatted_groups = [];
             for (let i = 0; i < user.group_name.length; i++) {
               user.formatted_groups.push({
@@ -58,7 +70,17 @@ const UserManagement = () => {
                 label: user.group_name[i],
               });
             }
-            return <User data={user} options={allGroups} />;
+            return (
+              <User
+                data={user}
+                options={allGroups}
+                setAllUsers={(user) => {
+                  const allUsersArr = [...allUsers];
+                  allUsersArr[index] = user;
+                  setAllUsers(allUsersArr);
+                }}
+              />
+            );
           })}
         </tbody>
       </table>
@@ -69,14 +91,16 @@ const UserManagement = () => {
 export default UserManagement;
 
 const User = (props) => {
-  console.log(props);
   // Dataset as per database
   const [userData, setUserData] = useState(props.data);
-
   // Dataset as per React - to be displayed
   const [reactData, setReactData] = useState(props.data);
-
   const [readOnly, setReadOnly] = useState(true);
+
+  useEffect(() => {
+    setUserData(props.data);
+    setReactData(props.data);
+  }, [props.data]);
 
   const handleEditUser = () => {
     setReadOnly(!readOnly);
@@ -89,7 +113,6 @@ const User = (props) => {
 
   // to amend name to isActive instead
 
-  // To submit update
   const handleUpdateUser = () => {
     if (
       reactData.email !== userData.email ||
@@ -112,6 +135,7 @@ const User = (props) => {
 
     setReadOnly(!readOnly);
     setUserData(reactData);
+    props.setAllUsers(reactData);
   };
 
   const [passwordReset, setPasswordReset] = useState(false);
@@ -122,14 +146,13 @@ const User = (props) => {
       email: reactData.email,
     });
     setPasswordReset(true);
-    console.log(reactData.email);
   };
 
   return (
     <tr>
       <td>
         <input
-          defaultValue={userData.username}
+          value={userData.username}
           readOnly
           style={{ backgroundColor: readOnly ? "grey" : "white" }}
         />
@@ -152,8 +175,10 @@ const User = (props) => {
           })
         ) : (
           <Dropdown
+            multi={true}
             preselected={reactData.formatted_groups}
             options={props.options}
+            closeMenuOnSelect={false}
             callback={(e) => {
               setReactData({ ...reactData, formatted_groups: e });
             }}
@@ -161,7 +186,6 @@ const User = (props) => {
         )}
       </td>
       <td>
-        {console.log(reactData)}
         {readOnly ? (
           <div>{reactData.status}</div>
         ) : (

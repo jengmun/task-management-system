@@ -9,7 +9,7 @@ export default async function handlePostRequest(params, body) {
       body: JSON.stringify(body),
     });
     const data = await res.json();
-    console.log(data);
+    // console.log(data);
     return data;
   } catch (error) {
     console.error(error);

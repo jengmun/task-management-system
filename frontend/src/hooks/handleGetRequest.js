@@ -4,7 +4,7 @@ export default async function handleGetRequest(params) {
       credentials: "include",
     });
     const data = await res.json();
-    console.log(data);
+    // console.log(data);
     return data;
   } catch (error) {
     console.error(error);

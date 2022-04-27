@@ -50,6 +50,10 @@ router.post("/login", (req, res) => {
           }
 
           // Step 5 - return data
+          req.session.username = result[0].username;
+          req.session.email = result[0].email;
+          req.session.account_type = result[0].account_type;
+
           res.json({
             username: result[0].username,
             email: result[0].email,
@@ -61,6 +65,14 @@ router.post("/login", (req, res) => {
   } catch (error) {
     res.json(error);
   }
+});
+
+router.get("/login-details", checkLoggedIn, (req, res) => {
+  res.json({
+    username: req.session.username,
+    email: req.session.email,
+    account_type: req.session.account_type,
+  });
 });
 
 router.get("/logout", checkLoggedIn, (req, res) => {

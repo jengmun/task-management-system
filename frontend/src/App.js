@@ -1,5 +1,6 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { BrowserRouter, Redirect, Route, Switch } from "react-router-dom";
+import Cookies from "js-cookie";
 import "./App.css";
 import LoginContext from "./context/login-context";
 import Home from "./pages/Home";
@@ -11,9 +12,24 @@ import Profile from "./pages/Profile";
 import ResetPassword from "./pages/ResetPassword";
 import ForgotPassword from "./pages/ForgotPassword";
 import GroupManagement from "./pages/GroupManagement";
+import handleGetRequest from "./hooks/handleGetRequest";
 
 function App() {
   const [isLoggedIn, setIsLoggedIn] = useState("");
+
+  const fetchDetails = async () => {
+    const data = await handleGetRequest("user/login-details");
+
+    if (data) {
+      setIsLoggedIn(data);
+    }
+  };
+
+  useEffect(() => {
+    if (Cookies.get("isLoggedIn")) {
+      fetchDetails();
+    }
+  }, []);
 
   return (
     <LoginContext.Provider value={{ isLoggedIn, setIsLoggedIn }}>

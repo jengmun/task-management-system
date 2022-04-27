@@ -18,13 +18,13 @@ const Login = () => {
 
   return (
     <div>
-      <label>Username</label>
+      <label htmlFor="username">Username</label>
       <input
         id="username"
         name="username"
         onChange={(e) => setUsername(e.target.value)}
       />
-      <label>Password</label>
+      <label htmlFor="password">Password</label>
       <input
         id="password"
         name="password"
@@ -32,10 +32,8 @@ const Login = () => {
       />
       <input type="submit" onClick={handleLogin} />
       <NavLink to="/forgot-password">
-        <p>Forgot password</p>
+        <button className="btn btn-secondary">Forgot password</button>
       </NavLink>
-
-      <h3>Don't have an account? Please reach out to your administrator.</h3>
     </div>
   );
 };

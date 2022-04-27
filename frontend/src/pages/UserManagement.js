@@ -50,7 +50,10 @@ const UserManagement = () => {
         <button className="btn">Create New User</button>
       </NavLink>
       <label>Filter</label>
-      <input onChange={handleFilterUsers} />
+      <input
+        onChange={handleFilterUsers}
+        className="input input-bordered input-primary max-w-xs"
+      />
       <table>
         <thead>
           <tr>
@@ -114,6 +117,10 @@ const User = (props) => {
   // to amend name to isActive instead
 
   const handleUpdateUser = () => {
+    if (!reactData.email) {
+      return;
+    }
+
     if (
       reactData.email !== userData.email ||
       reactData.status !== userData.status
@@ -153,6 +160,7 @@ const User = (props) => {
       <td>
         <input
           value={userData.username}
+          className="input input-bordered input-primary max-w-xs"
           readOnly
           style={{ backgroundColor: readOnly ? "grey" : "white" }}
         />
@@ -160,6 +168,7 @@ const User = (props) => {
       <td>
         <input
           value={reactData.email}
+          className="input input-bordered input-primary max-w-xs"
           readOnly={readOnly}
           style={{ backgroundColor: readOnly ? "grey" : "white" }}
           onChange={(e) => {

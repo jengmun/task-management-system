@@ -19,7 +19,10 @@ const CreateNewGroup = (props) => {
   return (
     <form onSubmit={handleCreateGroup}>
       <label htmlFor="groupName">Create New Group</label>
-      <input name="groupName" />
+      <input
+        name="groupName"
+        className="input input-bordered input-primary max-w-xs"
+      />
       <button className="btn">Submit</button>
       <p>{message}</p>
     </form>

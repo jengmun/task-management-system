@@ -34,41 +34,43 @@ function App() {
   return (
     <LoginContext.Provider value={{ isLoggedIn, setIsLoggedIn }}>
       <BrowserRouter>
-        <Nav />
-        <Switch>
-          {/* USER ROUTES */}
-          <Route exact path="/" component={Home} />
-          <Route path="/login">
-            {isLoggedIn.username ? <Redirect to="/" /> : <Login />}
-          </Route>
-          <Route path="/forgot-password" component={ForgotPassword} />
-          <Route path="/reset-password/:username" component={ResetPassword} />
-          <Route path="/profile">
-            {isLoggedIn.username ? <Profile /> : <Redirect to="/" />}
-          </Route>
-          {/* ADMIN ROUTES */}
-          <Route path="/admin/user-management">
-            {isLoggedIn.account_type === "Admin" ? (
-              <UserManagement />
-            ) : (
-              <Redirect to="/" />
-            )}
-          </Route>
-          <Route path="/admin/create-user">
-            {isLoggedIn.account_type === "Admin" ? (
-              <CreateUser />
-            ) : (
-              <Redirect to="/" />
-            )}
-          </Route>
-          <Route path="/admin/group-management">
-            {isLoggedIn.account_type === "Admin" ? (
-              <GroupManagement />
-            ) : (
-              <Redirect to="/" />
-            )}
-          </Route>
-        </Switch>
+        <div className="flex flex-row min-h-screen">
+          <Nav />
+          <Switch>
+            {/* USER ROUTES */}
+            <Route exact path="/" component={Home} />
+            <Route path="/login">
+              {isLoggedIn.username ? <Redirect to="/" /> : <Login />}
+            </Route>
+            <Route path="/forgot-password" component={ForgotPassword} />
+            <Route path="/reset-password/:username" component={ResetPassword} />
+            <Route path="/profile">
+              {isLoggedIn.username ? <Profile /> : <Redirect to="/" />}
+            </Route>
+            {/* ADMIN ROUTES */}
+            <Route path="/admin/user-management">
+              {isLoggedIn.account_type === "Admin" ? (
+                <UserManagement />
+              ) : (
+                <Redirect to="/" />
+              )}
+            </Route>
+            <Route path="/admin/create-user">
+              {isLoggedIn.account_type === "Admin" ? (
+                <CreateUser />
+              ) : (
+                <Redirect to="/" />
+              )}
+            </Route>
+            <Route path="/admin/group-management">
+              {isLoggedIn.account_type === "Admin" ? (
+                <GroupManagement />
+              ) : (
+                <Redirect to="/" />
+              )}
+            </Route>
+          </Switch>
+        </div>
       </BrowserRouter>
     </LoginContext.Provider>
   );

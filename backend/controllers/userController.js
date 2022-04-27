@@ -92,7 +92,7 @@ router.post("/update-email", checkLoggedIn, async (req, res, next) => {
     [email, username],
     (err, result) => {
       if (err) {
-        next(error);
+        next(err);
       } else {
         res.json(result);
       }
@@ -106,7 +106,7 @@ router.get("/all-users", checkAdmin, async (req, res, next) => {
   db.query(
     "SELECT accounts.username, email, account_type, status, GROUP_CONCAT(user_group) AS user_group, GROUP_CONCAT(group_name) AS group_name FROM accounts LEFT JOIN accounts_groups ON accounts.username = accounts_groups.username GROUP BY username;",
     (err, result) => {
-      if (err) next(error);
+      if (err) next(err);
       else {
         for (const user of result) {
           if (user.user_group) {
@@ -126,7 +126,7 @@ router.get("/all-users", checkAdmin, async (req, res, next) => {
 router.get("/all-groups", checkAdmin, (req, res, next) => {
   db.query(`SELECT * FROM ${database}.groups`, (err, result) => {
     if (err) {
-      next(error);
+      next(err);
     } else {
       res.json(result);
     }
@@ -139,7 +139,7 @@ router.post("/groups-users", checkAdmin, async (req, res, next) => {
     req.body.group,
     (err, result) => {
       if (err) {
-        next(error);
+        next(err);
       } else {
         res.json(result);
       }
@@ -179,15 +179,20 @@ router.post("/create-account", checkAdmin, async (req, res, next) => {
       if (err) {
         next(err);
       } else {
-        db.query("INSERT INTO accounts_groups VALUES " + values, (err) => {
-          if (err) {
-            db.query("ROLLBACK");
-            next(err);
-          } else {
-            db.query("COMMIT");
-            res.json("User created");
-          }
-        });
+        if (groups.length) {
+          db.query("INSERT INTO accounts_groups VALUES " + values, (err) => {
+            if (err) {
+              db.query("ROLLBACK");
+              next(err);
+            } else {
+              db.query("COMMIT");
+              res.json("User created");
+            }
+          });
+        } else {
+          db.query("COMMIT");
+          res.json("User created");
+        }
       }
     }
   );
@@ -200,7 +205,7 @@ router.post("/update-details", checkAdmin, async (req, res) => {
     [email, status, username],
     (err, result) => {
       if (err) {
-        next(error);
+        next(err);
       } else {
         res.json(result);
       }
@@ -230,7 +235,7 @@ router.post("/update-groups", checkAdmin, async (req, res, next) => {
       [`${username}_${group.value}`, username, group.value],
       (err, result) => {
         if (err) {
-          next(error);
+          next(err);
         } else {
           for (const group of toDelete) {
             db.query(
@@ -238,7 +243,7 @@ router.post("/update-groups", checkAdmin, async (req, res, next) => {
               [`${username}_${group}`],
               (err, result) => {
                 if (err) {
-                  next(error);
+                  next(err);
                 } else {
                   res.json("Updated groups");
                 }
@@ -286,7 +291,7 @@ router.post("/remove-group-member", checkAdmin, (req, res, next) => {
     [`${username}_${group}`],
     (err, result) => {
       if (err) {
-        next(error);
+        next(err);
       } else {
         res.json("Removed");
       }
@@ -428,7 +433,7 @@ router.post("/user-update-password", checkLoggedIn, async (req, res, next) => {
     "UPDATE accounts SET password = ? WHERE username = ?",
     [password, username],
     (err, result) => {
-      if (err) next(error);
+      if (err) next(err);
       else {
         res.json(result);
       }

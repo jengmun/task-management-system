@@ -23,26 +23,36 @@ const Login = () => {
   };
 
   return (
-    <div>
-      <label htmlFor="username">Username</label>
+    <div className="prose flex flex-col items-center justify-center">
+      <h3>Login</h3>
+      <label htmlFor="username" className="label">
+        <span className="label-text">Username</span>
+      </label>
       <input
         id="username"
         name="username"
+        className="input input-bordered input-primary max-w-xs"
+        // placeholder="Username"
         onChange={(e) => setUsername(e.target.value)}
       />
-      <label htmlFor="password">Password</label>
+
+      <label htmlFor="password" className="label">
+        <span className="label-text">Password</span>
+      </label>
       <input
         type="password"
         id="password"
         name="password"
+        className="input input-bordered input-primary max-w-xs"
+        // placeholder="Password"
         onChange={(e) => setPassword(e.target.value)}
       />
-      <button className="btn" onClick={handleLogin}>
+      <button className="btn mt-2" onClick={handleLogin}>
         Submit
       </button>
       {message}
-      <NavLink to="/forgot-password">
-        <button className="btn btn-secondary">Forgot password</button>
+      <NavLink to="/forgot-password" style={{ textDecoration: "none" }}>
+        <button className="btn btn-secondary mt-2">Forgot password</button>
       </NavLink>
     </div>
   );

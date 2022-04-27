@@ -22,6 +22,13 @@ app.use(cookieParser());
 const userController = require("./controllers/userController");
 app.use("/user", userController);
 
+// Error handler
+
+app.use((err, req, res, next) => {
+  console.log(err);
+  return res.json(`Error: ${err}`);
+});
+
 // Connect to port and DB
 
 db.connect((err) => {

@@ -6,17 +6,21 @@ const CreateNewGroup = (props) => {
   const handleCreateGroup = async (e) => {
     e.preventDefault();
 
-    const result = await handlePostRequest(`user/create-groups`, {
-      group: e.target.groupName.value,
-    });
-    setMessage(result);
-    props.fetchAllGroups();
+    if (e.target.groupName.value) {
+      const result = await handlePostRequest(`user/create-groups`, {
+        group: e.target.groupName.value,
+      });
+      setMessage(result);
+      props.fetchAllGroups();
+    } else {
+      setMessage("Please enter a group name");
+    }
   };
   return (
     <form onSubmit={handleCreateGroup}>
       <label htmlFor="groupName">Create New Group</label>
       <input name="groupName" />
-      <button>Submit</button>
+      <button className="btn">Submit</button>
       <p>{message}</p>
     </form>
   );

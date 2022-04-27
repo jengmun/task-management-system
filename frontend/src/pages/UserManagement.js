@@ -47,7 +47,7 @@ const UserManagement = () => {
   return (
     <div>
       <NavLink to="/admin/create-user">
-        <button>Create New User</button>
+        <button className="btn">Create New User</button>
       </NavLink>
       <label>Filter</label>
       <input onChange={handleFilterUsers} />
@@ -189,31 +189,42 @@ const User = (props) => {
         {readOnly ? (
           <div>{reactData.status}</div>
         ) : (
-          <button
-            onClick={() => {
+          <input
+            type="checkbox"
+            className="toggle toggle-primary"
+            checked={reactData.status === "Active" ? true : false}
+            onChange={() => {
               if (reactData.status === "Active") {
                 setReactData({ ...reactData, status: "Inactive" });
               } else {
                 setReactData({ ...reactData, status: "Active" });
               }
             }}
-          >
-            {reactData.status === "Active" ? "Inactive" : "Active"}
-          </button>
+          />
         )}
       </td>
       <td>
-        <button onClick={handleResetPassword} disabled={passwordReset}>
+        <button
+          className="btn"
+          onClick={handleResetPassword}
+          disabled={passwordReset}
+        >
           {passwordReset ? "Password resetted" : "Reset password"}
         </button>
       </td>
       <td>
         {readOnly ? (
-          <button onClick={handleEditUser}>Edit</button>
+          <button className="btn" onClick={handleEditUser}>
+            Edit
+          </button>
         ) : (
           <>
-            <button onClick={handleUpdateUser}>Save</button>
-            <button onClick={handleCancelChanges}>Cancel</button>
+            <button className="btn" onClick={handleUpdateUser}>
+              Save
+            </button>
+            <button className="btn" onClick={handleCancelChanges}>
+              Cancel
+            </button>
           </>
         )}
       </td>

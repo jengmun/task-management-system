@@ -10,7 +10,7 @@ const router = express.Router();
 
 // ================= AUTHENTICATION ================= //
 
-router.post("/login", (req, res) => {
+router.post("/login", (req, res, next) => {
   try {
     const { username, password } = req.body;
 
@@ -19,7 +19,7 @@ router.post("/login", (req, res) => {
       username,
       (err, result) => {
         // Step 1 - check if user is valid
-        if (!result) {
+        if (!result || !result.length) {
           res.json("Invalid user");
           return;
         }
@@ -63,7 +63,7 @@ router.post("/login", (req, res) => {
       }
     );
   } catch (error) {
-    res.json(error);
+    next(error);
   }
 });
 
@@ -84,85 +84,70 @@ router.get("/logout", checkLoggedIn, (req, res) => {
 
 // ================= USER PRIVILEGES (EXCLUDING PW RESET) ================= //
 
-// router.get("/username/:username", checkLoggedIn, (req, res) => {
-//   try {
-//     db.query(
-//       "SELECT * FROM accounts WHERE username = ?",
-//       [req.params.username],
-//       (err, result) => {
-//         if (err) throw err;
-//         res.json(result);
-//       }
-//     );
-//   } catch (error) {
-//     res.json(error);
-//   }
-// });
+router.post("/update-email", checkLoggedIn, async (req, res, next) => {
+  const { username, email } = req.body;
 
-router.post("/update-email", checkLoggedIn, async (req, res) => {
-  try {
-    const { username, email } = req.body;
-
-    db.query(
-      "UPDATE accounts SET email = ? WHERE username = ?",
-      [email, username],
-      (err, result) => {
-        if (err) throw err;
+  db.query(
+    "UPDATE accounts SET email = ? WHERE username = ?",
+    [email, username],
+    (err, result) => {
+      if (err) {
+        next(error);
+      } else {
         res.json(result);
       }
-    );
-  } catch (error) {
-    res.json(error);
-  }
+    }
+  );
 });
 
 // ================= ADMIN PRIVILEGES ================= //
 
-router.get("/all-users", checkAdmin, async (req, res) => {
-  try {
-    db.query(
-      "SELECT accounts.username, email, account_type, status, GROUP_CONCAT(user_group) AS user_group, GROUP_CONCAT(group_name) AS group_name FROM accounts LEFT JOIN accounts_groups ON accounts.username = accounts_groups.username GROUP BY username;",
-      (err, result) => {
-        if (err) throw err;
+router.get("/all-users", checkAdmin, async (req, res, next) => {
+  db.query(
+    "SELECT accounts.username, email, account_type, status, GROUP_CONCAT(user_group) AS user_group, GROUP_CONCAT(group_name) AS group_name FROM accounts LEFT JOIN accounts_groups ON accounts.username = accounts_groups.username GROUP BY username;",
+    (err, result) => {
+      if (err) next(error);
+      else {
         for (const user of result) {
-          console.log(user);
-          user.user_group = user.user_group.split(",");
-          user.group_name = user.group_name.split(",");
+          if (user.user_group) {
+            user.user_group = user.user_group.split(",");
+            user.group_name = user.group_name.split(",");
+          } else {
+            user.user_group = [""];
+            user.group_name = [""];
+          }
         }
         res.json(result);
       }
-    );
-  } catch (error) {
-    res.json(error);
-  }
+    }
+  );
 });
 
-router.get("/all-groups", checkAdmin, (req, res) => {
-  try {
-    db.query(`SELECT * FROM ${database}.groups`, (err, result) => {
+router.get("/all-groups", checkAdmin, (req, res, next) => {
+  db.query(`SELECT * FROM ${database}.groups`, (err, result) => {
+    if (err) {
+      next(error);
+    } else {
       res.json(result);
-    });
-  } catch (error) {
-    res.json(error);
-  }
+    }
+  });
 });
 
-router.post("/groups-users", checkAdmin, async (req, res) => {
-  try {
-    db.query(
-      "SELECT accounts.username, email, account_type, status FROM accounts INNER JOIN accounts_groups ON accounts.username = accounts_groups.username WHERE accounts_groups.group_name = ?;",
-      req.body.group,
-      (err, result) => {
-        if (err) throw err;
+router.post("/groups-users", checkAdmin, async (req, res, next) => {
+  db.query(
+    "SELECT accounts.username, email, account_type, status FROM accounts INNER JOIN accounts_groups ON accounts.username = accounts_groups.username WHERE accounts_groups.group_name = ?;",
+    req.body.group,
+    (err, result) => {
+      if (err) {
+        next(error);
+      } else {
         res.json(result);
       }
-    );
-  } catch (error) {
-    res.json(error);
-  }
+    }
+  );
 });
 
-router.post("/create-account", checkAdmin, async (req, res) => {
+router.post("/create-account", checkAdmin, async (req, res, next) => {
   const { username, password, email, groups } = req.body;
 
   // Password validation
@@ -186,125 +171,127 @@ router.post("/create-account", checkAdmin, async (req, res) => {
     }
   }
 
-  try {
-    db.query("BEGIN");
-    db.query(
-      "INSERT INTO accounts (username, password, email) VALUES (?, ?, ?)",
-      [username, hashedPassword, email]
-    );
-    db.query("INSERT INTO accounts_groups VALUES " + values);
-    db.query("COMMIT");
-    res.json("User created!");
-  } catch (error) {
-    db.query("ROLLBACK");
-    res.json("Error creating user");
-  }
+  db.query("BEGIN");
+  db.query(
+    "INSERT INTO accounts (username, password, email) VALUES (?, ?, ?)",
+    [username, hashedPassword, email],
+    (err) => {
+      if (err) {
+        next(err);
+      } else {
+        db.query("INSERT INTO accounts_groups VALUES " + values, (err) => {
+          if (err) {
+            db.query("ROLLBACK");
+            next(err);
+          } else {
+            db.query("COMMIT");
+            res.json("User created");
+          }
+        });
+      }
+    }
+  );
 });
 
 router.post("/update-details", checkAdmin, async (req, res) => {
-  try {
-    const { username, email, status } = req.body;
-    db.query(
-      "UPDATE accounts SET email = ?, status = ? WHERE username = ?",
-      [email, status, username],
-      (err, result) => {
-        if (err) throw err;
+  const { username, email, status } = req.body;
+  db.query(
+    "UPDATE accounts SET email = ?, status = ? WHERE username = ?",
+    [email, status, username],
+    (err, result) => {
+      if (err) {
+        next(error);
+      } else {
         res.json(result);
       }
-    );
-  } catch (error) {
-    res.json(error);
-  }
+    }
+  );
 });
 
 // User management
-router.post("/update-groups", checkAdmin, async (req, res) => {
-  try {
-    let { username, currentGroups, oldGroups } = req.body;
-    const toDelete = [];
+router.post("/update-groups", checkAdmin, async (req, res, next) => {
+  let { username, currentGroups, oldGroups } = req.body;
+  const toDelete = [];
 
-    for (let i = 0; i < oldGroups.length; i++) {
-      for (let j = 0; j < currentGroups.length; j++) {
-        if (oldGroups[i] === currentGroups[j].value) {
-          currentGroups.splice(j, 1);
-          break;
-        } else if (j === currentGroups.length - 1) {
-          toDelete.push(oldGroups[i]);
-        }
+  for (let i = 0; i < oldGroups.length; i++) {
+    for (let j = 0; j < currentGroups.length; j++) {
+      if (oldGroups[i] === currentGroups[j].value) {
+        currentGroups.splice(j, 1);
+        break;
+      } else if (j === currentGroups.length - 1) {
+        toDelete.push(oldGroups[i]);
       }
     }
-
-    for (const group of currentGroups) {
-      db.query(
-        "INSERT INTO accounts_groups VALUES (?, ?, ?)",
-        [`${username}_${group.value}`, username, group.value],
-        (err, result) => {
-          if (err) throw err;
-        }
-      );
-    }
-
-    for (const group of toDelete) {
-      db.query(
-        "DELETE FROM accounts_groups WHERE user_group = ?",
-        [`${username}_${group}`],
-        (err, result) => {
-          if (err) throw err;
-        }
-      );
-    }
-
-    res.json("Updated groups");
-  } catch (error) {
-    res.json(error);
   }
-});
 
-router.post("/create-groups", checkAdmin, (req, res) => {
-  try {
-    db.query(
-      `INSERT INTO ${database}.groups SET group_name = ?`,
-      req.body.group,
-      (err, result) => {
-        if (err) throw err;
-        res.json("Group created!");
-      }
-    );
-  } catch (error) {
-    res.json(error);
-  }
-});
-
-router.post("/add-group-member", checkAdmin, (req, res) => {
-  const { username, group } = req.body;
-  try {
+  for (const group of currentGroups) {
     db.query(
       "INSERT INTO accounts_groups VALUES (?, ?, ?)",
-      [`${username}_${group}`, username, group],
+      [`${username}_${group.value}`, username, group.value],
       (err, result) => {
-        if (err) throw err;
-        res.json("Added");
+        if (err) {
+          next(error);
+        } else {
+          for (const group of toDelete) {
+            db.query(
+              "DELETE FROM accounts_groups WHERE user_group = ?",
+              [`${username}_${group}`],
+              (err, result) => {
+                if (err) {
+                  next(error);
+                } else {
+                  res.json("Updated groups");
+                }
+              }
+            );
+          }
+        }
       }
     );
-  } catch (error) {
-    res.json(error);
   }
 });
 
-router.post("/remove-group-member", checkAdmin, (req, res) => {
+router.post("/create-groups", checkAdmin, (req, res, next) => {
+  db.query(
+    `INSERT INTO ${database}.groups SET group_name = ?`,
+    req.body.group,
+    (err, result) => {
+      if (err) {
+        next(err);
+      } else {
+        res.json("Group created!");
+      }
+    }
+  );
+});
+
+router.post("/add-group-member", checkAdmin, (req, res, next) => {
   const { username, group } = req.body;
-  try {
-    db.query(
-      "DELETE FROM accounts_groups WHERE user_group = ?",
-      [`${username}_${group}`],
-      (err, result) => {
-        if (err) throw err;
+
+  db.query(
+    "INSERT INTO accounts_groups VALUES (?, ?, ?)",
+    [`${username}_${group}`, username, group],
+    (err, result) => {
+      if (err) throw err;
+      res.json("Added");
+    }
+  );
+});
+
+router.post("/remove-group-member", checkAdmin, (req, res, next) => {
+  const { username, group } = req.body;
+
+  db.query(
+    "DELETE FROM accounts_groups WHERE user_group = ?",
+    [`${username}_${group}`],
+    (err, result) => {
+      if (err) {
+        next(error);
+      } else {
         res.json("Removed");
       }
-    );
-  } catch (error) {
-    res.json(error);
-  }
+    }
+  );
 });
 
 // ================= PASSWORD RESETTING - USER AND ADMIN ================= //
@@ -327,7 +314,7 @@ const generatePassword = () => {
   return password;
 };
 
-router.post("/admin-password-reset", async (req, res) => {
+router.post("/admin-password-reset", async (req, res, next) => {
   try {
     const validUser = await new Promise((resolve, reject) => {
       db.query(
@@ -371,12 +358,12 @@ router.post("/admin-password-reset", async (req, res) => {
       }
     );
   } catch (error) {
-    res.json(error);
+    next(error);
   }
 });
 
 // For users who forgot their password / had their passwords reset by the administrator
-router.post("/user-password-reset/:username", async (req, res) => {
+router.post("/user-password-reset/:username", async (req, res, next) => {
   try {
     const oldPassword = req.body.oldPassword;
     const username = req.params.username;
@@ -419,36 +406,34 @@ router.post("/user-password-reset/:username", async (req, res) => {
       }
     );
   } catch (error) {
-    res.json("Error resetting password");
+    next("Error resetting password");
   }
 });
 
 // For users who are logged in
-router.post("/user-update-password", checkLoggedIn, async (req, res) => {
-  try {
-    if (
-      !req.body.password.match(
-        /^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[0-9])(?=.*?[#?!@$%^&*-])\S{8,10}$/
-      )
-    ) {
-      res.json("Invalid password format");
-      return;
-    }
+router.post("/user-update-password", checkLoggedIn, async (req, res, next) => {
+  if (
+    !req.body.password.match(
+      /^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[0-9])(?=.*?[#?!@$%^&*-])\S{8,10}$/
+    )
+  ) {
+    res.json("Invalid password format");
+    return;
+  }
 
-    const { username } = req.body;
-    const password = await argon2.hash(req.body.password);
+  const { username } = req.body;
+  const password = await argon2.hash(req.body.password);
 
-    db.query(
-      "UPDATE accounts SET password = ? WHERE username = ?",
-      [password, username],
-      (err, result) => {
-        if (err) throw err;
+  db.query(
+    "UPDATE accounts SET password = ? WHERE username = ?",
+    [password, username],
+    (err, result) => {
+      if (err) next(error);
+      else {
         res.json(result);
       }
-    );
-  } catch (error) {
-    res.json(error);
-  }
+    }
+  );
 });
 
 module.exports = router;

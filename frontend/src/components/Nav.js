@@ -12,13 +12,9 @@ const Nav = () => {
         <li>
           <NavButton link="/" text="Home" />
         </li>
-        {loginContext.isLoggedIn ? (
+        {loginContext.isLoggedIn.username && (
           <li>
             <NavButton link="/profile" text="Profile" />
-          </li>
-        ) : (
-          <li>
-            <NavButton link="/login" text="Login" />
           </li>
         )}
         {loginContext.isLoggedIn.account_type === "Admin" && (
@@ -34,7 +30,7 @@ const Nav = () => {
             </li>
           </>
         )}
-        {loginContext.isLoggedIn && (
+        {loginContext.isLoggedIn.username && (
           <li>
             <NavLink
               to="/"

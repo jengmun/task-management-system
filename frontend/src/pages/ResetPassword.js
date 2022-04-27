@@ -39,11 +39,11 @@ const ResetPassword = () => {
       <h1>Change password</h1>
 
       <label htmlFor="oldPassword">Current Password</label>
-      <input id="oldPassword" name="oldPassword" />
+      <input id="oldPassword" name="oldPassword" type="password" />
       <label htmlFor="updatePassword">New Password</label>
-      <input id="updatePassword" name="updatePassword" />
+      <input id="updatePassword" name="updatePassword" type="password" />
       <label htmlFor="confirmPassword">Re-enter New Password</label>
-      <input id="confirmPassword" name="confirmPassword" />
+      <input id="confirmPassword" name="confirmPassword" type="password" />
       <button>Update password</button>
     </form>
   );

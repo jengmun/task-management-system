@@ -103,13 +103,14 @@ const GroupManagement = () => {
             <tbody>
               {groupMembers.map((member, index) => {
                 return (
-                  <tr>
+                  <tr key={member.username}>
                     <td>{member.username}</td>
                     <td>{member.email}</td>
                     <td>{member.status}</td>
                     {/* <td>{member.username}</td> */}
                     <td>
                       <button
+                        className="btn"
                         onClick={() => {
                           handleRemoveMember(member.username, index);
                         }}
@@ -134,12 +135,13 @@ const GroupManagement = () => {
             <tbody>
               {remainingUsers.map((member, index) => {
                 return (
-                  <tr>
+                  <tr key={member.username}>
                     <td>{member.username}</td>
                     <td>{member.email}</td>
                     <td>{member.status}</td>
                     <td>
                       <button
+                        className="btn"
                         onClick={() => {
                           handleAddMember(member.username, index);
                         }}

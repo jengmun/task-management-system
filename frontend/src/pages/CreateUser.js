@@ -40,7 +40,7 @@ const CreateUser = () => {
     e.target.username.value = "";
     e.target.password.value = "";
     e.target.email.value = "";
-    setSelectedGroups([]);
+    // setSelectedGroups([]);
   };
 
   return (
@@ -50,7 +50,7 @@ const CreateUser = () => {
         <label htmlFor="username">Username</label>
         <input id="username" name="username" required />
         <label htmlFor="password">Password</label>
-        <input id="password" name="password" required />
+        <input id="password" name="password" type="password" required />
         <label htmlFor="email">Email</label>
         <input id="email" name="email" required />
         <p>Assign group</p>

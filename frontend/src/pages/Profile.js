@@ -4,6 +4,7 @@ import handlePostRequest from "../hooks/handlePostRequest";
 
 const Profile = () => {
   const loginContext = useContext(LoginContext);
+  const [message, setMessage] = useState("");
 
   // ------------ Update email ------------
   const [updateEmail, setUpdateEmail] = useState("");
@@ -24,10 +25,10 @@ const Profile = () => {
   const [changePassword, setChangePassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
 
-  const handlePasswordChange = () => {
+  const handlePasswordChange = async () => {
     // Step 1 - check that both passwords match
     if (changePassword !== confirmPassword) {
-      console.log("Passwords do not match");
+      setMessage("Passwords do not match");
       return;
     }
 
@@ -37,15 +38,21 @@ const Profile = () => {
         /^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[0-9])(?=.*?[#?!@$%^&*-])\S{8,10}$/
       )
     ) {
-      console.log("Invalid password format");
+      setMessage("Invalid password format");
       return;
     }
 
     // Step 3 - submit password update request
-    handlePostRequest("user/update-password", {
+    const data = await handlePostRequest("user/user-update-password", {
       username: loginContext.isLoggedIn.username,
       password: confirmPassword,
     });
+
+    if (typeof data === "string") {
+      setMessage(data);
+    } else {
+      setMessage("Password updated");
+    }
   };
 
   return (
@@ -67,22 +74,29 @@ const Profile = () => {
         defaultValue={loginContext.isLoggedIn.email}
         onChange={(e) => setUpdateEmail(e.target.value)}
       />
-      <button onClick={() => handleEmailChange()}>Update</button>
+      <button className="btn" onClick={() => handleEmailChange()}>
+        Update
+      </button>
 
       <h1>Change password</h1>
       <label htmlFor="update-password">Password</label>
       <input
         id="update-password"
         name="update-password"
+        type="password"
         onChange={(e) => setChangePassword(e.target.value)}
       />
       <label htmlFor="confirm-password">Re-enter Password</label>
       <input
         id="confirm-password"
         name="confirm-password"
+        type="password"
         onChange={(e) => setConfirmPassword(e.target.value)}
       />
-      <button onClick={() => handlePasswordChange()}>Update password</button>
+      <button className="btn" onClick={() => handlePasswordChange()}>
+        Update password
+      </button>
+      <p>{message}</p>
     </div>
   );
 };

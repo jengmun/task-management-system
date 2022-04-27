@@ -23,7 +23,7 @@ const ResetPassword = () => {
       <label htmlFor="email">Email</label>
       <input id="email" name="email" />
 
-      <button>Submit</button>
+      <button className="btn">Submit</button>
       <p>{message}</p>
     </form>
   );

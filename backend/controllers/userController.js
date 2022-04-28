@@ -11,74 +11,65 @@ const router = express.Router();
 // ================= AUTHENTICATION ================= //
 
 router.post("/login", (req, res, next) => {
-  try {
-    const { username, password } = req.body;
+  const { username, password } = req.body;
 
-    db.query(
-      "SELECT * FROM accounts WHERE username = ?",
-      username,
-      (err, result) => {
-        // Step 1 - check if user is valid
-        if (!result || !result.length) {
-          res.json("Invalid user");
-          return;
-        }
+  db.query(
+    "SELECT * FROM accounts WHERE username = ?",
+    username,
+    (err, result) => {
+      if (err) {
+        next(err);
+        return;
+      }
 
-        // Step 2 - check if user is active
-        if (result[0].status !== "Active") {
-          res.json("Inactive user");
-          return;
-        }
+      // Step 1 - check if user is valid
+      if (!result || !result.length) {
+        res.json("Invalid user");
+        return;
+      }
 
-        argon2.verify(result[0].password, password).then((argon2Match) => {
-          // Step 3 - check if valid password
-          if (argon2Match) {
-            req.session.isLoggedIn = true;
-            res.cookie("isLoggedIn", true);
-          } else {
-            res.json("Invalid password");
-            return;
-          }
+      // Step 2 - check if user is active
+      if (result[0].status !== "Active") {
+        res.json("Inactive user");
+        return;
+      }
 
-          // Step 4 - check if admin
-          if (result[0].account_type === "Admin") {
-            req.session.isAdmin = true;
-            res.cookie("isAdmin", true);
-          } else {
-            req.session.isAdmin = false;
-            res.cookie("isAdmin", false);
-          }
-
-          // Step 5 - return data
+      argon2.verify(result[0].password, password).then((argon2Match) => {
+        // Step 3 - check if valid password
+        if (argon2Match) {
           req.session.username = result[0].username;
-          req.session.email = result[0].email;
-          req.session.account_type = result[0].account_type;
+          res.cookie("Username", result[0].username);
 
+          // Step 4 - return data
           res.json({
             username: result[0].username,
             email: result[0].email,
             account_type: result[0].account_type,
           });
-        });
-      }
-    );
-  } catch (error) {
-    next(error);
-  }
+        } else {
+          res.json("Invalid password");
+        }
+      });
+    }
+  );
 });
 
-router.get("/login-details", checkLoggedIn, (req, res) => {
-  res.json({
-    username: req.session.username,
-    email: req.session.email,
-    account_type: req.session.account_type,
-  });
+router.get("/login-details", checkLoggedIn, (req, res, next) => {
+  db.query(
+    "SELECT username, email, account_type FROM accounts WHERE username = ?",
+    req.session.username,
+    (err, results) => {
+      if (err) {
+        next(err);
+      }
+      res.json(results[0]);
+    }
+  );
 });
 
 router.get("/logout", checkLoggedIn, (req, res) => {
   req.session.destroy();
-  res.clearCookie("isLoggedIn");
-  res.clearCookie("isAdmin");
+  res.clearCookie("Username");
   res.json("Logged out");
 });
 
@@ -216,44 +207,76 @@ router.post("/update-details", checkAdmin, async (req, res) => {
 // User management
 router.post("/update-groups", checkAdmin, async (req, res, next) => {
   let { username, currentGroups, oldGroups } = req.body;
-  const toDelete = [];
+  let toDelete = [];
 
-  for (let i = 0; i < oldGroups.length; i++) {
-    for (let j = 0; j < currentGroups.length; j++) {
-      if (oldGroups[i] === currentGroups[j].value) {
-        currentGroups.splice(j, 1);
-        break;
-      } else if (j === currentGroups.length - 1) {
-        toDelete.push(oldGroups[i]);
+  if (!currentGroups.length) {
+    toDelete = [...oldGroups];
+  } else if (oldGroups.length && currentGroups.length) {
+    for (let i = 0; i < oldGroups.length; i++) {
+      for (let j = 0; j < currentGroups.length; j++) {
+        if (oldGroups[i] === currentGroups[j].value) {
+          currentGroups.splice(j, 1);
+          break;
+        } else if (j === currentGroups.length - 1) {
+          toDelete.push(oldGroups[i]);
+        }
       }
     }
   }
 
-  for (const group of currentGroups) {
-    db.query(
-      "INSERT INTO accounts_groups VALUES (?, ?, ?)",
-      [`${username}_${group.value}`, username, group.value],
-      (err, result) => {
-        if (err) {
-          next(err);
-        } else {
-          for (const group of toDelete) {
-            db.query(
-              "DELETE FROM accounts_groups WHERE user_group = ?",
-              [`${username}_${group}`],
-              (err, result) => {
-                if (err) {
-                  next(err);
-                } else {
-                  res.json("Updated groups");
-                }
-              }
-            );
+  const insertQuery = async (group) => {
+    return await new Promise((resolve, reject) => {
+      db.query(
+        "INSERT INTO accounts_groups VALUES (?, ?, ?)",
+        [`${username}_${group.value}`, username, group.value],
+        (err, result) => {
+          if (err) {
+            next(err);
+            resolve(false);
+          } else {
+            resolve(true);
           }
         }
+      );
+    });
+  };
+
+  const deleteQuery = async (group) => {
+    return await new Promise((resolve, reject) => {
+      db.query(
+        "DELETE FROM accounts_groups WHERE user_group = ?",
+        [`${username}_${group}`],
+        (err, result) => {
+          if (err) {
+            next(err);
+            resolve(false);
+          } else {
+            resolve(true);
+          }
+        }
+      );
+    });
+  };
+
+  async function runQueries() {
+    for (const group of currentGroups) {
+      const continueQuery = await insertQuery(group);
+      if (!continueQuery) {
+        return;
       }
-    );
+    }
+
+    for (const group of toDelete) {
+      const continueQuery = await deleteQuery(group);
+      if (!continueQuery) {
+        return;
+      }
+    }
+
+    res.json("Updated groups");
   }
+
+  runQueries();
 });
 
 router.post("/create-groups", checkAdmin, (req, res, next) => {

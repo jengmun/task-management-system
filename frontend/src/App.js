@@ -13,6 +13,7 @@ import ResetPassword from "./pages/ResetPassword";
 import ForgotPassword from "./pages/ForgotPassword";
 import GroupManagement from "./pages/GroupManagement";
 import handleGetRequest from "./hooks/handleGetRequest";
+import AdminRoute from "./components/AdminRoute";
 
 function App() {
   const [isLoggedIn, setIsLoggedIn] = useState("");
@@ -26,7 +27,7 @@ function App() {
   };
 
   useEffect(() => {
-    if (Cookies.get("isLoggedIn")) {
+    if (Cookies.get("Username")) {
       fetchDetails();
     }
   }, []);
@@ -47,28 +48,21 @@ function App() {
             <Route path="/profile">
               {isLoggedIn.username ? <Profile /> : <Redirect to="/" />}
             </Route>
+
             {/* ADMIN ROUTES */}
-            <Route path="/admin/user-management">
-              {isLoggedIn.account_type === "Admin" ? (
-                <UserManagement />
-              ) : (
-                <Redirect to="/" />
-              )}
-            </Route>
-            <Route path="/admin/create-user">
-              {isLoggedIn.account_type === "Admin" ? (
-                <CreateUser />
-              ) : (
-                <Redirect to="/" />
-              )}
-            </Route>
-            <Route path="/admin/group-management">
-              {isLoggedIn.account_type === "Admin" ? (
-                <GroupManagement />
-              ) : (
-                <Redirect to="/" />
-              )}
-            </Route>
+            {isLoggedIn.account_type && (
+              <>
+                <AdminRoute
+                  path="/admin/user-management"
+                  component={UserManagement}
+                />
+                <AdminRoute path="/admin/create-user" component={CreateUser} />
+                <AdminRoute
+                  path="/admin/group-management"
+                  component={GroupManagement}
+                />
+              </>
+            )}
           </Switch>
         </div>
       </BrowserRouter>

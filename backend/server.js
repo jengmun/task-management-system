@@ -17,10 +17,12 @@ app.use(
 app.use(express.json());
 app.use(cookieParser());
 
-// Controllers
+// Routers
 
 const userController = require("./controllers/userController");
 app.use("/user", userController);
+const taskRouter = require("./routers/taskRouter");
+app.use("/task", taskRouter);
 
 // Error handler
 

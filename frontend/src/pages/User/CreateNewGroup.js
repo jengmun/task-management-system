@@ -1,5 +1,5 @@
 import { useState } from "react";
-import handlePostRequest from "../hooks/handlePostRequest";
+import handlePostRequest from "../../hooks/handlePostRequest";
 
 const CreateNewGroup = (props) => {
   const [message, setMessage] = useState("");

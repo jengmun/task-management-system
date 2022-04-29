@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
-import handleGetRequest from "../hooks/handleGetRequest";
-import handlePostRequest from "../hooks/handlePostRequest";
-import Dropdown from "../components/Dropdown";
+import handleGetRequest from "../../hooks/handleGetRequest";
+import handlePostRequest from "../../hooks/handlePostRequest";
+import Dropdown from "../../components/Dropdown";
 
 const CreateUser = () => {
   // ------------- Fetch all groups -------------

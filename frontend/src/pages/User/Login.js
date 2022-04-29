@@ -1,7 +1,7 @@
 import { useContext, useState } from "react";
 import { NavLink, useHistory } from "react-router-dom";
-import LoginContext from "../context/login-context";
-import handlePostRequest from "../hooks/handlePostRequest";
+import LoginContext from "../../context/login-context";
+import handlePostRequest from "../../hooks/handlePostRequest";
 
 const Login = () => {
   const loginContext = useContext(LoginContext);

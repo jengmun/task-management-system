@@ -1,5 +1,5 @@
 import { useParams } from "react-router-dom";
-import handlePostRequest from "../hooks/handlePostRequest";
+import handlePostRequest from "../../hooks/handlePostRequest";
 
 const ResetPassword = () => {
   const params = useParams();

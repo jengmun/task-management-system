@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
-import Dropdown from "../components/Dropdown";
-import handleGetRequest from "../hooks/handleGetRequest";
-import handlePostRequest from "../hooks/handlePostRequest";
+import Dropdown from "../../components/Dropdown";
+import handleGetRequest from "../../hooks/handleGetRequest";
+import handlePostRequest from "../../hooks/handlePostRequest";
 import CreateNewGroup from "./CreateNewGroup";
 
 const GroupManagement = () => {

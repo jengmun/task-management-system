@@ -1,6 +1,6 @@
 import { useContext, useState } from "react";
-import LoginContext from "../context/login-context";
-import handlePostRequest from "../hooks/handlePostRequest";
+import LoginContext from "../../context/login-context";
+import handlePostRequest from "../../hooks/handlePostRequest";
 
 const Profile = () => {
   const loginContext = useContext(LoginContext);

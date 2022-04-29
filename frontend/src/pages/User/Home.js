@@ -1,6 +1,6 @@
 import { useContext } from "react";
 import { NavLink } from "react-router-dom";
-import LoginContext from "../context/login-context";
+import LoginContext from "../../context/login-context";
 
 const Home = () => {
   const loginContext = useContext(LoginContext);

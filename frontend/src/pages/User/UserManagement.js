@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from "react";
 import { NavLink } from "react-router-dom";
-import Dropdown from "../components/Dropdown";
-import handleGetRequest from "../hooks/handleGetRequest";
-import handlePostRequest from "../hooks/handlePostRequest";
+import Dropdown from "../../components/Dropdown";
+import handleGetRequest from "../../hooks/handleGetRequest";
+import handlePostRequest from "../../hooks/handlePostRequest";
 
 const UserManagement = () => {
   const [allUsers, setAllUsers] = useState([]);

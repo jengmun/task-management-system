@@ -1,5 +1,5 @@
 import { useState } from "react";
-import handlePostRequest from "../hooks/handlePostRequest";
+import handlePostRequest from "../../hooks/handlePostRequest";
 
 const ResetPassword = () => {
   const [message, setMessage] = useState("");

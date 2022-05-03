@@ -19,8 +19,8 @@ app.use(cookieParser());
 
 // Routers
 
-const userController = require("./controllers/userController");
-app.use("/user", userController);
+const userRouter = require("./routers/userRouter");
+app.use("/user", userRouter);
 const taskRouter = require("./routers/taskRouter");
 app.use("/task", taskRouter);
 

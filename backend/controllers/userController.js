@@ -1,16 +1,10 @@
-const express = require("express");
 const argon2 = require("argon2");
 const { db, database } = require("../modules/db");
 const emailNewPassword = require("../modules/email");
-const { checkAdmin, checkLoggedIn } = require("../middleware/auth");
-
-const router = express.Router();
-
-// ------------- Routes -------------
 
 // ================= AUTHENTICATION ================= //
 
-router.post("/login", (req, res, next) => {
+exports.login = (req, res, next) => {
   const { username, password } = req.body;
 
   db.query(
@@ -52,9 +46,9 @@ router.post("/login", (req, res, next) => {
       });
     }
   );
-});
+};
 
-router.get("/login-details", checkLoggedIn, (req, res, next) => {
+exports.getLoginDetails = (req, res, next) => {
   db.query(
     "SELECT username, email, account_type FROM accounts WHERE username = ?",
     req.session.username,
@@ -65,17 +59,17 @@ router.get("/login-details", checkLoggedIn, (req, res, next) => {
       res.json(results[0]);
     }
   );
-});
+};
 
-router.get("/logout", checkLoggedIn, (req, res) => {
+exports.logout = (req, res) => {
   req.session.destroy();
   res.clearCookie("Username");
   res.json("Logged out");
-});
+};
 
 // ================= USER PRIVILEGES (EXCLUDING PW RESET) ================= //
 
-router.post("/update-email", checkLoggedIn, async (req, res, next) => {
+exports.updateEmail = async (req, res, next) => {
   const { username, email } = req.body;
 
   db.query(
@@ -89,11 +83,11 @@ router.post("/update-email", checkLoggedIn, async (req, res, next) => {
       }
     }
   );
-});
+};
 
 // ================= ADMIN PRIVILEGES ================= //
 
-router.get("/all-users", checkAdmin, async (req, res, next) => {
+exports.getAllUsers = async (req, res, next) => {
   db.query(
     "SELECT accounts.username, email, account_type, status, GROUP_CONCAT(user_group) AS user_group, GROUP_CONCAT(group_name) AS group_name FROM accounts LEFT JOIN accounts_groups ON accounts.username = accounts_groups.username GROUP BY username;",
     (err, result) => {
@@ -112,9 +106,9 @@ router.get("/all-users", checkAdmin, async (req, res, next) => {
       }
     }
   );
-});
+};
 
-router.get("/all-groups", checkAdmin, (req, res, next) => {
+exports.getAllGroups = (req, res, next) => {
   db.query(`SELECT * FROM ${database}.groups`, (err, result) => {
     if (err) {
       next(err);
@@ -122,9 +116,9 @@ router.get("/all-groups", checkAdmin, (req, res, next) => {
       res.json(result);
     }
   });
-});
+};
 
-router.post("/groups-users", checkAdmin, async (req, res, next) => {
+exports.getUserGroups = async (req, res, next) => {
   db.query(
     "SELECT accounts.username, email, account_type, status FROM accounts INNER JOIN accounts_groups ON accounts.username = accounts_groups.username WHERE accounts_groups.group_name = ?;",
     req.body.group,
@@ -136,9 +130,9 @@ router.post("/groups-users", checkAdmin, async (req, res, next) => {
       }
     }
   );
-});
+};
 
-router.post("/create-account", checkAdmin, async (req, res, next) => {
+exports.createAccount = async (req, res, next) => {
   const { username, password, email, groups } = req.body;
 
   // Password validation
@@ -187,9 +181,9 @@ router.post("/create-account", checkAdmin, async (req, res, next) => {
       }
     }
   );
-});
+};
 
-router.post("/update-details", checkAdmin, async (req, res) => {
+exports.updateDetails = async (req, res) => {
   const { username, email, status } = req.body;
   db.query(
     "UPDATE accounts SET email = ?, status = ? WHERE username = ?",
@@ -202,10 +196,10 @@ router.post("/update-details", checkAdmin, async (req, res) => {
       }
     }
   );
-});
+};
 
 // User management
-router.post("/update-groups", checkAdmin, async (req, res, next) => {
+exports.updateGroups = async (req, res, next) => {
   let { username, currentGroups, oldGroups } = req.body;
   let toDelete = [];
 
@@ -277,9 +271,9 @@ router.post("/update-groups", checkAdmin, async (req, res, next) => {
   }
 
   runQueries();
-});
+};
 
-router.post("/create-groups", checkAdmin, (req, res, next) => {
+exports.createGroups = (req, res, next) => {
   db.query(
     `INSERT INTO ${database}.groups SET group_name = ?`,
     req.body.group,
@@ -291,9 +285,9 @@ router.post("/create-groups", checkAdmin, (req, res, next) => {
       }
     }
   );
-});
+};
 
-router.post("/add-group-member", checkAdmin, (req, res, next) => {
+exports.addGroupMember = (req, res, next) => {
   const { username, group } = req.body;
 
   db.query(
@@ -304,9 +298,9 @@ router.post("/add-group-member", checkAdmin, (req, res, next) => {
       res.json("Added");
     }
   );
-});
+};
 
-router.post("/remove-group-member", checkAdmin, (req, res, next) => {
+exports.removeGroupMember = (req, res, next) => {
   const { username, group } = req.body;
 
   db.query(
@@ -320,7 +314,7 @@ router.post("/remove-group-member", checkAdmin, (req, res, next) => {
       }
     }
   );
-});
+};
 
 // ================= PASSWORD RESETTING - USER AND ADMIN ================= //
 
@@ -342,7 +336,7 @@ const generatePassword = () => {
   return password;
 };
 
-router.post("/admin-password-reset", async (req, res, next) => {
+exports.adminPasswordReset = async (req, res, next) => {
   try {
     const validUser = await new Promise((resolve, reject) => {
       db.query(
@@ -388,10 +382,10 @@ router.post("/admin-password-reset", async (req, res, next) => {
   } catch (error) {
     next(error);
   }
-});
+};
 
 // For users who forgot their password / had their passwords reset by the administrator
-router.post("/user-password-reset/:username", async (req, res, next) => {
+exports.userPasswordReset = async (req, res, next) => {
   try {
     const oldPassword = req.body.oldPassword;
     const username = req.params.username;
@@ -436,10 +430,10 @@ router.post("/user-password-reset/:username", async (req, res, next) => {
   } catch (error) {
     next("Error resetting password");
   }
-});
+};
 
 // For users who are logged in
-router.post("/user-update-password", checkLoggedIn, async (req, res, next) => {
+exports.userUpdatePassword = async (req, res, next) => {
   if (
     !req.body.password.match(
       /^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[0-9])(?=.*?[#?!@$%^&*-])\S{8,10}$/
@@ -462,6 +456,4 @@ router.post("/user-update-password", checkLoggedIn, async (req, res, next) => {
       }
     }
   );
-});
-
-module.exports = router;
+};

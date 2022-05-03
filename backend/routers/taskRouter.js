@@ -1,11 +1,11 @@
 const express = require("express");
+const router = express.Router();
 const {
   createApplication,
   createPlan,
   createTask,
 } = require("../controllers/taskController");
 const checkState = require("../modules/checkState");
-const router = express.Router();
 
 router.post("/create-app", createApplication);
 

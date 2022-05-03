@@ -156,31 +156,53 @@ exports.createAccount = async (req, res, next) => {
     }
   }
 
-  db.query("BEGIN");
-  db.query(
-    "INSERT INTO accounts (username, password, email) VALUES (?, ?, ?)",
-    [username, hashedPassword, email],
-    (err) => {
-      if (err) {
-        next(err);
-      } else {
-        if (groups.length) {
-          db.query("INSERT INTO accounts_groups VALUES " + values, (err) => {
-            if (err) {
-              db.query("ROLLBACK");
-              next(err);
-            } else {
-              db.query("COMMIT");
-              res.json("User created");
-            }
-          });
+  const defaultErrorHandler = (err) => {
+    if (err) {
+      next(err);
+    }
+  };
+
+  db.beginTransaction((err) => {
+    if (err) {
+      next(err);
+    }
+
+    db.query(
+      "INSERT INTO accounts (username, password, email) VALUES (?, ?, ?)",
+      [username, hashedPassword, email],
+      (err) => {
+        if (err) {
+          db.rollback(defaultErrorHandler);
+          next(err);
         } else {
-          db.query("COMMIT");
-          res.json("User created");
+          if (groups.length) {
+            db.query("INSERT INTO accounts_groups VALUES " + values, (err) => {
+              if (err) {
+                db.rollback(defaultErrorHandler);
+                next(err);
+              } else {
+                db.commit((err) => {
+                  if (err) {
+                    db.rollback(defaultErrorHandler);
+                    next(err);
+                  }
+                });
+                res.json("User created");
+              }
+            });
+          } else {
+            db.commit((err) => {
+              if (err) {
+                db.rollback(defaultErrorHandler);
+                next(err);
+              }
+            });
+            res.json("User created");
+          }
         }
       }
-    }
-  );
+    );
+  });
 };
 
 exports.updateDetails = async (req, res) => {

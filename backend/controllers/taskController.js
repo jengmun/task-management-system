@@ -92,3 +92,11 @@ exports.createTask = async (req, res, next) => {
 };
 
 exports.updatePermissions = () => {};
+
+exports.updateTask = (req, res, next) => {};
+
+exports.updateTaskState = (req, res, next) => {};
+
+exports.createNotes = (req, res, next) => {
+  db.query("");
+};

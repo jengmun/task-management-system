@@ -95,10 +95,10 @@ exports.updatePermissions = () => {};
 
 exports.updateTask = (req, res, next) => {};
 
-exports.updateTaskState = async (req, res, next) => {
-  const { taskID } = req.body;
+const listOfStates = ["Open", "Todo", "Doing", "Done", "Closed"];
 
-  const listOfStates = ["Open", "Todo", "Doing", "Done", "Closed"];
+exports.taskStateProgression = async (req, res, next) => {
+  const { taskID } = req.body;
 
   const results = await new Promise((resolve) => {
     db.query(
@@ -155,6 +155,55 @@ exports.updateTaskState = async (req, res, next) => {
   }
 
   res.json("State updated");
+};
+
+exports.taskStateRegression = async (req, res, next) => {
+  const { taskID } = req.body;
+
+  const currentState = await new Promise((resolve) => {
+    db.query(
+      "SELECT state FROM tasks WHERE task_id = ?",
+      taskID,
+      (err, results) => {
+        if (err) {
+          return next(err);
+        }
+        if (results.length) {
+          resolve(results[0].state);
+        } else {
+          resolve("");
+        }
+      }
+    );
+  });
+
+  if (currentState !== "Doing" && currentState !== "Done") {
+    res.json("State can't be demoted!");
+    return;
+  }
+
+  const newState = listOfStates[listOfStates.indexOf(currentState) - 1];
+
+  db.query(
+    "UPDATE tasks SET state = ? WHERE task_id = ?",
+    [newState, taskID],
+    (err, results) => {
+      if (err) {
+        return next(err);
+      }
+    }
+  );
+
+  if (newState === "Todo") {
+    db.query("UPDATE tasks SET owner = NULL WHERE task_id = ?", [taskID]),
+      (err, results) => {
+        if (err) {
+          return next(err);
+        }
+      };
+  }
+
+  res.json("State demoted");
 };
 
 exports.createNotes = async (req, res, next) => {

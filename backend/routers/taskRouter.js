@@ -4,7 +4,8 @@ const {
   createApplication,
   createPlan,
   createTask,
-  updateTaskState,
+  taskStateProgression,
+  taskStateRegression,
   createNotes,
 } = require("../controllers/taskController");
 const checkState = require("../modules/checkState");
@@ -15,7 +16,9 @@ router.post("/create-plan", createPlan);
 
 router.post("/create-task", createTask);
 
-router.post("/update-task-state", updateTaskState);
+router.post("/task-state-progression", taskStateProgression);
+
+router.post("/task-state-regression", taskStateRegression);
 
 router.post("/create-notes", createNotes);
 

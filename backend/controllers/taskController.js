@@ -168,7 +168,7 @@ exports.taskStateProgression = async (req, res, next) => {
 
   const teamLeads = await new Promise((resolve) => {
     db.query(
-      "SELECT username, email FROM accounts_groups INNER JOIN accounts on accounts_groups.username = accounts.username WHERE acronym = ? AND group_name = 2",
+      "SELECT username, email FROM accounts_groups INNER JOIN accounts on accounts_groups.username = accounts.username WHERE acronym = ? AND group_name = Team Lead",
       acronym,
       (err, results) => {
         if (err) {

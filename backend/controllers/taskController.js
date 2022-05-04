@@ -204,7 +204,10 @@ exports.taskStateRegression = async (req, res, next) => {
 };
 
 exports.createNotes = async (req, res, next) => {
-  const { details, creator, state, taskID } = req.body;
+  const { details, creator, taskID } = req.body;
+
+  const state = await checkState(taskID);
+
   const runningNumber = await new Promise((resolve) => {
     db.query(
       "SELECT running_number FROM notes WHERE task_id = ?",

@@ -1,4 +1,5 @@
 const checkGroup = require("../modules/checkGroup");
+const checkState = require("../modules/checkState");
 const { db } = require("../modules/db");
 
 const checkAdmin = async (req, res, next) => {
@@ -26,34 +27,49 @@ const checkLoggedIn = (req, res, next) => {
 };
 
 const checkPermissions = async (req, res, next) => {
-  const isDeveloper = await checkGroup(
+  // const listOfActions = ["create", "open", "todo", "doing", "done"];
+  const { taskID, acronym } = req.body;
+
+  const state = await checkState(taskID);
+  let action;
+
+  if (state === "Closed") {
+    res.json("Task is closed");
+    return;
+  }
+
+  if (!state) {
+    action = "create";
+  } else {
+    action = state.toLowerCase();
+  }
+
+  const permittedGroup = await new Promise((resolve) => {
+    db.query(
+      "SELECT ?? FROM applications WHERE acronym = ?",
+      [`permit_${action}`, acronym],
+      (err, results) => {
+        if (err) {
+          return next(err);
+        }
+        resolve(results[0][`permit_${action}`]);
+      }
+    );
+  });
+
+  const isPermitted = await checkGroup(
     "accounts_groups",
     req.session.username,
     "group_name",
-    "Developer"
-  );
-  const isTeamLead = await checkGroup(
-    "accounts_groups",
-    req.session.username,
-    "group_name",
-    "Team Lead"
-  );
-  const isPM = await checkGroup(
-    "accounts_groups",
-    req.session.username,
-    "group_name",
-    "Project Manager"
+    permittedGroup,
+    acronym
   );
 
-  db.query(
-    "SELECT * FROM applications WHERE acronym = ?",
-    req.body.acronym,
-    (err) => {
-      if (err) {
-        next(err);
-      }
-    }
-  );
+  if (isPermitted) {
+    next();
+  } else {
+    res.json("Insufficient permissions");
+  }
 };
 
-module.exports = { checkAdmin, checkLoggedIn };
+module.exports = { checkAdmin, checkLoggedIn, checkPermissions };

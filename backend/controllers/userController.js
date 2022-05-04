@@ -316,7 +316,7 @@ exports.addGroupMember = (req, res, next) => {
     "INSERT INTO accounts_groups VALUES (?, ?, ?)",
     [`${username}_${group}`, username, group],
     (err, result) => {
-      if (err) throw err;
+      if (err) next(err);
       res.json("Added");
     }
   );
@@ -359,99 +359,91 @@ const generatePassword = () => {
 };
 
 exports.adminPasswordReset = async (req, res, next) => {
-  try {
-    const validUser = await new Promise((resolve, reject) => {
-      db.query(
-        "SELECT * FROM accounts WHERE username = ? AND email = ?",
-        [req.body.username, req.body.email],
-        (err, results) => {
-          if (err) throw err;
-          resolve(results);
-        }
-      );
-    });
+  const validUser = await new Promise((resolve, reject) => {
+    db.query(
+      "SELECT * FROM accounts WHERE username = ? AND email = ?",
+      [req.body.username, req.body.email],
+      (err, results) => {
+        if (err) next(err);
+        resolve(results);
+      }
+    );
+  });
 
-    if (!validUser.length) {
-      res.json("No valid user found!");
-      return;
-    }
+  if (!validUser.length) {
+    res.json("No valid user found!");
+    return;
+  }
 
-    const password = generatePassword();
-    const link = `http://localhost:3000/reset-password/${req.body.username}`;
+  const password = generatePassword();
+  const link = `http://localhost:3000/reset-password/${req.body.username}`;
 
-    emailNewPassword(
-      req.body.email,
-      "Your password has been resetted",
-      `
+  emailNewPassword(
+    req.body.email,
+    "Your password has been resetted",
+    `
       <h3>Your password has been resetted.</h3>
       <p>Your temporary password is: <b>${password}</b></p>
       <a href=${link}>Click to change your password</a>
       <p>Or copy and paste the URL in your browser:</p>
       <a href=${link}>${link}</a>
       `
-    );
+  );
 
-    const hashedPassword = await argon2.hash(password);
+  const hashedPassword = await argon2.hash(password);
 
-    db.query(
-      "UPDATE accounts SET password = ? WHERE username = ? AND email = ? ",
-      [hashedPassword, req.body.username, req.body.email],
-      (err, result) => {
-        if (err) throw err;
-        res.json("Password successfully resetted");
-      }
-    );
-  } catch (error) {
-    next(error);
-  }
+  db.query(
+    "UPDATE accounts SET password = ? WHERE username = ? AND email = ? ",
+    [hashedPassword, req.body.username, req.body.email],
+    (err, result) => {
+      if (err) next(err);
+      res.json("Password successfully resetted");
+    }
+  );
 };
 
 // For users who forgot their password / had their passwords reset by the administrator
 exports.userPasswordReset = async (req, res, next) => {
-  try {
-    const oldPassword = req.body.oldPassword;
-    const username = req.params.username;
+  const oldPassword = req.body.oldPassword;
+  const username = req.params.username;
 
-    if (
-      !db.query(
-        "SELECT password FROM accounts WHERE username = ?",
-        username,
-        (err, result) => {
-          if (err) throw err;
-          argon2.verify(result[0].password, oldPassword).then((argon2Match) => {
-            if (!argon2Match) {
-              return false;
-            }
-          });
-        }
-      )
-    ) {
-      res.json("Wrong password");
-      return;
-    }
-
-    if (
-      !req.body.password.match(
-        /^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[0-9])(?=.*?[#?!@$%^&*-])\S{8,10}$/
-      )
-    ) {
-      res.json("Invalid password format");
-      return;
-    }
-
-    const password = await argon2.hash(req.body.password);
-
-    db.query(
-      "UPDATE accounts SET password = ? WHERE username = ?",
-      [password, username],
+  if (
+    !db.query(
+      "SELECT password FROM accounts WHERE username = ?",
+      username,
       (err, result) => {
-        if (err) throw err;
-        res.json(result);
+        if (err) next(err);
+        argon2.verify(result[0].password, oldPassword).then((argon2Match) => {
+          if (!argon2Match) {
+            return false;
+          }
+        });
       }
-    );
-  } catch (error) {
-    next("Error resetting password");
+    )
+  ) {
+    res.json("Wrong password");
+    return;
   }
+
+  if (
+    !req.body.password.match(
+      /^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[0-9])(?=.*?[#?!@$%^&*-])\S{8,10}$/
+    )
+  ) {
+    res.json("Invalid password format");
+    return;
+  }
+
+  const password = await argon2.hash(req.body.password);
+
+  db.query(
+    "UPDATE accounts SET password = ? WHERE username = ?",
+    [password, username],
+    (err, result) => {
+      if (err) next(err);
+      res.json(result);
+    }
+  );
 };
 
 // For users who are logged in

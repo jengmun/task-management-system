@@ -1,6 +1,6 @@
 const nodemailer = require("nodemailer");
 
-const emailNewPassword = async (email, header, content) => {
+const sendEmail = async (email, header, content) => {
   const transporter = nodemailer.createTransport({
     name: "Admin",
     host: "smtp.gmail.com",
@@ -24,4 +24,4 @@ const emailNewPassword = async (email, header, content) => {
   console.log("Message sent: %s", info.messageId);
 };
 
-module.exports = emailNewPassword;
+module.exports = sendEmail;

@@ -1,5 +1,6 @@
 const checkState = require("../modules/checkState");
 const { db } = require("../modules/db");
+const sendEmail = require("../modules/email");
 
 exports.createApplication = (req, res, next) => {
   db.query(
@@ -43,11 +44,6 @@ exports.createPlan = (req, res, next) => {
 };
 
 exports.createTask = async (req, res, next) => {
-  let planName = null;
-  if (req.body.planName) {
-    planName = req.body.planName;
-  }
-
   const runningNumber = await new Promise((resolve, reject) => {
     db.query(
       "SELECT running_number FROM applications WHERE acronym = ?",
@@ -69,7 +65,7 @@ exports.createTask = async (req, res, next) => {
       req.body.taskName,
       req.body.description,
       req.body.notes,
-      planName,
+      req.body.planName ? req.body.planName : null,
       req.body.acronym.toUpperCase(),
       "Open",
       req.body.creator,
@@ -112,11 +108,11 @@ exports.updatePermissions = (req, res, next) => {
 const listOfStates = ["Open", "Todo", "Doing", "Done", "Closed"];
 
 exports.taskStateProgression = async (req, res, next) => {
-  const { taskID } = req.body;
+  const { taskID, acronym } = req.body;
 
   const results = await new Promise((resolve) => {
     db.query(
-      "SELECT state, creator FROM tasks WHERE task_id = ?",
+      "SELECT state, owner FROM tasks WHERE task_id = ?",
       taskID,
       (err, results) => {
         if (err) {
@@ -125,27 +121,28 @@ exports.taskStateProgression = async (req, res, next) => {
         if (results.length) {
           resolve(results[0]);
         } else {
-          resolve({ state: "", creator: "" });
+          resolve({ state: "", owner: "" });
         }
       }
     );
   });
 
   const currentState = results.state;
-  const creator = results.creator;
+  const owner = results.owner;
 
   if (currentState === "Closed" || !currentState) {
     res.json("State can't be updated!");
     return;
   }
 
-  if (creator === req.session.username) {
-    res.json("Creator can't be assigned the task!");
+  if (owner === req.session.username) {
+    res.json("Checker cannot be the owner of the task!");
     return;
   }
 
   const newState = listOfStates[listOfStates.indexOf(currentState) + 1];
 
+  // Update task state
   db.query(
     "UPDATE tasks SET state = ? WHERE task_id = ?",
     [newState, taskID],
@@ -156,6 +153,7 @@ exports.taskStateProgression = async (req, res, next) => {
     }
   );
 
+  // Update owner of task
   if (newState === "Doing") {
     db.query("UPDATE tasks SET owner = ? WHERE task_id = ?", [
       req.session.username,
@@ -166,6 +164,27 @@ exports.taskStateProgression = async (req, res, next) => {
           return next(err);
         }
       };
+  }
+
+  const teamLeads = await new Promise((resolve) => {
+    db.query(
+      "SELECT username, email FROM accounts_groups INNER JOIN accounts on accounts_groups.username = accounts.username WHERE acronym = ? AND group_name = 2",
+      acronym,
+      (err, results) => {
+        if (err) {
+          return next(err);
+        }
+        resolve(results);
+      }
+    );
+  });
+
+  for (const teamLead of teamLeads) {
+    sendEmail(
+      teamLead.email,
+      `${acronym}: Task promoted to Done`,
+      `Task ${taskID} of Application ${acronym} has been promoted to Done by ${req.session.username}.`
+    );
   }
 
   res.json("State updated");

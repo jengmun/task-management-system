@@ -1,6 +1,6 @@
 const argon2 = require("argon2");
 const { db, database } = require("../modules/db");
-const emailNewPassword = require("../modules/email");
+const sendEmail = require("../modules/email");
 
 // ================= AUTHENTICATION ================= //
 
@@ -378,7 +378,7 @@ exports.adminPasswordReset = async (req, res, next) => {
   const password = generatePassword();
   const link = `http://localhost:3000/reset-password/${req.body.username}`;
 
-  emailNewPassword(
+  sendEmail(
     req.body.email,
     "Your password has been resetted",
     `

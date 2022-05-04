@@ -9,22 +9,28 @@ const {
   taskStateRegression,
   createNotes,
 } = require("../controllers/taskController");
-const { checkPermissions } = require("../middleware/auth");
+const { checkPM, checkTaskPermissions } = require("../middleware/auth");
 
-router.post("/create-app", checkPermissions, createApplication);
+router.post("/create-app", checkPM, createApplication);
 
-router.post("/create-plan", checkPermissions, createPlan);
+router.post("/create-plan", checkPM, createPlan);
 
-router.post("/create-task", checkPermissions, createTask);
+router.post("/create-task", checkTaskPermissions, createTask);
 
-router.post("/update-permissions", checkPermissions, updatePermissions);
+router.post("/update-permissions", checkPM, updatePermissions);
 
-router.post("/task-state-progression", checkPermissions, taskStateProgression);
+router.post(
+  "/task-state-progression",
+  checkTaskPermissions,
+  taskStateProgression
+);
 
-router.post("/task-state-regression", checkPermissions, taskStateRegression);
+router.post(
+  "/task-state-regression",
+  checkTaskPermissions,
+  taskStateRegression
+);
 
 router.post("/create-notes", createNotes);
-
-router.post("/permissions");
 
 module.exports = router;

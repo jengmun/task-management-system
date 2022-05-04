@@ -43,6 +43,11 @@ exports.createPlan = (req, res, next) => {
 };
 
 exports.createTask = async (req, res, next) => {
+  let planName = null;
+  if (req.body.planName) {
+    planName = req.body.planName;
+  }
+
   const runningNumber = await new Promise((resolve, reject) => {
     db.query(
       "SELECT running_number FROM applications WHERE acronym = ?",
@@ -64,29 +69,26 @@ exports.createTask = async (req, res, next) => {
       req.body.taskName,
       req.body.description,
       req.body.notes,
-      req.body.planName,
+      planName,
       req.body.acronym.toUpperCase(),
       "Open",
       req.body.creator,
     ],
-    (err, results) => {
+    (err) => {
       if (err) {
         next(err);
       } else {
-        console.log(results);
-      }
-    }
-  );
-
-  db.query(
-    "UPDATE applications SET running_number = ?",
-    runningNumber + 1,
-    (err, results) => {
-      if (err) {
-        next(err);
-      } else {
-        console.log(results);
-        res.json(results);
+        db.query(
+          "UPDATE applications SET running_number = ?",
+          runningNumber + 1,
+          (err, results) => {
+            if (err) {
+              next(err);
+            } else {
+              res.json(results);
+            }
+          }
+        );
       }
     }
   );

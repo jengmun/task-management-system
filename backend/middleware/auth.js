@@ -26,22 +26,39 @@ const checkLoggedIn = (req, res, next) => {
   next();
 };
 
-const checkPermissions = async (req, res, next) => {
+const checkPM = async (req, res, next) => {
+  const { acronym } = req.body;
+
+  const isPermitted = await checkGroup(
+    "accounts_groups",
+    req.session.username,
+    "group_name",
+    "Project Manager",
+    acronym
+  );
+
+  if (isPermitted) {
+    next();
+  } else {
+    res.json("Insufficient permissions");
+  }
+};
+
+const checkTaskPermissions = async (req, res, next) => {
   // const listOfActions = ["create", "open", "todo", "doing", "done"];
   const { taskID, acronym } = req.body;
-
-  const state = await checkState(taskID);
   let action;
 
-  if (state === "Closed") {
-    res.json("Task is closed");
-    return;
-  }
-
-  if (!state) {
+  if (!taskID) {
     action = "create";
   } else {
-    action = state.toLowerCase();
+    const state = await checkState(taskID);
+    if (state === "Closed") {
+      res.json("Task is closed");
+      return;
+    } else {
+      action = state.toLowerCase();
+    }
   }
 
   const permittedGroup = await new Promise((resolve) => {
@@ -59,7 +76,8 @@ const checkPermissions = async (req, res, next) => {
 
   const isPermitted = await checkGroup(
     "accounts_groups",
-    req.session.username,
+    req.body.username,
+    // to change back
     "group_name",
     permittedGroup,
     acronym
@@ -72,4 +90,4 @@ const checkPermissions = async (req, res, next) => {
   }
 };
 
-module.exports = { checkAdmin, checkLoggedIn, checkPermissions };
+module.exports = { checkAdmin, checkLoggedIn, checkPM, checkTaskPermissions };

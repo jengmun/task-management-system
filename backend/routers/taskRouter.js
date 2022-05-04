@@ -2,6 +2,7 @@ const express = require("express");
 const router = express.Router();
 const {
   createApplication,
+  allApplications,
   createPlan,
   createTask,
   updatePermissions,
@@ -12,6 +13,8 @@ const {
 const { checkPM, checkTaskPermissions } = require("../middleware/auth");
 
 router.post("/create-app", checkPM, createApplication);
+
+router.get("/all-apps", allApplications);
 
 router.post("/create-plan", checkPM, createPlan);
 

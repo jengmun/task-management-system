@@ -28,6 +28,16 @@ exports.createApplication = (req, res, next) => {
   );
 };
 
+exports.allApplications = (req, res, next) => {
+  db.query(`SELECT acronym FROM applications`, (err, result) => {
+    if (err) {
+      next(err);
+    } else {
+      res.json(result);
+    }
+  });
+};
+
 exports.createPlan = (req, res, next) => {
   db.query(
     "INSERT INTO plans VALUES (?, ?, ?, ?)",

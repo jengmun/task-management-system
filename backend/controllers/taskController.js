@@ -1,3 +1,4 @@
+const checkState = require("../modules/checkState");
 const { db } = require("../modules/db");
 
 exports.createApplication = (req, res, next) => {
@@ -91,9 +92,20 @@ exports.createTask = async (req, res, next) => {
   );
 };
 
-exports.updatePermissions = () => {};
+exports.updatePermissions = (req, res, next) => {
+  const { create, open, todo, doing, done, acronym } = req.body;
 
-exports.updateTask = (req, res, next) => {};
+  db.query(
+    "UPDATE applications SET permit_create = ?, permit_open = ?, permit_todo = ?, permit_doing = ?, permit_done = ? WHERE acronym = ?",
+    [create, open, todo, doing, done, acronym],
+    (err, results) => {
+      if (err) {
+        return next(err);
+      }
+      res.json("Permissions updated");
+    }
+  );
+};
 
 const listOfStates = ["Open", "Todo", "Doing", "Done", "Closed"];
 
@@ -160,22 +172,7 @@ exports.taskStateProgression = async (req, res, next) => {
 exports.taskStateRegression = async (req, res, next) => {
   const { taskID } = req.body;
 
-  const currentState = await new Promise((resolve) => {
-    db.query(
-      "SELECT state FROM tasks WHERE task_id = ?",
-      taskID,
-      (err, results) => {
-        if (err) {
-          return next(err);
-        }
-        if (results.length) {
-          resolve(results[0].state);
-        } else {
-          resolve("");
-        }
-      }
-    );
-  });
+  const currentState = await checkState(taskID);
 
   if (currentState !== "Doing" && currentState !== "Done") {
     res.json("State can't be demoted!");
@@ -243,3 +240,5 @@ exports.createNotes = async (req, res, next) => {
     }
   );
 };
+
+exports.updateTask = (req, res, next) => {};

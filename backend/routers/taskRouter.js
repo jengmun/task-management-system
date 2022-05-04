@@ -4,17 +4,19 @@ const {
   createApplication,
   createPlan,
   createTask,
+  updatePermissions,
   taskStateProgression,
   taskStateRegression,
   createNotes,
 } = require("../controllers/taskController");
-const checkState = require("../modules/checkState");
 
 router.post("/create-app", createApplication);
 
 router.post("/create-plan", createPlan);
 
 router.post("/create-task", createTask);
+
+router.post("/update-permissions", updatePermissions);
 
 router.post("/task-state-progression", taskStateProgression);
 

@@ -1,17 +1,18 @@
 const { db } = require("./db");
 
-const checkState = async (req, res) => {
-  return await new Promise((resolve, reject) => {
+const checkState = (taskID) => {
+  return new Promise((resolve, reject) => {
     db.query(
       "SELECT state FROM tasks WHERE task_id = ?",
-      req.body.task_id,
-      (err, result) => {
+      taskID,
+      (err, results) => {
         if (err) {
           reject(err);
+        }
+        if (results.length) {
+          resolve(results[0].state);
         } else {
-          res.json("hi");
-          console.log(result[0].state);
-          resolve(result[0].state);
+          resolve("");
         }
       }
     );

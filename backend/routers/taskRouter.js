@@ -4,6 +4,8 @@ const {
   createApplication,
   createPlan,
   createTask,
+  updateTaskState,
+  createNotes,
 } = require("../controllers/taskController");
 const checkState = require("../modules/checkState");
 
@@ -13,6 +15,8 @@ router.post("/create-plan", createPlan);
 
 router.post("/create-task", createTask);
 
-router.post("/", checkState);
+router.post("/update-task-state", updateTaskState);
+
+router.post("/create-notes", createNotes);
 
 module.exports = router;

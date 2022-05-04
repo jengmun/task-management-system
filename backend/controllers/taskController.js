@@ -65,7 +65,7 @@ exports.createTask = async (req, res, next) => {
       req.body.notes,
       req.body.planName,
       req.body.acronym.toUpperCase(),
-      req.body.state,
+      "Open",
       req.body.creator,
     ],
     (err, results) => {
@@ -95,8 +95,102 @@ exports.updatePermissions = () => {};
 
 exports.updateTask = (req, res, next) => {};
 
-exports.updateTaskState = (req, res, next) => {};
+exports.updateTaskState = async (req, res, next) => {
+  const { taskID } = req.body;
 
-exports.createNotes = (req, res, next) => {
-  db.query("");
+  const listOfStates = ["Open", "Todo", "Doing", "Done", "Closed"];
+
+  const results = await new Promise((resolve) => {
+    db.query(
+      "SELECT state, creator FROM tasks WHERE task_id = ?",
+      taskID,
+      (err, results) => {
+        if (err) {
+          return next(err);
+        }
+        if (results.length) {
+          resolve(results[0]);
+        } else {
+          resolve({ state: "", creator: "" });
+        }
+      }
+    );
+  });
+
+  const currentState = results.state;
+  const creator = results.creator;
+
+  if (currentState === "Closed" || !currentState) {
+    res.json("State can't be updated!");
+    return;
+  }
+
+  if (creator === req.session.username) {
+    res.json("Creator can't be assigned the task!");
+    return;
+  }
+
+  const newState = listOfStates[listOfStates.indexOf(currentState) + 1];
+
+  db.query(
+    "UPDATE tasks SET state = ? WHERE task_id = ?",
+    [newState, taskID],
+    (err, results) => {
+      if (err) {
+        return next(err);
+      }
+    }
+  );
+
+  if (newState === "Doing") {
+    db.query("UPDATE tasks SET owner = ? WHERE task_id = ?", [
+      req.session.username,
+      taskID,
+    ]),
+      (err, results) => {
+        if (err) {
+          return next(err);
+        }
+      };
+  }
+
+  res.json("State updated");
+};
+
+exports.createNotes = async (req, res, next) => {
+  const { details, creator, state, taskID } = req.body;
+  const runningNumber = await new Promise((resolve) => {
+    db.query(
+      "SELECT running_number FROM notes WHERE task_id = ?",
+      taskID,
+      (err, results) => {
+        if (err) {
+          return next(err);
+        }
+        if (results.length) {
+          resolve(results[results.length - 1].running_number + 1);
+        } else {
+          resolve(1);
+        }
+      }
+    );
+  });
+
+  db.query(
+    "INSERT INTO notes (notes_id, running_number, details, creator, state, task_id) VALUES (?, ?, ?, ?, ?, ?)",
+    [
+      `${taskID}_${runningNumber}`,
+      runningNumber,
+      details,
+      creator,
+      state,
+      taskID,
+    ],
+    (err, results) => {
+      if (err) {
+        return next(err);
+      }
+      res.json(results);
+    }
+  );
 };

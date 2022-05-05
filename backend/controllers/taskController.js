@@ -100,6 +100,17 @@ exports.createTask = async (req, res, next) => {
   );
 };
 
+exports.allAppTasks = (req, res, next) => {
+  const acronym = req.params.app;
+
+  db.query("SELECT * FROM tasks WHERE acronym = ?", acronym, (err, results) => {
+    if (err) {
+      return next(err);
+    }
+    res.json(results);
+  });
+};
+
 exports.updatePermissions = (req, res, next) => {
   const { create, open, todo, doing, done, acronym } = req.body;
 
@@ -178,7 +189,7 @@ exports.taskStateProgression = async (req, res, next) => {
 
   const teamLeads = await new Promise((resolve) => {
     db.query(
-      "SELECT username, email FROM accounts_groups INNER JOIN accounts on accounts_groups.username = accounts.username WHERE acronym = ? AND group_name = Team Lead",
+      "SELECT accounts_groups.username, email FROM accounts_groups INNER JOIN accounts on accounts_groups.username = accounts.username WHERE acronym = ? AND group_name = 'Team Lead'",
       acronym,
       (err, results) => {
         if (err) {

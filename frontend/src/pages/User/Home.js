@@ -1,6 +1,7 @@
 import { useContext } from "react";
 import { NavLink } from "react-router-dom";
 import LoginContext from "../../context/login-context";
+import KanbanBoard from "../Tasks/KanbanBoard";
 
 const Home = () => {
   const loginContext = useContext(LoginContext);
@@ -8,7 +9,7 @@ const Home = () => {
   return (
     <div className="prose">
       {loginContext.isLoggedIn ? (
-        "Welcome to your dashboard"
+        <KanbanBoard />
       ) : (
         <>
           <h1>Welcome</h1>

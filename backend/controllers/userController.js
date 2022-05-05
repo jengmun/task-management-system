@@ -89,21 +89,34 @@ exports.updateEmail = async (req, res, next) => {
 
 exports.getAllUsers = async (req, res, next) => {
   db.query(
-    "SELECT accounts.username, email, account_type, status, GROUP_CONCAT(user_group) AS user_group, GROUP_CONCAT(group_name) AS group_name FROM accounts LEFT JOIN accounts_groups ON accounts.username = accounts_groups.username GROUP BY username;",
+    "SELECT accounts.username, email, account_type, status, GROUP_CONCAT(user_group) AS user_group FROM accounts LEFT JOIN accounts_groups ON accounts.username = accounts_groups.username GROUP BY username;",
     (err, result) => {
-      if (err) next(err);
-      else {
-        for (const user of result) {
-          if (user.user_group) {
-            user.user_group = user.user_group.split(",");
-            user.group_name = user.group_name.split(",");
-          } else {
-            user.user_group = [""];
-            user.group_name = [""];
+      if (err) return next(err);
+
+      for (const user of result) {
+        user.apps = [];
+        user.groups = [];
+
+        if (user.user_group) {
+          const arrOfUserGroups = user.user_group.split(",");
+          user.user_group = [];
+          for (const group of arrOfUserGroups) {
+            const firstSeparator = group.indexOf("_");
+            const secondSeparator = group.indexOf("_", firstSeparator + 1);
+            user.apps.push(group.slice(0, firstSeparator));
+            user.groups.push(group.slice(firstSeparator + 1, secondSeparator));
+            user.user_group.push(
+              `${group.slice(0, firstSeparator)}_${group.slice(
+                firstSeparator + 1,
+                secondSeparator
+              )}`
+            );
           }
+        } else {
+          user.user_group = [];
         }
-        res.json(result);
       }
+      res.json(result);
     }
   );
 };
@@ -120,12 +133,13 @@ exports.getAllGroups = (req, res, next) => {
 
 exports.getUserGroups = async (req, res, next) => {
   db.query(
-    "SELECT accounts.username, email, account_type, status FROM accounts INNER JOIN accounts_groups ON accounts.username = accounts_groups.username WHERE accounts_groups.group_name = ?;",
-    req.body.group,
+    "SELECT accounts.username, email, account_type, status FROM accounts INNER JOIN accounts_groups ON accounts.username = accounts_groups.username WHERE accounts_groups.user_group LIKE ?;",
+    req.body.group + "%",
     (err, result) => {
       if (err) {
         next(err);
       } else {
+        console.log(result);
         res.json(result);
       }
     }
@@ -149,7 +163,11 @@ exports.createAccount = async (req, res, next) => {
 
   let values = ``;
   for (let i = 0; i < groups.length; i++) {
-    values += `("${username}_${groups[i].value}", "${username}", "${groups[i].value}")`;
+    const separatorIndex = groups[i].value.indexOf("_");
+    const acronym = groups[i].value.slice(0, separatorIndex);
+    const groupName = groups[i].value.slice(separatorIndex + 1);
+
+    values += `("${acronym}_${groupName}_${username}", "${username}", "${groupName}", "${acronym}")`;
 
     if (i !== groups.length - 1) {
       values += ", ";
@@ -164,7 +182,7 @@ exports.createAccount = async (req, res, next) => {
 
   db.beginTransaction((err) => {
     if (err) {
-      next(err);
+      return next(err);
     }
 
     db.query(
@@ -173,28 +191,32 @@ exports.createAccount = async (req, res, next) => {
       (err) => {
         if (err) {
           db.rollback(defaultErrorHandler);
-          next(err);
+          return next(err);
         } else {
           if (groups.length) {
-            db.query("INSERT INTO accounts_groups VALUES " + values, (err) => {
-              if (err) {
-                db.rollback(defaultErrorHandler);
-                next(err);
-              } else {
-                db.commit((err) => {
-                  if (err) {
-                    db.rollback(defaultErrorHandler);
-                    next(err);
-                  }
-                });
-                res.json("User created");
+            db.query(
+              "INSERT INTO accounts_groups (user_group, username, group_name, acronym) VALUES " +
+                values,
+              (err) => {
+                if (err) {
+                  db.rollback(defaultErrorHandler);
+                  return next(err);
+                } else {
+                  db.commit((err) => {
+                    if (err) {
+                      db.rollback(defaultErrorHandler);
+                      return next(err);
+                    }
+                  });
+                  res.json("User created");
+                }
               }
-            });
+            );
           } else {
             db.commit((err) => {
               if (err) {
                 db.rollback(defaultErrorHandler);
-                next(err);
+                return next(err);
               }
             });
             res.json("User created");
@@ -205,7 +227,7 @@ exports.createAccount = async (req, res, next) => {
   });
 };
 
-exports.updateDetails = async (req, res) => {
+exports.updateDetails = async (req, res, next) => {
   const { username, email, status } = req.body;
   db.query(
     "UPDATE accounts SET email = ?, status = ? WHERE username = ?",
@@ -241,10 +263,14 @@ exports.updateGroups = async (req, res, next) => {
   }
 
   const insertQuery = async (group) => {
-    return await new Promise((resolve, reject) => {
+    const separatorIndex = group.value.indexOf("_");
+    const acronym = group.value.slice(0, separatorIndex);
+    const groupName = group.value.slice(separatorIndex + 1);
+
+    return await new Promise((resolve) => {
       db.query(
-        "INSERT INTO accounts_groups VALUES (?, ?, ?)",
-        [`${username}_${group.value}`, username, group.value],
+        "INSERT INTO accounts_groups (user_group, username, group_name, acronym) VALUES (?, ?, ?, ?)",
+        [`${acronym}_${groupName}_${username}`, username, groupName, acronym],
         (err, result) => {
           if (err) {
             next(err);
@@ -258,10 +284,10 @@ exports.updateGroups = async (req, res, next) => {
   };
 
   const deleteQuery = async (group) => {
-    return await new Promise((resolve, reject) => {
+    return await new Promise((resolve) => {
       db.query(
         "DELETE FROM accounts_groups WHERE user_group = ?",
-        [`${username}_${group}`],
+        [`${group}_${username}`],
         (err, result) => {
           if (err) {
             next(err);
@@ -299,7 +325,7 @@ exports.createGroups = (req, res, next) => {
   db.query(
     `INSERT INTO ${database}.groups SET group_name = ?`,
     req.body.group,
-    (err, result) => {
+    (err) => {
       if (err) {
         next(err);
       } else {
@@ -312,11 +338,17 @@ exports.createGroups = (req, res, next) => {
 exports.addGroupMember = (req, res, next) => {
   const { username, group } = req.body;
 
+  const firstSeparator = group.indexOf("_");
+  const app = group.slice(0, firstSeparator);
+
+  const secondSeparator = group.indexOf("_", firstSeparator + 1);
+  const groupName = group.slice(firstSeparator + 1, secondSeparator);
+
   db.query(
-    "INSERT INTO accounts_groups VALUES (?, ?, ?)",
-    [`${username}_${group}`, username, group],
-    (err, result) => {
-      if (err) next(err);
+    "INSERT INTO accounts_groups (user_group, username, group_name, acronym) VALUES (?, ?, ?, ?)",
+    [`${group}_${username}`, username, groupName, app],
+    (err) => {
+      if (err) return next(err);
       res.json("Added");
     }
   );
@@ -327,13 +359,10 @@ exports.removeGroupMember = (req, res, next) => {
 
   db.query(
     "DELETE FROM accounts_groups WHERE user_group = ?",
-    [`${username}_${group}`],
-    (err, result) => {
-      if (err) {
-        next(err);
-      } else {
-        res.json("Removed");
-      }
+    [`${group}_${username}`],
+    (err) => {
+      if (err) return next(err);
+      res.json("Removed");
     }
   );
 };
@@ -364,7 +393,7 @@ exports.adminPasswordReset = async (req, res, next) => {
       "SELECT * FROM accounts WHERE username = ? AND email = ?",
       [req.body.username, req.body.email],
       (err, results) => {
-        if (err) next(err);
+        if (err) return next(err);
         resolve(results);
       }
     );
@@ -396,7 +425,7 @@ exports.adminPasswordReset = async (req, res, next) => {
     "UPDATE accounts SET password = ? WHERE username = ? AND email = ? ",
     [hashedPassword, req.body.username, req.body.email],
     (err, result) => {
-      if (err) next(err);
+      if (err) return next(err);
       res.json("Password successfully resetted");
     }
   );
@@ -412,7 +441,7 @@ exports.userPasswordReset = async (req, res, next) => {
       "SELECT password FROM accounts WHERE username = ?",
       username,
       (err, result) => {
-        if (err) next(err);
+        if (err) return next(err);
         argon2.verify(result[0].password, oldPassword).then((argon2Match) => {
           if (!argon2Match) {
             return false;
@@ -440,7 +469,7 @@ exports.userPasswordReset = async (req, res, next) => {
     "UPDATE accounts SET password = ? WHERE username = ?",
     [password, username],
     (err, result) => {
-      if (err) next(err);
+      if (err) return next(err);
       res.json(result);
     }
   );
@@ -464,10 +493,8 @@ exports.userUpdatePassword = async (req, res, next) => {
     "UPDATE accounts SET password = ? WHERE username = ?",
     [password, username],
     (err, result) => {
-      if (err) next(err);
-      else {
-        res.json(result);
-      }
+      if (err) return next(err);
+      res.json(result);
     }
   );
 };

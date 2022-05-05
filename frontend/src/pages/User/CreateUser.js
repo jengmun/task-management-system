@@ -18,13 +18,32 @@ const CreateUser = () => {
     fetchAllGroups();
   }, []);
 
+  // ------------- Fetch all apps -------------
+  const [allApps, setAllApps] = useState([]);
+
+  const fetchAllApps = async () => {
+    const data = await handleGetRequest("task/all-apps");
+    if (data) {
+      setAllApps(data);
+    }
+  };
+
+  useEffect(() => {
+    fetchAllApps();
+  }, []);
+
   // ------------- Submit form -------------
   const [selectedGroups, setSelectedGroups] = useState([]);
   const [message, setMessage] = useState("");
 
   const options = [];
-  for (const group of allGroups) {
-    options.push({ value: group.group_name, label: group.group_name });
+  for (const app of allApps) {
+    for (const group of allGroups) {
+      options.push({
+        value: `${app.acronym}_${group.group_name}`,
+        label: `${app.acronym} - ${group.group_name}`,
+      });
+    }
   }
 
   const handleSubmit = async (e) => {

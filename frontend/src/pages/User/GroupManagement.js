@@ -5,22 +5,18 @@ import handlePostRequest from "../../hooks/handlePostRequest";
 import CreateNewGroup from "./CreateNewGroup";
 
 const GroupManagement = () => {
+  // ------------- Fetch all groups -------------
   const [allGroups, setAllGroups] = useState([]);
-  const [selectedGroup, setSelectedGroup] = useState({ value: "" });
-  const [allUsers, setAllUsers] = useState([]);
-  const [groupMembers, setGroupMembers] = useState([]);
-  const [remainingUsers, setRemainingUsers] = useState([]);
 
   const fetchAllGroups = async () => {
     const data = await handleGetRequest("user/all-groups");
     if (data) {
-      const options = [];
-      for (const group of data) {
-        options.push({ value: group.group_name, label: group.group_name });
-      }
-      setAllGroups(options);
+      setAllGroups(data);
     }
   };
+
+  // ------------- Fetch all users -------------
+  const [allUsers, setAllUsers] = useState([]);
 
   const fetchAllUsers = async () => {
     const data = await handleGetRequest("user/all-users");
@@ -29,10 +25,35 @@ const GroupManagement = () => {
     }
   };
 
+  // ------------- Fetch all apps -------------
+  const [allApps, setAllApps] = useState([]);
+
+  const fetchAllApps = async () => {
+    const data = await handleGetRequest("task/all-apps");
+    if (data) {
+      setAllApps(data);
+    }
+  };
+
   useEffect(() => {
     fetchAllGroups();
     fetchAllUsers();
+    fetchAllApps();
   }, []);
+
+  const options = [];
+  for (const app of allApps) {
+    for (const group of allGroups) {
+      options.push({
+        value: `${app.acronym}_${group.group_name}`,
+        label: `${app.acronym} - ${group.group_name}`,
+      });
+    }
+  }
+
+  const [groupMembers, setGroupMembers] = useState([]);
+  const [remainingUsers, setRemainingUsers] = useState([]);
+  const [selectedGroup, setSelectedGroup] = useState({ value: null });
 
   const fetchGroupMembers = async () => {
     const data = await handlePostRequest("user/groups-users", {
@@ -82,11 +103,11 @@ const GroupManagement = () => {
       <CreateNewGroup fetchAllGroups={fetchAllGroups} />
       <Dropdown
         multi={false}
-        options={allGroups}
+        options={options}
         closeMenuOnSelect={true}
         callback={setSelectedGroup}
       />
-      <h3>Group: {selectedGroup.value}</h3>
+      <h3>Group: {selectedGroup.label}</h3>
       {selectedGroup.value && (
         <>
           <h4>Current Members:</h4>
@@ -96,7 +117,6 @@ const GroupManagement = () => {
                 <th>Username</th>
                 <th>Email</th>
                 <th>Status</th>
-                {/* <th>Role</th> */}
               </tr>
             </thead>
 
@@ -107,7 +127,6 @@ const GroupManagement = () => {
                     <td>{member.username}</td>
                     <td>{member.email}</td>
                     <td>{member.status}</td>
-                    {/* <td>{member.username}</td> */}
                     <td>
                       <button
                         className="btn"

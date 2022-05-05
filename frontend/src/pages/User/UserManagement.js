@@ -5,8 +5,8 @@ import handleGetRequest from "../../hooks/handleGetRequest";
 import handlePostRequest from "../../hooks/handlePostRequest";
 
 const UserManagement = () => {
+  // ------------- Fetch all users -------------
   const [allUsers, setAllUsers] = useState([]);
-  const [allGroups, setAllGroups] = useState([]);
   const [filterUsers, setFilterUsers] = useState([]);
 
   const fetchAllUsers = async () => {
@@ -17,21 +17,41 @@ const UserManagement = () => {
     }
   };
 
+  // ------------- Fetch all groups -------------
+  const [allGroups, setAllGroups] = useState([]);
+
   const fetchAllGroups = async () => {
     const data = await handleGetRequest("user/all-groups");
     if (data) {
-      const options = [];
-      for (const group of data) {
-        options.push({ value: group.group_name, label: group.group_name });
-      }
-      setAllGroups(options);
+      setAllGroups(data);
+    }
+  };
+
+  // ------------- Fetch all apps -------------
+  const [allApps, setAllApps] = useState([]);
+
+  const fetchAllApps = async () => {
+    const data = await handleGetRequest("task/all-apps");
+    if (data) {
+      setAllApps(data);
     }
   };
 
   useEffect(() => {
     fetchAllUsers();
     fetchAllGroups();
+    fetchAllApps();
   }, []);
+
+  const options = [];
+  for (const app of allApps) {
+    for (const group of allGroups) {
+      options.push({
+        value: `${app.acronym}_${group.group_name}`,
+        label: `${app.acronym} - ${group.group_name}`,
+      });
+    }
+  }
 
   const handleFilterUsers = (e) => {
     const filteredArr = allUsers.filter((user) => {
@@ -66,17 +86,19 @@ const UserManagement = () => {
         </thead>
         <tbody>
           {filterUsers.map((user, index) => {
-            user.formatted_groups = [];
-            for (let i = 0; i < user.group_name.length; i++) {
-              user.formatted_groups.push({
-                value: user.group_name[i],
-                label: user.group_name[i],
-              });
+            if (!user.formatted_groups) {
+              user.formatted_groups = [];
+              for (let i = 0; i < user.user_group.length; i++) {
+                user.formatted_groups.push({
+                  value: `${user.apps[i]}_${user.groups[i]}`,
+                  label: `${user.apps[i]} - ${user.groups[i]}`,
+                });
+              }
             }
             return (
               <User
                 data={user}
-                options={allGroups}
+                options={options}
                 setAllUsers={(user) => {
                   const allUsersArr = [...allUsers];
                   allUsersArr[index] = user;
@@ -136,7 +158,7 @@ const User = (props) => {
       handlePostRequest("user/update-groups", {
         username: reactData.username,
         currentGroups: reactData.formatted_groups,
-        oldGroups: userData.group_name,
+        oldGroups: userData.user_group,
       });
     }
 
@@ -180,7 +202,7 @@ const User = (props) => {
       <td>
         {readOnly ? (
           reactData.formatted_groups.map((group) => {
-            return <div>{group.value}</div>;
+            return <div>{group.label}</div>;
           })
         ) : (
           <Dropdown

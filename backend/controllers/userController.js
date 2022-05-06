@@ -372,6 +372,35 @@ exports.removeGroupMember = (req, res, next) => {
   );
 };
 
+exports.assignPM = async (req, res, next) => {
+  const { acronym, username } = req.body;
+
+  const existingApp = await new Promise((resolve) => {
+    db.query(
+      "SELECT acronym FROM applications WHERE acronym = ?",
+      acronym,
+      (err, results) => {
+        if (err) return next(err);
+        resolve(results);
+      }
+    );
+  });
+
+  if (existingApp.length) {
+    res.json("App already exists");
+    return;
+  }
+
+  db.query(
+    "INSERT INTO accounts_groups (user_group, username, group_name, acronym) VALUES (?, ?, 'Project Manager', ?)",
+    [`${acronym}_Project Manager_${username}`, username, acronym],
+    (err) => {
+      if (err) return next(err);
+      res.json("PM Assigned");
+    }
+  );
+};
+
 // ================= PASSWORD RESETTING - USER AND ADMIN ================= //
 
 const generatePassword = () => {

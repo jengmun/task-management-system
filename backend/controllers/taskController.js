@@ -150,18 +150,20 @@ exports.taskStateProgression = async (req, res, next) => {
 
   const currentState = results.state;
   const owner = results.owner;
+  console.log("currentState: ", currentState);
 
   if (currentState === "Closed" || !currentState) {
     res.json("State can't be updated!");
     return;
   }
 
-  if (owner === req.session.username) {
+  if (owner === req.session.username && currentState === "Done") {
     res.json("Checker cannot be the owner of the task!");
     return;
   }
 
   const newState = listOfStates[listOfStates.indexOf(currentState) + 1];
+  console.log("New state:", newState);
 
   // Update task state
   db.query(
@@ -200,13 +202,13 @@ exports.taskStateProgression = async (req, res, next) => {
     );
   });
 
-  for (const teamLead of teamLeads) {
-    sendEmail(
-      teamLead.email,
-      `${acronym}: Task promoted to Done`,
-      `Task ${taskID} of Application ${acronym} has been promoted to Done by ${req.session.username}.`
-    );
-  }
+  // for (const teamLead of teamLeads) {
+  //   sendEmail(
+  //     teamLead.email,
+  //     `${acronym}: Task promoted to Done`,
+  //     `Task ${taskID} of Application ${acronym} has been promoted to Done by ${req.session.username}.`
+  //   );
+  // }
 
   res.json("State updated");
 };

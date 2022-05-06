@@ -7,6 +7,11 @@ const sendEmail = require("../modules/email");
 exports.login = (req, res, next) => {
   const { username, password } = req.body;
 
+  if (!username || !password) {
+    res.json("Please enter all details");
+    return;
+  }
+
   db.query(
     "SELECT * FROM accounts WHERE username = ?",
     username,

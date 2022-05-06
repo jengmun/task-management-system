@@ -1,6 +1,7 @@
 import Board, { moveCard } from "@asseinfo/react-kanban";
 import "@asseinfo/react-kanban/dist/styles.css";
 import { useEffect, useState } from "react";
+import checkGroup from "../../hooks/checkGroup";
 import handleGetRequest from "../../hooks/handleGetRequest";
 import handlePostRequest from "../../hooks/handlePostRequest";
 
@@ -54,27 +55,41 @@ const KanbanBoard = () => {
     createBoard();
   }, [allTasks]);
 
-  const handleCardMove = (card, source, destination) => {
-    // Update board
-    const oldState = states[source.fromColumnId];
-    const newState = states[destination.toColumnId];
-    console.log(oldState, newState);
+  const handleCardMove = async (card, source, destination) => {
+    // const oldState = states[source.fromColumnId];
+    // const newState = states[destination.toColumnId];
+    // console.log(oldState, newState);
 
-    const updatedBoard = moveCard(board, source, destination);
-    setBoard(updatedBoard);
+    let data;
 
-    //   Update database
+    if (Math.abs(destination.toColumnId - source.fromColumnId) !== 1) {
+      return;
+    }
+
     if (destination.toColumnId > source.fromColumnId) {
-      handlePostRequest("task/task-state-progression", {
+      //   Query / Update database
+      data = await handlePostRequest("task/task-state-progression", {
         taskID: card.id,
         acronym: app,
       });
     } else {
-      handlePostRequest("task/task-state-regression", {
+      data = await handlePostRequest("task/task-state-regression", {
         taskID: card.id,
         acronym: app,
       });
     }
+
+    if (data === "Insufficient permissions") {
+      return;
+    }
+    console.log(data);
+
+    if (data !== "State updated" && data !== "State demoted") {
+      return;
+    }
+    // Update board
+    const updatedBoard = moveCard(board, source, destination);
+    setBoard(updatedBoard);
   };
 
   return (

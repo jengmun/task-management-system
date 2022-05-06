@@ -74,14 +74,15 @@ const checkTaskPermissions = async (req, res, next) => {
     );
   });
 
+  console.log("Permitted Group: ", permittedGroup);
   const isPermitted = await checkGroup(
     "accounts_groups",
-    req.body.username,
-    // to change back
+    req.session.username,
     "group_name",
     permittedGroup,
     acronym
   );
+  console.log("isPermitted: ", isPermitted);
 
   if (isPermitted) {
     next();

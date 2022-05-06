@@ -29,14 +29,24 @@ const CreatePlan = () => {
     console.log(data);
   };
 
+  const [startDate, setStartDate] = useState("");
+
   return (
     <form onSubmit={handleCreatePlan}>
       <label htmlFor="planName">Plan Name</label>
       <input id="planName" name="planName" required />
       <label htmlFor="startDate">Start Date</label>
-      <input type="date" id="startDate" name="startDate" required />
+      <input
+        type="date"
+        id="startDate"
+        name="startDate"
+        required
+        onChange={(e) => {
+          setStartDate(e.target.value);
+        }}
+      />
       <label htmlFor="endDate">End Date</label>
-      <input type="date" id="endDate" name="endDate" required />
+      <input type="date" id="endDate" name="endDate" required min={startDate} />
       <select id="acronym" name="acronym">
         {allApps.map((app) => {
           return <option value={app.acronym}>{app.acronym}</option>;

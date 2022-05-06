@@ -42,6 +42,7 @@ const CreateApp = () => {
     });
     console.log(data);
   };
+  const [startDate, setStartDate] = useState("");
 
   return (
     <form onSubmit={handleCreateApp}>
@@ -50,10 +51,17 @@ const CreateApp = () => {
       <label htmlFor="description">Description</label>
       <textarea id="description" name="description" maxLength="255" required />
       <label htmlFor="startDate">Start Date</label>
-      <input type="date" id="startDate" name="startDate" required />
+      <input
+        type="date"
+        id="startDate"
+        name="startDate"
+        required
+        onChange={(e) => {
+          setStartDate(e.target.value);
+        }}
+      />
       <label htmlFor="endDate">End Date</label>
-      <input type="date" id="endDate" name="endDate" required />
-      {/* restrict end date to after start date */}
+      <input type="date" id="endDate" name="endDate" required min={startDate} />
       {permissions.map((permission) => {
         return (
           <>

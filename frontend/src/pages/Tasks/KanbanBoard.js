@@ -1,14 +1,15 @@
 import Board, { moveCard } from "@asseinfo/react-kanban";
 import "@asseinfo/react-kanban/dist/styles.css";
 import { useEffect, useState } from "react";
+import { NavLink, useParams } from "react-router-dom";
 import handleGetRequest from "../../hooks/handleGetRequest";
 import handlePostRequest from "../../hooks/handlePostRequest";
 
 const KanbanBoard = () => {
   const [allTasks, setAllTasks] = useState([]);
 
-  const app = "APP";
-  //   change to indiv app
+  const { app } = useParams();
+
   const fetchTasks = async () => {
     const data = await handleGetRequest(`task/${app}/all-tasks`);
     setAllTasks(data);
@@ -93,6 +94,13 @@ const KanbanBoard = () => {
 
   return (
     <div>
+      <h1>{app}</h1>
+      <NavLink to={`/app/${app}/create-plan`}>
+        <button>Create Plan</button>
+      </NavLink>
+      <NavLink to={`/app/${app}/create-task`}>
+        <button>Create Task</button>
+      </NavLink>
       <Board onCardDragEnd={handleCardMove} disableColumnDrag>
         {board}
       </Board>

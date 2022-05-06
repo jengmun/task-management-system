@@ -14,6 +14,11 @@ import ForgotPassword from "./pages/User/ForgotPassword";
 import GroupManagement from "./pages/User/GroupManagement";
 import handleGetRequest from "./hooks/handleGetRequest";
 import AdminRoute from "./components/AdminRoute";
+import Overview from "./pages/Tasks/Overview";
+import CreateApp from "./pages/Tasks/CreatePlan";
+import CreatePlan from "./pages/Tasks/CreatePlan";
+import CreateTask from "./pages/Tasks/CreateTask";
+import KanbanBoard from "./pages/Tasks/KanbanBoard";
 
 function App() {
   const [isLoggedIn, setIsLoggedIn] = useState("");
@@ -38,8 +43,18 @@ function App() {
         <div className="flex flex-row min-h-screen">
           <Nav />
           <Switch>
+            {/* TASK MANAGEMENT ROUTES */}
+            <Route path="/task-management" component={Overview} />
+
+            <Route path="/create-app" component={CreateApp} />
+            <Route path="/app/:app/create-plan" component={CreatePlan} />
+            <Route path="/app/:app/create-task" component={CreateTask} />
+            <Route path="/app/:app" component={KanbanBoard} />
+
             {/* USER ROUTES */}
-            <Route exact path="/" component={Home} />
+            <Route exact path="/">
+              {isLoggedIn.username ? <Overview /> : <Home />}
+            </Route>
             <Route path="/login">
               {isLoggedIn.username ? <Redirect to="/" /> : <Login />}
             </Route>
@@ -48,7 +63,6 @@ function App() {
             <Route path="/profile">
               {isLoggedIn.username ? <Profile /> : <Redirect to="/" />}
             </Route>
-
             {/* ADMIN ROUTES */}
             {isLoggedIn.account_type && (
               <>

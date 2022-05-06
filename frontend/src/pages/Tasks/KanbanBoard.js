@@ -1,7 +1,6 @@
 import Board, { moveCard } from "@asseinfo/react-kanban";
 import "@asseinfo/react-kanban/dist/styles.css";
 import { useEffect, useState } from "react";
-import checkGroup from "../../hooks/checkGroup";
 import handleGetRequest from "../../hooks/handleGetRequest";
 import handlePostRequest from "../../hooks/handlePostRequest";
 

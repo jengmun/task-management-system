@@ -53,6 +53,20 @@ exports.createPlan = (req, res, next) => {
   );
 };
 
+exports.allPlans = (req, res, next) => {
+  db.query(
+    `SELECT plan_name FROM plans WHERE acronym = ?`,
+    req.body.acronym,
+    (err, result) => {
+      if (err) {
+        next(err);
+      } else {
+        res.json(result);
+      }
+    }
+  );
+};
+
 exports.createTask = async (req, res, next) => {
   const runningNumber = await new Promise((resolve, reject) => {
     db.query(
@@ -78,7 +92,7 @@ exports.createTask = async (req, res, next) => {
       req.body.planName ? req.body.planName : null,
       req.body.acronym.toUpperCase(),
       "Open",
-      req.body.creator,
+      req.session.username,
     ],
     (err) => {
       if (err) {

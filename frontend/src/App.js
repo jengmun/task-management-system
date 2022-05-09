@@ -68,6 +68,7 @@ function App() {
             <Route path="/profile">
               {isLoggedIn.username ? <Profile /> : <Redirect to="/" />}
             </Route>
+
             {/* ADMIN ROUTES */}
             {isLoggedIn.account_type && (
               <>

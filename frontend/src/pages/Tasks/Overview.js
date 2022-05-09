@@ -1,15 +1,25 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useContext } from "react";
 import { NavLink } from "react-router-dom";
+import LoginContext from "../../context/login-context";
 import handleGetRequest from "../../hooks/handleGetRequest";
 
 const Overview = () => {
+  const loginContext = useContext(LoginContext);
+
   // ------------- Fetch all apps -------------
   const [allApps, setAllApps] = useState([]);
 
   const fetchAllApps = async () => {
-    const data = await handleGetRequest("task/all-apps/user");
-    if (data) {
-      setAllApps(data);
+    if (loginContext.isLoggedIn.account_type === "Admin") {
+      const data = await handleGetRequest("task/all-apps");
+      if (data) {
+        setAllApps(data);
+      }
+    } else {
+      const data = await handleGetRequest("task/all-apps/user");
+      if (data) {
+        setAllApps(data);
+      }
     }
   };
 

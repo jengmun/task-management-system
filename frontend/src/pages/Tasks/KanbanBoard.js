@@ -29,7 +29,7 @@ const KanbanBoard = () => {
     fetchAllPlans();
   }, []);
 
-  //   Create Kanban Board
+  // ------------- Create Kanban Board -------------
   const [board, setBoard] = useState({ columns: [] });
   const states = ["Open", "Todo", "Doing", "Done", "Closed"];
 
@@ -105,7 +105,7 @@ const KanbanBoard = () => {
 
   return (
     <div>
-      <NavLink to={`/app`}>
+      <NavLink to={`/`}>
         <button>Back</button>
       </NavLink>
       <h1>{app}</h1>

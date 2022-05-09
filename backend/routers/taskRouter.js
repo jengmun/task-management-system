@@ -75,4 +75,7 @@ router.post("/create-notes/:task", checkApplicationAccess, createNotes);
 
 router.get("/all-notes/:task", checkApplicationAccess, allNotes);
 
+// ================= AUTH ================= //
+router.post("/update-task/:task", checkPM);
+
 module.exports = router;

@@ -33,12 +33,12 @@ router.get("/logout", checkLoggedIn, logout);
 
 router.post("/update-email", checkLoggedIn, updateEmail);
 
-router.get("/all-groups", getAllGroups);
-//  checkLoggedIn,
+router.get("/all-groups", checkLoggedIn, getAllGroups);
+
 // ================= ADMIN PRIVILEGES ================= //
 
-router.get("/all-users", getAllUsers);
-// checkAdmin,
+router.get("/all-users", checkAdmin, getAllUsers);
+
 router.post("/groups-users", checkAdmin, getUserGroups);
 
 router.post("/create-account", checkAdmin, createAccount);
@@ -53,8 +53,8 @@ router.post("/add-group-member", checkAdmin, addGroupMember);
 
 router.post("/remove-group-member", checkAdmin, removeGroupMember);
 
-router.post("/assign-PM", assignPM);
-// checkAdmin,
+router.post("/assign-PM", checkAdmin, assignPM);
+
 // ================= PASSWORD RESETTING - USER AND ADMIN ================= //
 
 router.post("/admin-password-reset", checkAdmin, adminPasswordReset);

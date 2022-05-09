@@ -46,8 +46,7 @@ exports.createPlan = (req, res, next) => {
       if (err) {
         next(err);
       } else {
-        console.log(results);
-        res.json(results);
+        res.json("Plan created");
       }
     }
   );
@@ -105,7 +104,7 @@ exports.createTask = async (req, res, next) => {
             if (err) {
               next(err);
             } else {
-              res.json(results);
+              res.json("Task created");
             }
           }
         );

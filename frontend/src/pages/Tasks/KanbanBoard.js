@@ -15,8 +15,20 @@ const KanbanBoard = () => {
     setAllTasks(data);
   };
 
+  // ------------- Fetch all plans -------------
+  const [allPlans, setAllPlans] = useState([]);
+
+  const fetchAllPlans = async () => {
+    const data = await handlePostRequest("task/all-plans", { acronym: app });
+    if (data) {
+      setAllPlans(data);
+    }
+    console.log(data);
+  };
+
   useEffect(() => {
     fetchTasks();
+    fetchAllPlans();
   }, []);
 
   //   Create Kanban Board
@@ -95,6 +107,10 @@ const KanbanBoard = () => {
   return (
     <div>
       <h1>{app}</h1>
+      <h2>All Plans:</h2>
+      {allPlans.map((plan) => {
+        return <h5>{plan.plan_name}</h5>;
+      })}
       <NavLink to={`/app/${app}/create-plan`}>
         <button>Create Plan</button>
       </NavLink>

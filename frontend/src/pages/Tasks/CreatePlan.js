@@ -1,21 +1,11 @@
-import { useState, useEffect } from "react";
-import handleGetRequest from "../../hooks/handleGetRequest";
+import { useState } from "react";
+import { useParams, NavLink } from "react-router-dom";
 import handlePostRequest from "../../hooks/handlePostRequest";
 
 const CreatePlan = () => {
-  // ------------- Fetch all apps -------------
-  const [allApps, setAllApps] = useState([]);
+  const { app } = useParams();
 
-  const fetchAllApps = async () => {
-    const data = await handleGetRequest("task/all-apps");
-    if (data) {
-      setAllApps(data);
-    }
-  };
-
-  useEffect(() => {
-    fetchAllApps();
-  }, []);
+  const [message, setMessage] = useState("");
 
   const handleCreatePlan = async (e) => {
     e.preventDefault();
@@ -24,36 +14,49 @@ const CreatePlan = () => {
       planName: e.target.planName.value,
       startDate: e.target.startDate.value,
       endDate: e.target.endDate.value,
-      acronym: e.target.acronym.value,
+      acronym: app,
     });
-    console.log(data);
+    setMessage(data);
+
+    if (data === "Plan created") {
+      e.target.startDate.value = "";
+      e.target.endDate.value = "";
+      e.target.planName.value = "";
+    }
   };
 
   const [startDate, setStartDate] = useState("");
 
   return (
-    <form onSubmit={handleCreatePlan}>
-      <label htmlFor="planName">Plan Name</label>
-      <input id="planName" name="planName" required />
-      <label htmlFor="startDate">Start Date</label>
-      <input
-        type="date"
-        id="startDate"
-        name="startDate"
-        required
-        onChange={(e) => {
-          setStartDate(e.target.value);
-        }}
-      />
-      <label htmlFor="endDate">End Date</label>
-      <input type="date" id="endDate" name="endDate" required min={startDate} />
-      <select id="acronym" name="acronym">
-        {allApps.map((app) => {
-          return <option value={app.acronym}>{app.acronym}</option>;
-        })}
-      </select>
-      <button>Submit</button>
-    </form>
+    <>
+      <NavLink to={`/app/${app}`}>
+        <button>Back</button>
+      </NavLink>
+      <form onSubmit={handleCreatePlan}>
+        <label htmlFor="planName">Plan Name</label>
+        <input id="planName" name="planName" required />
+        <label htmlFor="startDate">Start Date</label>
+        <input
+          type="date"
+          id="startDate"
+          name="startDate"
+          required
+          onChange={(e) => {
+            setStartDate(e.target.value);
+          }}
+        />
+        <label htmlFor="endDate">End Date</label>
+        <input
+          type="date"
+          id="endDate"
+          name="endDate"
+          required
+          min={startDate}
+        />
+        <button>Submit</button>
+      </form>
+      {message}
+    </>
   );
 };
 

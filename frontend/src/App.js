@@ -44,9 +44,9 @@ function App() {
           <Nav />
           <Switch>
             {/* TASK MANAGEMENT ROUTES */}
-            <Route path="/task-management" component={Overview} />
+            <Route path="/app/all" component={Overview} />
 
-            <Route path="/create-app" component={CreateApp} />
+            <Route path="/app/create-app" component={CreateApp} />
             <Route path="/app/:app/create-plan" component={CreatePlan} />
             <Route path="/app/:app/create-task" component={CreateTask} />
             <Route path="/app/:app" component={KanbanBoard} />

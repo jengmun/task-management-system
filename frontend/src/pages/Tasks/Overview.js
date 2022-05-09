@@ -19,7 +19,7 @@ const Overview = () => {
 
   return (
     <div>
-      <NavLink to="/create-app">
+      <NavLink to="/app/create-app">
         <button>Create App</button>
       </NavLink>
       {allApps.map((app) => {

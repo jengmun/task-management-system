@@ -11,6 +11,10 @@ const {
   taskStateRegression,
   createNotes,
   allAppTasks,
+  allNotes,
+  taskDetails,
+  updateTask,
+  updatePlan,
 } = require("../controllers/taskController");
 const { checkPM, checkTaskPermissions } = require("../middleware/auth");
 
@@ -19,14 +23,22 @@ router.post("/create-app", checkPM, createApplication);
 router.get("/all-apps", allApplications);
 // to update to indiv apps
 
+router.post("/update-app/:app");
+
 router.post("/create-plan", createPlan);
 // checkPM,
 
-router.post("/all-plans", allPlans);
+router.get("/all-plans/:app", allPlans);
+
+router.post("/update-plan/:app", updatePlan);
 
 router.post("/create-task", createTask);
 // checkTaskPermissions,
-router.get("/:app/all-tasks", allAppTasks);
+router.get("/all-tasks/:app", allAppTasks);
+
+router.get("/task-details/:task", taskDetails);
+
+router.post("/update-task/:task", updateTask);
 
 router.post("/update-permissions", checkPM, updatePermissions);
 
@@ -43,5 +55,7 @@ router.post(
 );
 
 router.post("/create-notes", createNotes);
+
+router.get("/all-notes/:task", allNotes);
 
 module.exports = router;

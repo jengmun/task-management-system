@@ -19,6 +19,8 @@ import CreateApp from "./pages/Tasks/CreatePlan";
 import CreatePlan from "./pages/Tasks/CreatePlan";
 import CreateTask from "./pages/Tasks/CreateTask";
 import KanbanBoard from "./pages/Tasks/KanbanBoard";
+import EditTask from "./pages/Tasks/EditTask";
+import EditPlan from "./pages/Tasks/EditPlan";
 
 function App() {
   const [isLoggedIn, setIsLoggedIn] = useState("");
@@ -45,11 +47,12 @@ function App() {
           <Switch>
             {/* TASK MANAGEMENT ROUTES */}
             <Route path="/app/all" component={Overview} />
-
             <Route path="/app/create-app" component={CreateApp} />
+            <Route exact path="/app/:app" component={KanbanBoard} />
             <Route path="/app/:app/create-plan" component={CreatePlan} />
             <Route path="/app/:app/create-task" component={CreateTask} />
-            <Route path="/app/:app" component={KanbanBoard} />
+            <Route path="/app/:app/edit-plan" component={EditPlan} />
+            <Route path="/app/:app/:task/edit-task" component={EditTask} />
 
             {/* USER ROUTES */}
             <Route exact path="/">

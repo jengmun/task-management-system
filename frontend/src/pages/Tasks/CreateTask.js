@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { NavLink, useParams } from "react-router-dom";
+import handleGetRequest from "../../hooks/handleGetRequest";
 import handlePostRequest from "../../hooks/handlePostRequest";
 
 const CreateTask = () => {
@@ -9,7 +10,7 @@ const CreateTask = () => {
   const [allPlans, setAllPlans] = useState([]);
 
   const fetchAllPlans = async () => {
-    const data = await handlePostRequest("task/all-plans", { acronym: app });
+    const data = await handleGetRequest(`task/all-plans/${app}`);
     if (data) {
       setAllPlans(data);
     }

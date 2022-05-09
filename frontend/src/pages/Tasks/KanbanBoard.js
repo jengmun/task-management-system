@@ -10,7 +10,7 @@ const KanbanBoard = () => {
   const [allTasks, setAllTasks] = useState([]);
 
   const fetchTasks = async () => {
-    const data = await handleGetRequest(`task/${app}/all-tasks`);
+    const data = await handleGetRequest(`task/all-tasks/${app}`);
     setAllTasks(data);
   };
 
@@ -18,7 +18,7 @@ const KanbanBoard = () => {
   const [allPlans, setAllPlans] = useState([]);
 
   const fetchAllPlans = async () => {
-    const data = await handlePostRequest("task/all-plans", { acronym: app });
+    const data = await handleGetRequest(`task/all-plans/${app}`);
     if (data) {
       setAllPlans(data);
     }
@@ -133,6 +133,8 @@ const KanbanBoard = () => {
 export default KanbanBoard;
 
 const Card = (props) => {
+  const { app } = useParams();
+
   const [message, setMessage] = useState("");
 
   const handleAddNote = async (e) => {
@@ -160,7 +162,9 @@ const Card = (props) => {
         <button className="btn">Add notes</button>
       </form>
       {message}
-      <button className="btn">Edit task</button>
+      <NavLink to={`/app/${app}/${props.content.id}/edit-task`}>
+        <button className="btn">Edit task</button>
+      </NavLink>
     </div>
   );
 };

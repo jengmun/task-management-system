@@ -52,10 +52,29 @@ exports.createPlan = (req, res, next) => {
   );
 };
 
+exports.updatePlan = (req, res, next) => {
+  db.query(
+    "UPDATE plans SET plan_name = ?, start_date = ?, end_date = ? WHERE plan_name = ?",
+    [
+      req.body.planName,
+      req.body.startDate,
+      req.body.endDate,
+      req.body.currentPlan,
+    ],
+    (err, result) => {
+      if (err) {
+        next(err);
+      } else {
+        res.json("Plan updated");
+      }
+    }
+  );
+};
+
 exports.allPlans = (req, res, next) => {
   db.query(
-    `SELECT plan_name FROM plans WHERE acronym = ?`,
-    req.body.acronym,
+    `SELECT * FROM plans WHERE acronym = ?`,
+    req.params.app,
     (err, result) => {
       if (err) {
         next(err);
@@ -122,6 +141,55 @@ exports.allAppTasks = (req, res, next) => {
     }
     res.json(results);
   });
+};
+
+exports.taskDetails = (req, res, next) => {
+  const taskID = req.params.task;
+
+  db.query("SELECT * FROM tasks WHERE task_id = ?", taskID, (err, results) => {
+    if (err) {
+      return next(err);
+    }
+    res.json(results[0]);
+  });
+};
+
+exports.updateTask = (req, res, next) => {
+  const taskID = req.params.task;
+  const { description, planName } = req.body;
+
+  const validPlan = new Promise((resolve) => {
+    db.query(
+      `SELECT plan_name FROM plans WHERE acronym = ? AND plan_name = ?`,
+      [taskID.slice(0, 3), planName],
+      (err, result) => {
+        if (err) {
+          next(err);
+        } else {
+          if (result.length) {
+            resolve(true);
+          } else {
+            resolve(false);
+          }
+        }
+      }
+    );
+  });
+
+  if (validPlan) {
+    db.query(
+      "UPDATE tasks SET description = ?, plan_name = ? WHERE task_id = ?",
+      [description, planName, taskID],
+      (err, results) => {
+        if (err) {
+          return next(err);
+        }
+        res.json("Task updated");
+      }
+    );
+  } else {
+    res.json("Invalid plan selected");
+  }
 };
 
 exports.updatePermissions = (req, res, next) => {
@@ -301,4 +369,12 @@ exports.createNotes = async (req, res, next) => {
   );
 };
 
-exports.updateTask = (req, res, next) => {};
+exports.allNotes = (req, res, next) => {
+  const taskID = req.params.task;
+  db.query("SELECT * FROM notes WHERE task_id = ?", taskID, (err, results) => {
+    if (err) {
+      return next(err);
+    }
+    res.json(results);
+  });
+};

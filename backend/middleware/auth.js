@@ -44,6 +44,37 @@ const checkPM = async (req, res, next) => {
   }
 };
 
+const checkApplicationAccess = async (req, res, next) => {
+  let { app, task } = req.params;
+
+  if (!app) {
+    app = task.slice(0, 3);
+  }
+
+  const isMember = new Promise((resolve) => {
+    db.query(
+      "SELECT * FROM accounts_groups WHERE username = ? AND acronym = ?",
+      [req.session.username, app],
+      (err, results) => {
+        if (err) {
+          return next(err);
+        }
+        if (results.length) {
+          resolve(true);
+        } else {
+          resolve(false);
+        }
+      }
+    );
+  });
+
+  if (isMember) {
+    next();
+  } else {
+    res.json("Not a team member of this application!");
+  }
+};
+
 const checkTaskPermissions = async (req, res, next) => {
   // const listOfActions = ["create", "open", "todo", "doing", "done"];
   const { taskID, acronym } = req.body;
@@ -91,4 +122,10 @@ const checkTaskPermissions = async (req, res, next) => {
   }
 };
 
-module.exports = { checkAdmin, checkLoggedIn, checkPM, checkTaskPermissions };
+module.exports = {
+  checkAdmin,
+  checkLoggedIn,
+  checkPM,
+  checkApplicationAccess,
+  checkTaskPermissions,
+};

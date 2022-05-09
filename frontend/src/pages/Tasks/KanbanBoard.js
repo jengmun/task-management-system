@@ -145,10 +145,13 @@ const Card = (props) => {
 
   const handleAddNote = async (e) => {
     e.preventDefault();
-    const data = await handlePostRequest("task/create-notes", {
-      taskID: props.content.id,
-      details: e.target.notes.value,
-    });
+    const data = await handlePostRequest(
+      `task/create-notes/${props.content.id}`,
+      {
+        taskID: props.content.id,
+        details: e.target.notes.value,
+      }
+    );
 
     if (data !== "Added note") {
       setMessage("Note could not be added. ");

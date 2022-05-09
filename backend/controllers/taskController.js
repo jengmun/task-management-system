@@ -38,6 +38,20 @@ exports.allApplications = (req, res, next) => {
   });
 };
 
+exports.userApplications = (req, res, next) => {
+  db.query(
+    `SELECT acronym FROM accounts_groups WHERE username = ?`,
+    req.session.username,
+    (err, result) => {
+      if (err) {
+        next(err);
+      } else {
+        res.json(result);
+      }
+    }
+  );
+};
+
 exports.applicationDetails = (req, res, next) => {
   db.query(
     `SELECT * FROM applications WHERE acronym = ?`,

@@ -7,7 +7,7 @@ const Overview = () => {
   const [allApps, setAllApps] = useState([]);
 
   const fetchAllApps = async () => {
-    const data = await handleGetRequest("task/all-apps");
+    const data = await handleGetRequest("task/all-apps/user");
     if (data) {
       setAllApps(data);
     }

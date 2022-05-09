@@ -17,36 +17,43 @@ const {
   updatePlan,
   applicationDetails,
   updateApp,
+  userApplications,
 } = require("../controllers/taskController");
-const { checkPM, checkTaskPermissions } = require("../middleware/auth");
+const {
+  checkAdmin,
+  checkPM,
+  checkApplicationAccess,
+  checkTaskPermissions,
+} = require("../middleware/auth");
 
 // ================= APPLICATIONS ================= //
 router.post("/create-app", checkPM, createApplication);
 
-router.get("/all-apps", allApplications);
+router.get("/all-apps", checkAdmin, allApplications);
 
-router.get("/apps/:app", applicationDetails);
+router.get("/all-apps/user", userApplications);
 
-router.post("/update-app/:app", updateApp);
+router.get("/apps/:app", checkApplicationAccess, applicationDetails);
+
+router.post("/update-app/:app", checkPM, updateApp);
 
 // ================= PLANS ================= //
 
-router.post("/create-plan", createPlan);
-// checkPM,
+router.post("/create-plan", checkPM, createPlan);
 
-router.get("/all-plans/:app", allPlans);
+router.get("/all-plans/:app", checkApplicationAccess, allPlans);
 
-router.post("/update-plan/:app", updatePlan);
+router.post("/update-plan/:app", checkPM, updatePlan);
 
 // ================= TASKS ================= //
 
-router.post("/create-task", createTask);
-// checkTaskPermissions,
-router.get("/all-tasks/:app", allAppTasks);
+router.post("/create-task", checkTaskPermissions, createTask);
 
-router.get("/task-details/:task", taskDetails);
+router.get("/all-tasks/:app", checkApplicationAccess, allAppTasks);
 
-router.post("/update-task/:task", updateTask);
+router.get("/task-details/:task", checkApplicationAccess, taskDetails);
+
+router.post("/update-task/:task", checkPM, updateTask);
 
 router.post("/update-permissions", checkPM, updatePermissions);
 
@@ -64,8 +71,8 @@ router.post(
 
 // ================= NOTES ================= //
 
-router.post("/create-notes", createNotes);
+router.post("/create-notes/:task", checkApplicationAccess, createNotes);
 
-router.get("/all-notes/:task", allNotes);
+router.get("/all-notes/:task", checkApplicationAccess, allNotes);
 
 module.exports = router;

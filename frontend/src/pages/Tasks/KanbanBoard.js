@@ -6,9 +6,8 @@ import handleGetRequest from "../../hooks/handleGetRequest";
 import handlePostRequest from "../../hooks/handlePostRequest";
 
 const KanbanBoard = () => {
-  const [allTasks, setAllTasks] = useState([]);
-
   const { app } = useParams();
+  const [allTasks, setAllTasks] = useState([]);
 
   const fetchTasks = async () => {
     const data = await handleGetRequest(`task/${app}/all-tasks`);
@@ -23,7 +22,6 @@ const KanbanBoard = () => {
     if (data) {
       setAllPlans(data);
     }
-    console.log(data);
   };
 
   useEffect(() => {
@@ -50,6 +48,7 @@ const KanbanBoard = () => {
           id: numOfCards[i].task_id,
           title: numOfCards[i].task_name,
           description: numOfCards[i].description,
+          planName: numOfCards[i].plan_name,
         });
       }
       columns.push({ id, title, cards });
@@ -106,6 +105,9 @@ const KanbanBoard = () => {
 
   return (
     <div>
+      <NavLink to={`/app`}>
+        <button>Back</button>
+      </NavLink>
       <h1>{app}</h1>
       <h2>All Plans:</h2>
       {allPlans.map((plan) => {
@@ -117,7 +119,11 @@ const KanbanBoard = () => {
       <NavLink to={`/app/${app}/create-task`}>
         <button>Create Task</button>
       </NavLink>
-      <Board onCardDragEnd={handleCardMove} disableColumnDrag>
+      <Board
+        renderCard={(content) => <Card content={content} />}
+        onCardDragEnd={handleCardMove}
+        disableColumnDrag
+      >
         {board}
       </Board>
     </div>
@@ -125,3 +131,36 @@ const KanbanBoard = () => {
 };
 
 export default KanbanBoard;
+
+const Card = (props) => {
+  const [message, setMessage] = useState("");
+
+  const handleAddNote = async (e) => {
+    e.preventDefault();
+    const data = await handlePostRequest("task/create-notes", {
+      taskID: props.content.id,
+      details: e.target.notes.value,
+    });
+
+    if (data !== "Added note") {
+      setMessage("Note could not be added. ");
+    } else {
+      setMessage(data);
+      e.target.notes.value = "";
+    }
+  };
+
+  return (
+    <div>
+      <h4>{props.content.title}</h4>
+      <h5>Plan: {props.content.planName}</h5>
+      <h5>{props.content.description}</h5>
+      <form onSubmit={handleAddNote}>
+        <textarea id="notes" name="notes" maxLength="255" required />
+        <button className="btn">Add notes</button>
+      </form>
+      {message}
+      <button className="btn">Edit task</button>
+    </div>
+  );
+};

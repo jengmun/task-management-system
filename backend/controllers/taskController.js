@@ -261,7 +261,7 @@ exports.taskStateRegression = async (req, res, next) => {
 };
 
 exports.createNotes = async (req, res, next) => {
-  const { details, creator, taskID } = req.body;
+  const { details, taskID } = req.body;
 
   const state = await checkState(taskID);
 
@@ -288,7 +288,7 @@ exports.createNotes = async (req, res, next) => {
       `${taskID}_${runningNumber}`,
       runningNumber,
       details,
-      creator,
+      req.session.username,
       state,
       taskID,
     ],
@@ -296,7 +296,7 @@ exports.createNotes = async (req, res, next) => {
       if (err) {
         return next(err);
       }
-      res.json(results);
+      res.json("Added note");
     }
   );
 };

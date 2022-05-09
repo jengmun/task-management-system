@@ -9,7 +9,7 @@ const checkState = (taskID) => {
         if (err) {
           reject(err);
         }
-        if (results.length) {
+        if (results && results.length) {
           resolve(results[0].state);
         } else {
           resolve("");

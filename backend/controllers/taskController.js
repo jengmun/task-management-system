@@ -38,6 +38,46 @@ exports.allApplications = (req, res, next) => {
   });
 };
 
+exports.applicationDetails = (req, res, next) => {
+  db.query(
+    `SELECT * FROM applications WHERE acronym = ?`,
+    req.params.app,
+    (err, result) => {
+      if (err) {
+        next(err);
+      } else {
+        res.json(result[0]);
+      }
+    }
+  );
+};
+
+exports.updateApp = (req, res, next) => {
+  const { app } = req.params;
+
+  db.query(
+    `UPDATE applications SET description = ?, start_date = ?, end_date = ?, permit_create = ?, permit_open = ?, permit_todo = ?, permit_doing = ?, permit_done = ? WHERE acronym = ?`,
+    [
+      req.body.description,
+      req.body.startDate,
+      req.body.endDate,
+      req.body.permitCreate,
+      req.body.permitOpen,
+      req.body.permitTodo,
+      req.body.permitDoing,
+      req.body.permitDone,
+      app,
+    ],
+    (err, result) => {
+      if (err) {
+        next(err);
+      } else {
+        res.json("Updated app");
+      }
+    }
+  );
+};
+
 exports.createPlan = (req, res, next) => {
   db.query(
     "INSERT INTO plans VALUES (?, ?, ?, ?)",
@@ -101,12 +141,11 @@ exports.createTask = async (req, res, next) => {
   });
 
   db.query(
-    "INSERT INTO tasks (task_id, task_name, description, notes, plan_name, acronym, state, creator) VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
+    "INSERT INTO tasks (task_id, task_name, description, plan_name, acronym, state, creator) VALUES (?, ?, ?, ?, ?, ?, ?)",
     [
       `${req.body.acronym.toUpperCase()}_${runningNumber}`,
       req.body.taskName,
       req.body.description,
-      req.body.notes,
       req.body.planName ? req.body.planName : null,
       req.body.acronym.toUpperCase(),
       "Open",

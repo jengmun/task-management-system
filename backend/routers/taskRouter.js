@@ -15,15 +15,21 @@ const {
   taskDetails,
   updateTask,
   updatePlan,
+  applicationDetails,
+  updateApp,
 } = require("../controllers/taskController");
 const { checkPM, checkTaskPermissions } = require("../middleware/auth");
 
+// ================= APPLICATIONS ================= //
 router.post("/create-app", checkPM, createApplication);
 
 router.get("/all-apps", allApplications);
-// to update to indiv apps
 
-router.post("/update-app/:app");
+router.get("/apps/:app", applicationDetails);
+
+router.post("/update-app/:app", updateApp);
+
+// ================= PLANS ================= //
 
 router.post("/create-plan", createPlan);
 // checkPM,
@@ -31,6 +37,8 @@ router.post("/create-plan", createPlan);
 router.get("/all-plans/:app", allPlans);
 
 router.post("/update-plan/:app", updatePlan);
+
+// ================= TASKS ================= //
 
 router.post("/create-task", createTask);
 // checkTaskPermissions,
@@ -53,6 +61,8 @@ router.post(
   checkTaskPermissions,
   taskStateRegression
 );
+
+// ================= NOTES ================= //
 
 router.post("/create-notes", createNotes);
 

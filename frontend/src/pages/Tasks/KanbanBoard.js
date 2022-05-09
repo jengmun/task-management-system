@@ -109,15 +109,21 @@ const KanbanBoard = () => {
         <button>Back</button>
       </NavLink>
       <h1>{app}</h1>
+      <NavLink to={`/app/${app}/edit-app`}>
+        <button className="btn">Edit app</button>
+      </NavLink>
       <h2>All Plans:</h2>
+      <NavLink to={`/app/${app}/edit-plan`}>
+        <button className="btn">Edit plans</button>
+      </NavLink>
       {allPlans.map((plan) => {
         return <h5>{plan.plan_name}</h5>;
       })}
       <NavLink to={`/app/${app}/create-plan`}>
-        <button>Create Plan</button>
+        <button className="btn">Create Plan</button>
       </NavLink>
       <NavLink to={`/app/${app}/create-task`}>
-        <button>Create Task</button>
+        <button className="btn">Create Task</button>
       </NavLink>
       <Board
         renderCard={(content) => <Card content={content} />}

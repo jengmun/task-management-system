@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useParams } from "react-router-dom";
+import { useParams, NavLink } from "react-router-dom";
 import handleGetRequest from "../../hooks/handleGetRequest";
 import handlePostRequest from "../../hooks/handlePostRequest";
 
@@ -22,6 +22,9 @@ const EditPlan = () => {
 
   return (
     <div>
+      <NavLink to={`/app/${app}`}>
+        <button>Back</button>
+      </NavLink>
       <table>
         <thead>
           <tr>

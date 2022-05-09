@@ -95,7 +95,7 @@ const KanbanBoard = () => {
     }
     console.log(data);
 
-    if (data !== "State updated" && data !== "State demoted") {
+    if (data !== "Task updated") {
       return;
     }
     // Update board

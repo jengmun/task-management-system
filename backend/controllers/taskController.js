@@ -344,7 +344,9 @@ exports.taskStateProgression = async (req, res, next) => {
   //   );
   // }
 
-  res.json("State updated");
+  req.body.details = `Task updated from ${currentState} to ${newState}`;
+
+  next();
 };
 
 exports.taskStateRegression = async (req, res, next) => {
@@ -378,7 +380,9 @@ exports.taskStateRegression = async (req, res, next) => {
       };
   }
 
-  res.json("State demoted");
+  req.body.details = `Task updated from ${currentState} to ${newState}`;
+
+  next();
 };
 
 exports.createNotes = async (req, res, next) => {
@@ -417,7 +421,7 @@ exports.createNotes = async (req, res, next) => {
       if (err) {
         return next(err);
       }
-      res.json("Added note");
+      res.json("Task updated");
     }
   );
 };

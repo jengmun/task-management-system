@@ -55,6 +55,7 @@ const EditTask = () => {
       planName: e.target.planName.value,
     });
     setMessage(data);
+    fetchAllNotes();
   };
 
   return (
@@ -78,6 +79,9 @@ const EditTask = () => {
         />
         <label htmlFor="planName">Plan Name</label>
         <select id="planName" name="planName">
+          <option value="null" selected={taskDetails.plan_name ? true : false}>
+            No plan
+          </option>
           {allPlans.map((plan) => {
             return (
               <option
@@ -97,11 +101,11 @@ const EditTask = () => {
       {allNotes.map((note) => {
         return (
           <div>
-            <h5>{note.details}</h5>
-            <h5>{note.creator}</h5>
-            <h5>{note.date}</h5>
-            <h5>{note.state}</h5>
-            <h5>{note.notes_id}</h5>
+            <h5>Note ID: {note.notes_id}</h5>
+            <h5>Description: {note.details}</h5>
+            <h5>Author: {note.creator}</h5>
+            <h5>Date: {note.date}</h5>
+            <h5>Current State: {note.state}</h5>
           </div>
         );
       })}

@@ -1,6 +1,7 @@
 const checkState = require("../modules/checkState");
 const { db } = require("../modules/db");
 const sendEmail = require("../modules/email");
+const checkGroup = require("../modules/checkGroup");
 
 exports.createApplication = (req, res, next) => {
   db.query(
@@ -207,42 +208,81 @@ exports.taskDetails = (req, res, next) => {
   });
 };
 
-exports.updateTask = (req, res, next) => {
+exports.updateTask = async (req, res, next) => {
   const taskID = req.params.task;
-  const { description, planName } = req.body;
+  let { description, planName } = req.body;
 
-  const validPlan = new Promise((resolve) => {
+  const oldDetails = await new Promise((resolve) => {
     db.query(
-      `SELECT plan_name FROM plans WHERE acronym = ? AND plan_name = ?`,
-      [taskID.slice(0, 3), planName],
+      `SELECT description, plan_name FROM tasks WHERE task_id = ?`,
+      [taskID],
       (err, result) => {
         if (err) {
           next(err);
         } else {
-          if (result.length) {
-            resolve(true);
-          } else {
-            resolve(false);
-          }
+          resolve(result[0]);
         }
       }
     );
   });
 
-  if (validPlan) {
-    db.query(
-      "UPDATE tasks SET description = ?, plan_name = ? WHERE task_id = ?",
-      [description, planName, taskID],
-      (err, results) => {
-        if (err) {
-          return next(err);
-        }
-        res.json("Task updated");
-      }
-    );
-  } else {
-    res.json("Invalid plan selected");
+  if (
+    oldDetails.description === description &&
+    oldDetails.plan_name === planName
+  ) {
+    res.json("No change in details");
+    return;
   }
+
+  if (planName !== "null") {
+    const validPlan = await new Promise((resolve) => {
+      db.query(
+        `SELECT plan_name FROM plans WHERE acronym = ? AND plan_name = ?`,
+        [taskID.slice(0, 3), planName],
+        (err, result) => {
+          if (err) {
+            next(err);
+          } else {
+            if (result.length) {
+              resolve(true);
+            } else {
+              resolve(false);
+            }
+          }
+        }
+      );
+    });
+
+    if (!validPlan) {
+      res.json("Invalid plan selected");
+      return;
+    }
+  } else {
+    planName = null;
+  }
+
+  db.query(
+    "UPDATE tasks SET description = ?, plan_name = ? WHERE task_id = ?",
+    [description, planName, taskID],
+    (err, results) => {
+      if (err) {
+        return next(err);
+      }
+
+      if (
+        oldDetails.description !== description &&
+        oldDetails.plan_name !== planName
+      ) {
+        req.body.details = `Task description updated from ${oldDetails.description} to ${description}. Plan name updated from from ${oldDetails.plan_name} to ${planName}.`;
+      } else if (oldDetails.description !== description) {
+        req.body.details = `Task description updated from ${oldDetails.description} to ${description}.`;
+      } else {
+        req.body.details = `Plan name updated from from ${oldDetails.plan_name} to ${planName}.`;
+      }
+
+      next();
+    }
+  );
 };
 
 exports.updatePermissions = (req, res, next) => {
@@ -267,7 +307,7 @@ exports.taskStateProgression = async (req, res, next) => {
 
   const results = await new Promise((resolve) => {
     db.query(
-      "SELECT state, owner FROM tasks WHERE task_id = ?",
+      "SELECT state, creator, owner FROM tasks WHERE task_id = ?",
       taskID,
       (err, results) => {
         if (err) {
@@ -276,18 +316,22 @@ exports.taskStateProgression = async (req, res, next) => {
         if (results.length) {
           resolve(results[0]);
         } else {
-          resolve({ state: "", owner: "" });
+          resolve({ state: "", creator: "", owner: "" });
         }
       }
     );
   });
 
-  const currentState = results.state;
-  const owner = results.owner;
+  const { currentState, creator, owner } = results.state;
   console.log("currentState: ", currentState);
 
   if (currentState === "Closed" || !currentState) {
     res.json("State can't be updated!");
+    return;
+  }
+
+  if (creator === req.session.username && currentState === "Open") {
+    res.json("Approver cannot be the creator of the task!");
     return;
   }
 
@@ -386,7 +430,11 @@ exports.taskStateRegression = async (req, res, next) => {
 };
 
 exports.createNotes = async (req, res, next) => {
-  const { details, taskID } = req.body;
+  let { details, taskID } = req.body;
+
+  if (!taskID) {
+    taskID = req.params.task;
+  }
 
   const state = await checkState(taskID);
 
@@ -434,4 +482,22 @@ exports.allNotes = (req, res, next) => {
     }
     res.json(results);
   });
+};
+
+exports.isGroup = async (req, res, next) => {
+  const { acronym } = req.body;
+
+  const isPermitted = await checkGroup(
+    "accounts_groups",
+    req.session.username,
+    "group_name",
+    req.body.group,
+    acronym ? acronym : null
+  );
+
+  if (isPermitted) {
+    res.json(true);
+  } else {
+    res.json(false);
+  }
 };

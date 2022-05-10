@@ -24,9 +24,36 @@ const KanbanBoard = () => {
     }
   };
 
+  // ------------- Check if PM -------------/
+  const [isPM, setIsPM] = useState(false);
+
+  const checkPM = async () => {
+    const data = await handlePostRequest("task/is-group", {
+      group: "Project Manager",
+    });
+    if (data) {
+      setIsPM(data);
+    }
+  };
+
+  // ------------- Check if Lead -------------/
+  const [isLead, setIsLead] = useState(false);
+
+  const checkLead = async () => {
+    const data = await handlePostRequest("task/is-group", {
+      group: "Team Lead",
+      acronym: app,
+    });
+    if (data) {
+      setIsLead(data);
+    }
+  };
+
   useEffect(() => {
     fetchTasks();
     fetchAllPlans();
+    checkPM();
+    checkLead();
   }, []);
 
   // ------------- Create Kanban Board -------------
@@ -49,6 +76,7 @@ const KanbanBoard = () => {
           title: numOfCards[i].task_name,
           description: numOfCards[i].description,
           planName: numOfCards[i].plan_name,
+          isLead: isLead,
         });
       }
       columns.push({ id, title, cards });
@@ -64,13 +92,9 @@ const KanbanBoard = () => {
 
   useEffect(() => {
     createBoard();
-  }, [allTasks]);
+  }, [allTasks, isLead]);
 
   const handleCardMove = async (card, source, destination) => {
-    // const oldState = states[source.fromColumnId];
-    // const newState = states[destination.toColumnId];
-    // console.log(oldState, newState);
-
     let data;
 
     if (Math.abs(destination.toColumnId - source.fromColumnId) !== 1) {
@@ -78,7 +102,7 @@ const KanbanBoard = () => {
     }
 
     if (destination.toColumnId > source.fromColumnId) {
-      //   Query / Update database
+      // ------------- Query / Update Database -------------
       data = await handlePostRequest("task/task-state-progression", {
         taskID: card.id,
         acronym: app,
@@ -98,7 +122,7 @@ const KanbanBoard = () => {
     if (data !== "Task updated") {
       return;
     }
-    // Update board
+    // ------------- Update Board -------------
     const updatedBoard = moveCard(board, source, destination);
     setBoard(updatedBoard);
   };
@@ -109,22 +133,30 @@ const KanbanBoard = () => {
         <button>Back</button>
       </NavLink>
       <h1>{app}</h1>
-      <NavLink to={`/app/${app}/edit-app`}>
-        <button className="btn">Edit app</button>
-      </NavLink>
+      {isPM && (
+        <NavLink to={`/app/${app}/edit-app`}>
+          <button className="btn">Edit app</button>
+        </NavLink>
+      )}
       <h2>All Plans:</h2>
-      <NavLink to={`/app/${app}/edit-plan`}>
-        <button className="btn">Edit plans</button>
-      </NavLink>
+      {isPM && (
+        <NavLink to={`/app/${app}/edit-plan`}>
+          <button className="btn">Edit plans</button>
+        </NavLink>
+      )}
       {allPlans.map((plan) => {
-        return <h5>{plan.plan_name}</h5>;
+        return <h5 key={plan.plan_name}>{plan.plan_name}</h5>;
       })}
-      <NavLink to={`/app/${app}/create-plan`}>
-        <button className="btn">Create Plan</button>
-      </NavLink>
-      <NavLink to={`/app/${app}/create-task`}>
-        <button className="btn">Create Task</button>
-      </NavLink>
+      {isPM && (
+        <NavLink to={`/app/${app}/create-plan`}>
+          <button className="btn">Create Plan</button>
+        </NavLink>
+      )}
+      {isLead && (
+        <NavLink to={`/app/${app}/create-task`}>
+          <button className="btn">Create Task</button>
+        </NavLink>
+      )}
       <Board
         renderCard={(content) => <Card content={content} />}
         onCardDragEnd={handleCardMove}
@@ -171,9 +203,11 @@ const Card = (props) => {
         <button className="btn">Add notes</button>
       </form>
       {message}
-      <NavLink to={`/app/${app}/${props.content.id}/edit-task`}>
-        <button className="btn">Edit task</button>
-      </NavLink>
+      {props.content.isLead && (
+        <NavLink to={`/app/${app}/${props.content.id}/edit-task`}>
+          <button className="btn">Edit task</button>
+        </NavLink>
+      )}
     </div>
   );
 };

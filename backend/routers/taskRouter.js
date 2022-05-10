@@ -18,6 +18,7 @@ const {
   applicationDetails,
   updateApp,
   userApplications,
+  isGroup,
 } = require("../controllers/taskController");
 const {
   checkAdmin,
@@ -37,6 +38,8 @@ router.get("/apps/:app", checkApplicationAccess, applicationDetails);
 
 router.post("/update-app/:app", checkPM, updateApp);
 
+router.post("/update-permissions", checkPM, updatePermissions);
+
 // ================= PLANS ================= //
 
 router.post("/create-plan", checkPM, createPlan);
@@ -53,20 +56,20 @@ router.get("/all-tasks/:app", checkApplicationAccess, allAppTasks);
 
 router.get("/task-details/:task", checkApplicationAccess, taskDetails);
 
-router.post("/update-task/:task", checkPM, updateTask);
-
-router.post("/update-permissions", checkPM, updatePermissions);
+router.post("/update-task/:task", checkPM, updateTask, createNotes);
 
 router.post(
   "/task-state-progression",
   checkTaskPermissions,
-  taskStateProgression
+  taskStateProgression,
+  createNotes
 );
 
 router.post(
   "/task-state-regression",
   checkTaskPermissions,
-  taskStateRegression
+  taskStateRegression,
+  createNotes
 );
 
 // ================= NOTES ================= //
@@ -76,6 +79,6 @@ router.post("/create-notes/:task", checkApplicationAccess, createNotes);
 router.get("/all-notes/:task", checkApplicationAccess, allNotes);
 
 // ================= AUTH ================= //
-router.post("/update-task/:task", checkPM);
+router.post("/is-group", isGroup);
 
 module.exports = router;

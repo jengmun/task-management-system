@@ -50,9 +50,11 @@ const EditTask = () => {
   const handleTaskUpdate = async (e) => {
     e.preventDefault();
 
-    const data = await handlePostRequest(`task/update-task/${task}`, {
+    const data = await handlePostRequest(`task/update-task`, {
       description: e.target.description.value,
       planName: e.target.planName.value,
+      acronym: app,
+      taskID: task,
     });
     setMessage(data);
     fetchAllNotes();

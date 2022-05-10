@@ -77,6 +77,7 @@ const KanbanBoard = () => {
           description: numOfCards[i].description,
           planName: numOfCards[i].plan_name,
           isLead: isLead,
+          state: numOfCards[i].state,
         });
       }
       columns.push({ id, title, cards });
@@ -203,7 +204,7 @@ const Card = (props) => {
         <button className="btn">Add notes</button>
       </form>
       {message}
-      {props.content.isLead && (
+      {props.content.isLead && props.content.state === "Open" && (
         <NavLink to={`/app/${app}/${props.content.id}/edit-task`}>
           <button className="btn">Edit task</button>
         </NavLink>

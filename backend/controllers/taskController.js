@@ -209,7 +209,63 @@ exports.taskDetails = (req, res, next) => {
 };
 
 exports.updateTask = async (req, res, next) => {
-  const taskID = req.params.task;
+  const { taskID, acronym } = req.body;
+
+  const permittedGroup = await new Promise((resolve) => {
+    db.query(
+      "SELECT permit_create FROM applications WHERE acronym = ?",
+      [acronym],
+      (err, results) => {
+        if (err) {
+          return next(err);
+        }
+        resolve(results[0]["permit_create"]);
+      }
+    );
+  });
+
+  console.log(permittedGroup);
+
+  const isPermitted = await checkGroup(
+    "accounts_groups",
+    req.session.username,
+    "group_name",
+    permittedGroup,
+    acronym
+  );
+
+  if (!isPermitted) {
+    res.json("Insufficient permissions");
+    return;
+  }
+  console.log(isPermitted);
+
+  const results = await new Promise((resolve) => {
+    db.query(
+      "SELECT state FROM tasks WHERE task_id = ?",
+      taskID,
+      (err, results) => {
+        if (err) {
+          return next(err);
+        }
+        console.log(results[0].state);
+        if (results.length) {
+          resolve(results[0]);
+        } else {
+          resolve({ state: "" });
+        }
+      }
+    );
+  });
+
+  const currentState = results.state;
+  console.log(currentState);
+
+  if (currentState !== "Open" || !currentState) {
+    res.json("Task can't be updated!");
+    return;
+  }
+
   let { description, planName } = req.body;
 
   const oldDetails = await new Promise((resolve) => {
@@ -322,7 +378,8 @@ exports.taskStateProgression = async (req, res, next) => {
     );
   });
 
-  const { currentState, creator, owner } = results.state;
+  const currentState = results.state;
+  const { creator, owner } = results;
   console.log("currentState: ", currentState);
 
   if (currentState === "Closed" || !currentState) {

@@ -56,7 +56,7 @@ router.get("/all-tasks/:app", checkApplicationAccess, allAppTasks);
 
 router.get("/task-details/:task", checkApplicationAccess, taskDetails);
 
-router.post("/update-task/:task", checkPM, updateTask, createNotes);
+router.post("/update-task", updateTask, createNotes);
 
 router.post(
   "/task-state-progression",

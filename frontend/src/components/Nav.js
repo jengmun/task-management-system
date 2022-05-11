@@ -2,32 +2,45 @@ import React, { useContext } from "react";
 import { NavLink } from "react-router-dom";
 import LoginContext from "../context/login-context";
 import handleGetRequest from "../hooks/handleGetRequest";
+import { useTheme } from "@mui/material/styles";
+import { List, ListItem, Button } from "@mui/material";
 
 const Nav = () => {
   const loginContext = useContext(LoginContext);
+  const theme = useTheme();
 
   return (
-    <ul>
-      <li>
-        <NavButton link="/" text="Home" />
-      </li>
+    <List
+      sx={{
+        position: "absolute",
+        display: "flex",
+        flexDirection: "column",
+        width: "15%",
+        height: "100%",
+        p: 0,
+        backgroundColor: theme.palette.primary.light,
+      }}
+    >
+      <ListItem>
+        <NavButton link="/" text="Dashboard" />
+      </ListItem>
       {loginContext.isLoggedIn.username && (
-        <li>
+        <ListItem>
           <NavButton link="/profile" text="Profile" />
-        </li>
+        </ListItem>
       )}
       {loginContext.isLoggedIn.account_type === "Admin" && (
         <>
-          <li>
+          <ListItem>
             <NavButton link="/admin/user-management" text="User Management" />
-          </li>
-          <li>
+          </ListItem>
+          <ListItem>
             <NavButton link="/admin/group-management" text="Group Management" />
-          </li>
+          </ListItem>
         </>
       )}
       {loginContext.isLoggedIn.username && (
-        <li>
+        <ListItem>
           <NavLink
             to="/"
             style={{ textDecoration: "none" }}
@@ -36,11 +49,11 @@ const Nav = () => {
               loginContext.setIsLoggedIn("");
             }}
           >
-            <button>Logout</button>
+            <Button>Logout</Button>
           </NavLink>
-        </li>
+        </ListItem>
       )}
-    </ul>
+    </List>
   );
 };
 
@@ -49,7 +62,7 @@ export default Nav;
 const NavButton = (props) => {
   return (
     <NavLink to={props.link} style={{ textDecoration: "none" }}>
-      <button>{props.text}</button>
+      <Button>{props.text}</Button>
     </NavLink>
   );
 };

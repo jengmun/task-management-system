@@ -2,8 +2,10 @@ import { useEffect, useState } from "react";
 import { BrowserRouter, Redirect, Route, Switch } from "react-router-dom";
 import Cookies from "js-cookie";
 import "./App.css";
+import AdminRoute from "./ProtectedRoutes/AdminRoute";
+import PermissionsRoute from "./ProtectedRoutes/PermissionsRoute";
 import LoginContext from "./context/login-context";
-import Home from "./pages/User/Home";
+import handleGetRequest from "./hooks/handleGetRequest";
 import Nav from "./components/Nav";
 import Login from "./pages/User/Login";
 import UserManagement from "./pages/User/UserManagement";
@@ -12,8 +14,6 @@ import Profile from "./pages/User/Profile";
 import ResetPassword from "./pages/User/ResetPassword";
 import ForgotPassword from "./pages/User/ForgotPassword";
 import GroupManagement from "./pages/User/GroupManagement";
-import handleGetRequest from "./hooks/handleGetRequest";
-import AdminRoute from "./components/AdminRoute";
 import Overview from "./pages/Tasks/Overview";
 import AssignPM from "./pages/Tasks/AssignPM";
 import CreateApp from "./pages/Tasks/CreateApp";
@@ -23,7 +23,8 @@ import KanbanBoard from "./pages/Tasks/KanbanBoard";
 import EditTask from "./pages/Tasks/EditTask";
 import EditPlan from "./pages/Tasks/EditPlan";
 import EditApp from "./pages/Tasks/EditApp";
-import PermissionsRoute from "./components/PermissionsRoute";
+import { ThemeProvider, createTheme } from "@mui/material/styles";
+import { Box } from "@mui/material";
 
 function App() {
   const [isLoggedIn, setIsLoggedIn] = useState("");
@@ -42,84 +43,121 @@ function App() {
     }
   }, []);
 
+  // ------------- CSS -------------
+
+  const theme = createTheme({
+    palette: {
+      primary: { main: "rgb(23 239 239)", light: "rgba(242, 241, 238, 0.6)" },
+      info: { main: "rgb(46 170 220)" },
+      error: { light: "rgb(255 226 221)", main: "rgb(158 33 30)" },
+      warning: { main: "rgb(253 236 200)" },
+      success: { main: "rgb(219 237 219)" },
+    },
+    typography: {
+      fontFamily: "Arial",
+      h1: { fontSize: "6rem" },
+      h2: { fontSize: "3.75rem" },
+      h3: { fontSize: "3rem" },
+      h4: { fontSize: "2.125rem" },
+      h5: { fontSize: "1.5rem" },
+      h6: { fontSize: "1.25rem" },
+      body1: { fontSize: "1rem" },
+      body2: { fontSize: "0.875rem" },
+    },
+  });
+
   return (
-    <LoginContext.Provider value={{ isLoggedIn, setIsLoggedIn }}>
-      <BrowserRouter>
-        <div>
-          <Nav />
-          <Switch>
-            <Route exact path="/">
-              {isLoggedIn.username ? <Overview /> : <Home />}
-            </Route>
-
-            {/* USER ROUTES */}
-            <Route path="/login">
-              {isLoggedIn.username ? <Redirect to="/" /> : <Login />}
-            </Route>
-            <Route path="/forgot-password" component={ForgotPassword} />
-            <Route path="/reset-password/:username" component={ResetPassword} />
-            <Route path="/profile">
-              {isLoggedIn.username ? <Profile /> : <Redirect to="/" />}
-            </Route>
-
-            {/* Required for refreshes */}
-            {isLoggedIn.account_type && (
+    <ThemeProvider theme={theme}>
+      <LoginContext.Provider value={{ isLoggedIn, setIsLoggedIn }}>
+        <BrowserRouter>
+          <Box sx={{ display: "flex", height: "100vh", width: "100vw" }}>
+            <Nav />
+            <Box sx={{ width: "85%", ml: "15%" }}>
               <Switch>
-                {/* TASK MANAGEMENT ROUTES */}
-                <AdminRoute path="/app/assign-PM" component={AssignPM} />
+                <Route exact path="/">
+                  {isLoggedIn.username ? (
+                    <Overview />
+                  ) : (
+                    <Redirect to="/login" />
+                  )}
+                </Route>
 
-                <PermissionsRoute
-                  path="/app/create-app"
-                  component={CreateApp}
-                  permission="PM"
+                {/* USER ROUTES */}
+                <Route path="/login">
+                  {isLoggedIn.username ? <Redirect to="/" /> : <Login />}
+                </Route>
+                <Route path="/forgot-password" component={ForgotPassword} />
+                <Route
+                  path="/reset-password/:username"
+                  component={ResetPassword}
                 />
-                <PermissionsRoute
-                  path="/app/:app/edit-app"
-                  component={EditApp}
-                  permission="PM"
-                />
-                <PermissionsRoute
-                  path="/app/:app/create-plan"
-                  component={CreatePlan}
-                  permission="PM"
-                />
-                <PermissionsRoute
-                  path="/app/:app/edit-plan"
-                  component={EditPlan}
-                  permission="PM"
-                />
-                <PermissionsRoute
-                  path="/app/:app/create-task"
-                  component={CreateTask}
-                  permission="Lead"
-                />
-                <PermissionsRoute
-                  path="/app/:app/:task/edit-task"
-                  component={EditTask}
-                  permission="Lead"
-                />
-                <PermissionsRoute
-                  path="/app/:app"
-                  component={KanbanBoard}
-                  permission="All"
-                />
+                <Route path="/profile">
+                  {isLoggedIn.username ? <Profile /> : <Redirect to="/" />}
+                </Route>
 
-                {/* ADMIN ROUTES */}
-                <AdminRoute
-                  path="/admin/user-management"
-                  component={UserManagement}
-                />
-                <AdminRoute path="/admin/create-user" component={CreateUser} />
-                <AdminRoute
-                  path="/admin/group-management"
-                  component={GroupManagement}
-                />
+                {/* Required for refreshes */}
+                {isLoggedIn.account_type && (
+                  <Switch>
+                    {/* TASK MANAGEMENT ROUTES */}
+                    <AdminRoute path="/app/assign-PM" component={AssignPM} />
+
+                    <PermissionsRoute
+                      path="/app/create-app"
+                      component={CreateApp}
+                      permission="PM"
+                    />
+                    <PermissionsRoute
+                      path="/app/:app/edit-app"
+                      component={EditApp}
+                      permission="PM"
+                    />
+                    <PermissionsRoute
+                      path="/app/:app/create-plan"
+                      component={CreatePlan}
+                      permission="PM"
+                    />
+                    <PermissionsRoute
+                      path="/app/:app/edit-plan"
+                      component={EditPlan}
+                      permission="PM"
+                    />
+                    <PermissionsRoute
+                      path="/app/:app/create-task"
+                      component={CreateTask}
+                      permission="Lead"
+                    />
+                    <PermissionsRoute
+                      path="/app/:app/:task/edit-task"
+                      component={EditTask}
+                      permission="Lead"
+                    />
+                    <PermissionsRoute
+                      path="/app/:app"
+                      component={KanbanBoard}
+                      permission="All"
+                    />
+
+                    {/* ADMIN ROUTES */}
+                    <AdminRoute
+                      path="/admin/user-management"
+                      component={UserManagement}
+                    />
+                    <AdminRoute
+                      path="/admin/create-user"
+                      component={CreateUser}
+                    />
+                    <AdminRoute
+                      path="/admin/group-management"
+                      component={GroupManagement}
+                    />
+                  </Switch>
+                )}
               </Switch>
-            )}
-          </Switch>
-        </div>
-      </BrowserRouter>
-    </LoginContext.Provider>
+            </Box>
+          </Box>
+        </BrowserRouter>
+      </LoginContext.Provider>
+    </ThemeProvider>
   );
 }
 

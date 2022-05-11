@@ -2,6 +2,8 @@ import { useContext, useState } from "react";
 import { NavLink, useHistory } from "react-router-dom";
 import LoginContext from "../../context/login-context";
 import handlePostRequest from "../../hooks/handlePostRequest";
+import { useTheme } from "@mui/material/styles";
+import { Box, TextField, Button, Typography } from "@mui/material";
 
 const Login = () => {
   const loginContext = useContext(LoginContext);
@@ -22,33 +24,53 @@ const Login = () => {
     }
   };
 
-  return (
-    <div>
-      <h3>Login</h3>
-      <label htmlFor="username">
-        <span>Username</span>
-      </label>
-      <input
-        id="username"
-        name="username"
-        onChange={(e) => setUsername(e.target.value)}
-      />
+  const theme = useTheme();
 
-      <label htmlFor="password">
-        <span>Password</span>
-      </label>
-      <input
-        type="password"
-        id="password"
-        name="password"
-        onChange={(e) => setPassword(e.target.value)}
+  return (
+    <Box
+      sx={{
+        display: "flex",
+        flexDirection: "column",
+        alignItems: "center",
+        justifyContent: "center",
+        height: "100%",
+      }}
+    >
+      <Typography variant="h3" sx={{ mb: 2 }}>
+        Login
+      </Typography>
+      <TextField
+        required
+        id="outlined-search"
+        label="Username"
+        onChange={(e) => setUsername(e.target.value)}
+        sx={{ mt: 1, mb: 1 }}
       />
-      <button onClick={handleLogin}>Submit</button>
-      {message}
+      <TextField
+        required
+        id="outlined-search"
+        label="Password"
+        type="password"
+        onChange={(e) => setPassword(e.target.value)}
+        sx={{ mt: 1, mb: 1 }}
+      />
+      <Typography variant="body1" color="error">
+        {message}
+      </Typography>
+      <Button
+        onClick={handleLogin}
+        variant="contained"
+        color="warning"
+        sx={{ mt: 1, mb: 1 }}
+      >
+        Submit
+      </Button>
       <NavLink to="/forgot-password" style={{ textDecoration: "none" }}>
-        <button>Forgot password</button>
+        <Button variant="outlined" color="info" sx={{ mt: 1, mb: 1 }}>
+          Forgot password
+        </Button>
       </NavLink>
-    </div>
+    </Box>
   );
 };
 

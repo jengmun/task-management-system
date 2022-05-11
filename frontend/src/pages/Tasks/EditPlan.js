@@ -105,9 +105,7 @@ const Plan = (props) => {
         />
       </td>
       <td>
-        <button className="btn" onClick={handleUpdatePlan}>
-          Update
-        </button>
+        <button onClick={handleUpdatePlan}>Update</button>
       </td>
     </tr>
   );

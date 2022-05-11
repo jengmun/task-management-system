@@ -45,7 +45,7 @@ function App() {
   return (
     <LoginContext.Provider value={{ isLoggedIn, setIsLoggedIn }}>
       <BrowserRouter>
-        <div className="flex flex-row min-h-screen">
+        <div>
           <Nav />
           <Switch>
             <Route exact path="/">

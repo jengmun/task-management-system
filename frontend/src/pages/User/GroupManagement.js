@@ -129,7 +129,6 @@ const GroupManagement = () => {
                     <td>{member.status}</td>
                     <td>
                       <button
-                        className="btn"
                         onClick={() => {
                           handleRemoveMember(member.username, index);
                         }}
@@ -160,7 +159,6 @@ const GroupManagement = () => {
                     <td>{member.status}</td>
                     <td>
                       <button
-                        className="btn"
                         onClick={() => {
                           handleAddMember(member.username, index);
                         }}

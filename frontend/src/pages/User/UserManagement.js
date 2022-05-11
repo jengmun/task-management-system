@@ -67,13 +67,10 @@ const UserManagement = () => {
   return (
     <div>
       <NavLink to="/admin/create-user">
-        <button className="btn">Create New User</button>
+        <button>Create New User</button>
       </NavLink>
       <label>Filter</label>
-      <input
-        onChange={handleFilterUsers}
-        className="input input-bordered input-primary max-w-xs"
-      />
+      <input onChange={handleFilterUsers} />
       <table>
         <thead>
           <tr>
@@ -182,7 +179,6 @@ const User = (props) => {
       <td>
         <input
           value={userData.username}
-          className="input input-bordered input-primary max-w-xs"
           readOnly
           style={{ backgroundColor: readOnly ? "grey" : "white" }}
         />
@@ -190,7 +186,6 @@ const User = (props) => {
       <td>
         <input
           value={reactData.email}
-          className="input input-bordered input-primary max-w-xs"
           readOnly={readOnly}
           style={{ backgroundColor: readOnly ? "grey" : "white" }}
           onChange={(e) => {
@@ -222,7 +217,6 @@ const User = (props) => {
         ) : (
           <input
             type="checkbox"
-            className="toggle toggle-primary"
             checked={reactData.status === "Active" ? true : false}
             onChange={() => {
               if (reactData.status === "Active") {
@@ -235,27 +229,19 @@ const User = (props) => {
         )}
       </td>
       <td>
-        <button
-          className="btn"
-          onClick={handleResetPassword}
-          disabled={passwordReset}
-        >
+        <button onClick={handleResetPassword} disabled={passwordReset}>
           {passwordReset ? "Password resetted" : "Reset password"}
         </button>
       </td>
       <td>
         {readOnly ? (
-          <button className="btn" onClick={handleEditUser}>
-            Edit
-          </button>
+          <button onClick={handleEditUser}>Edit</button>
         ) : (
           <>
-            <button className="btn" onClick={handleUpdateUser}>
+            <button btn onClick={handleUpdateUser}>
               Save
             </button>
-            <button className="btn" onClick={handleCancelChanges}>
-              Cancel
-            </button>
+            <button onClick={handleCancelChanges}>Cancel</button>
           </>
         )}
       </td>

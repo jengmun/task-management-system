@@ -18,20 +18,12 @@ const ResetPassword = () => {
       <h1>Reset password</h1>
 
       <label htmlFor="username">Username</label>
-      <input
-        id="username"
-        name="username"
-        className="input input-bordered input-primary max-w-xs"
-      />
+      <input id="username" name="username" />
 
       <label htmlFor="email">Email</label>
-      <input
-        id="email"
-        name="email"
-        className="input input-bordered input-primary max-w-xs"
-      />
+      <input id="email" name="email" />
 
-      <button className="btn">Submit</button>
+      <button>Submit</button>
       <p>{message}</p>
     </form>
   );

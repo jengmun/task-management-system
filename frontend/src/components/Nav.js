@@ -7,7 +7,7 @@ const Nav = () => {
   const loginContext = useContext(LoginContext);
 
   return (
-    <ul className="prose list-none bg-neutral min-h-full p-5 mr-5">
+    <ul>
       <li>
         <NavButton link="/" text="Home" />
       </li>
@@ -36,7 +36,7 @@ const Nav = () => {
               loginContext.setIsLoggedIn("");
             }}
           >
-            <button className="btn btn-primary">Logout</button>
+            <button>Logout</button>
           </NavLink>
         </li>
       )}
@@ -49,7 +49,7 @@ export default Nav;
 const NavButton = (props) => {
   return (
     <NavLink to={props.link} style={{ textDecoration: "none" }}>
-      <button className="btn btn-primary">{props.text}</button>
+      <button>{props.text}</button>
     </NavLink>
   );
 };

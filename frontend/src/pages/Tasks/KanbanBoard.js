@@ -138,13 +138,13 @@ const KanbanBoard = () => {
       <h1>{app}</h1>
       {isPM && (
         <NavLink to={`/app/${app}/edit-app`}>
-          <button className="btn">Edit app</button>
+          <button>Edit app</button>
         </NavLink>
       )}
       <h2>All Plans:</h2>
       {isPM && (
         <NavLink to={`/app/${app}/edit-plan`}>
-          <button className="btn">Edit plans</button>
+          <button>Edit plans</button>
         </NavLink>
       )}
       {allPlans.map((plan) => {
@@ -152,12 +152,12 @@ const KanbanBoard = () => {
       })}
       {isPM && (
         <NavLink to={`/app/${app}/create-plan`}>
-          <button className="btn">Create Plan</button>
+          <button>Create Plan</button>
         </NavLink>
       )}
       {isLead && (
         <NavLink to={`/app/${app}/create-task`}>
-          <button className="btn">Create Task</button>
+          <button>Create Task</button>
         </NavLink>
       )}
       <Board
@@ -219,13 +219,13 @@ const Card = (props) => {
       {isMember && props.content.state !== "Closed" && (
         <form onSubmit={handleAddNote}>
           <textarea id="notes" name="notes" maxLength="255" required />
-          <button className="btn">Add notes</button>
+          <button>Add notes</button>
         </form>
       )}
 
       {message}
       <NavLink to={`/app/${app}/${props.content.id}/edit-task`}>
-        <button className="btn">View details</button>
+        <button>View details</button>
       </NavLink>
     </div>
   );

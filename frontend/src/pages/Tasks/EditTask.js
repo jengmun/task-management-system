@@ -130,7 +130,7 @@ const EditTask = () => {
                 );
               })}
             </select>
-            <button className="btn">Update task</button>
+            <button>Update task</button>
           </>
         )}
       </form>

@@ -71,7 +71,6 @@ const Profile = () => {
         name="username"
         defaultValue={loginContext.isLoggedIn.username}
         readOnly
-        className="input input-bordered input-primary max-w-xs"
       />
       <h1>Update email information</h1>
 
@@ -80,12 +79,9 @@ const Profile = () => {
         id="update-email"
         name="update-email"
         defaultValue={loginContext.isLoggedIn.email}
-        className="input input-bordered input-primary max-w-xs"
         onChange={(e) => setUpdateEmail(e.target.value)}
       />
-      <button className="btn" onClick={() => handleEmailChange()}>
-        Update
-      </button>
+      <button onClick={() => handleEmailChange()}>Update</button>
       <p>{emailMessage}</p>
       <h1>Change password</h1>
       <label htmlFor="update-password">Password</label>
@@ -93,7 +89,6 @@ const Profile = () => {
         id="update-password"
         name="update-password"
         type="password"
-        className="input input-bordered input-primary max-w-xs"
         onChange={(e) => setChangePassword(e.target.value)}
       />
       <label htmlFor="confirm-password">Re-enter Password</label>
@@ -101,12 +96,9 @@ const Profile = () => {
         id="confirm-password"
         name="confirm-password"
         type="password"
-        className="input input-bordered input-primary max-w-xs"
         onChange={(e) => setConfirmPassword(e.target.value)}
       />
-      <button className="btn" onClick={() => handlePasswordChange()}>
-        Update password
-      </button>
+      <button onClick={() => handlePasswordChange()}>Update password</button>
       <p>{passwordMessage}</p>
     </div>
   );

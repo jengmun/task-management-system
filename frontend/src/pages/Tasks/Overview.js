@@ -45,7 +45,7 @@ const Overview = () => {
     <div>
       {loginContext.isLoggedIn.account_type === "Admin" && (
         <NavLink to="/app/assign-PM">
-          <button className="btn">Assign PM</button>
+          <button>Assign PM</button>
         </NavLink>
       )}
 

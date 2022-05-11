@@ -67,27 +67,11 @@ const CreateUser = () => {
       <form onSubmit={handleSubmit}>
         <h1>Create New User</h1>
         <label htmlFor="username">Username</label>
-        <input
-          id="username"
-          name="username"
-          className="input input-bordered input-primary max-w-xs"
-          required
-        />
+        <input id="username" name="username" required />
         <label htmlFor="password">Password</label>
-        <input
-          id="password"
-          name="password"
-          type="password"
-          className="input input-bordered input-primary max-w-xs"
-          required
-        />
+        <input id="password" name="password" type="password" required />
         <label htmlFor="email">Email</label>
-        <input
-          id="email"
-          name="email"
-          className="input input-bordered input-primary max-w-xs"
-          required
-        />
+        <input id="email" name="email" required />
         <p>Assign group</p>
         <Dropdown
           multi={true}
@@ -95,7 +79,7 @@ const CreateUser = () => {
           closeMenuOnSelect={false}
           callback={setSelectedGroups}
         />
-        <button className="btn">Submit</button>
+        <button>Submit</button>
       </form>
       <p>{message}</p>
     </div>

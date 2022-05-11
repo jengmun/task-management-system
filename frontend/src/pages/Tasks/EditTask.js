@@ -37,14 +37,29 @@ const EditTask = () => {
     console.log(data);
   };
 
+  // ------------- Check if Lead -------------/
+  const [isLead, setIsLead] = useState(false);
+
+  const checkLead = async () => {
+    const data = await handlePostRequest("task/is-group", {
+      group: "Team Lead",
+      acronym: app,
+    });
+    if (data) {
+      setIsLead(data);
+    }
+  };
+
   useEffect(() => {
     fetchTaskDetails();
     fetchAllNotes();
     fetchAllPlans();
+    checkLead();
   }, []);
 
   // ------------- Update task details -------------
 
+  const [readOnly, setReadOnly] = useState(true);
   const [message, setMessage] = useState("");
 
   const handleTaskUpdate = async (e) => {
@@ -59,6 +74,16 @@ const EditTask = () => {
     setMessage(data);
     fetchAllNotes();
   };
+
+  const setPermissions = () => {
+    if (isLead && taskDetails.state === "Open") {
+      setReadOnly(false);
+    }
+  };
+
+  useEffect(() => {
+    setPermissions();
+  }, [isLead, taskDetails]);
 
   return (
     <div>
@@ -78,26 +103,36 @@ const EditTask = () => {
           defaultValue={taskDetails.description}
           id="description"
           name="description"
+          readOnly={readOnly}
         />
-        <label htmlFor="planName">Plan Name</label>
-        <select id="planName" name="planName">
-          <option value="null" selected={taskDetails.plan_name ? true : false}>
-            No plan
-          </option>
-          {allPlans.map((plan) => {
-            return (
+        {readOnly ? (
+          <h5>Plan Name: {taskDetails.plan_name}</h5>
+        ) : (
+          <>
+            <label htmlFor="planName">Plan Name</label>
+            <select id="planName" name="planName">
               <option
-                selected={
-                  plan.plan_name === taskDetails.plan_name ? true : false
-                }
-                value={plan.plan_name}
+                value="null"
+                selected={taskDetails.plan_name ? true : false}
               >
-                {plan.plan_name}
+                No plan
               </option>
-            );
-          })}
-        </select>
-        <button className="btn">Update task</button>
+              {allPlans.map((plan) => {
+                return (
+                  <option
+                    selected={
+                      plan.plan_name === taskDetails.plan_name ? true : false
+                    }
+                    value={plan.plan_name}
+                  >
+                    {plan.plan_name}
+                  </option>
+                );
+              })}
+            </select>
+            <button className="btn">Update task</button>
+          </>
+        )}
       </form>
       {message}
       {allNotes.map((note) => {

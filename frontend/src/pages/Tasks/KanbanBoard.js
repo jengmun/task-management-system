@@ -80,7 +80,6 @@ const KanbanBoard = () => {
           title: numOfCards[i].task_name,
           description: numOfCards[i].description,
           planName: numOfCards[i].plan_name,
-          isLead: isLead,
           state: numOfCards[i].state,
           creator: numOfCards[i].creator,
           owner: numOfCards[i].owner,
@@ -99,7 +98,7 @@ const KanbanBoard = () => {
 
   useEffect(() => {
     createBoard();
-  }, [allTasks, isLead]);
+  }, [allTasks]);
 
   const handleCardMove = async (card, source, destination) => {
     let data;
@@ -217,7 +216,7 @@ const Card = (props) => {
       <h4>{props.content.title}</h4>
       <h5>Plan: {props.content.planName}</h5>
       <h5>{props.content.description}</h5>
-      {isMember && (
+      {isMember && props.content.state !== "Closed" && (
         <form onSubmit={handleAddNote}>
           <textarea id="notes" name="notes" maxLength="255" required />
           <button className="btn">Add notes</button>
@@ -225,11 +224,9 @@ const Card = (props) => {
       )}
 
       {message}
-      {props.content.isLead && props.content.state === "Open" && (
-        <NavLink to={`/app/${app}/${props.content.id}/edit-task`}>
-          <button className="btn">Edit task</button>
-        </NavLink>
-      )}
+      <NavLink to={`/app/${app}/${props.content.id}/edit-task`}>
+        <button className="btn">View details</button>
+      </NavLink>
     </div>
   );
 };

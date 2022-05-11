@@ -482,8 +482,12 @@ exports.createNotes = async (req, res, next) => {
   }
 
   let { details, taskID } = req.body;
-
   const state = await checkState(taskID);
+
+  if (state === "Closed") {
+    res.json("Task is closed!");
+    return;
+  }
 
   if (!taskID) {
     taskID = req.params.task;

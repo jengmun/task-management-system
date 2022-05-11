@@ -30,9 +30,8 @@ const CreateTask = () => {
       acronym: app,
       taskName: e.target.taskName.value,
       description: e.target.description.value,
-      notes: e.target.notes.value,
+      details: e.target.notes.value,
       planName: e.target.planName.value,
-      username: "1",
     });
     setMessage(data);
 

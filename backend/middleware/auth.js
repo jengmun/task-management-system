@@ -51,7 +51,7 @@ const checkApplicationAccess = async (req, res, next) => {
     app = task.slice(0, 3);
   }
 
-  const isMember = new Promise((resolve) => {
+  const isMember = await new Promise((resolve) => {
     db.query(
       "SELECT * FROM accounts_groups WHERE username = ? AND acronym = ?",
       [req.session.username, app],
@@ -68,10 +68,21 @@ const checkApplicationAccess = async (req, res, next) => {
     );
   });
 
-  if (isMember) {
+  req.isMember = isMember;
+
+  console.log(isMember);
+
+  const isAdmin = await checkGroup(
+    "accounts",
+    req.session.username,
+    "account_type",
+    "Admin"
+  );
+
+  if (isMember || isAdmin) {
     next();
   } else {
-    res.json("Not a team member of this application!");
+    res.json(false);
   }
 };
 

@@ -7,11 +7,15 @@ import handlePostRequest from "../../hooks/handlePostRequest";
 
 const KanbanBoard = () => {
   const { app } = useParams();
+
+  // ------------- Fetch all tasks -------------
   const [allTasks, setAllTasks] = useState([]);
 
   const fetchTasks = async () => {
     const data = await handleGetRequest(`task/all-tasks/${app}`);
-    setAllTasks(data);
+    if (data) {
+      setAllTasks(data);
+    }
   };
 
   // ------------- Fetch all plans -------------
@@ -78,6 +82,8 @@ const KanbanBoard = () => {
           planName: numOfCards[i].plan_name,
           isLead: isLead,
           state: numOfCards[i].state,
+          creator: numOfCards[i].creator,
+          owner: numOfCards[i].owner,
         });
       }
       columns.push({ id, title, cards });
@@ -115,12 +121,9 @@ const KanbanBoard = () => {
       });
     }
 
-    if (data === "Insufficient permissions") {
-      return;
-    }
     console.log(data);
 
-    if (data !== "Task updated") {
+    if (data !== "Added note") {
       return;
     }
     // ------------- Update Board -------------
@@ -176,6 +179,20 @@ const Card = (props) => {
 
   const [message, setMessage] = useState("");
 
+  // ------------- Check if Member -------------/
+  const [isMember, setIsMember] = useState(false);
+
+  const checkMember = async () => {
+    const data = await handleGetRequest(`task/is-member/${app}`);
+    if (data) {
+      setIsMember(data);
+    }
+  };
+
+  useEffect(() => {
+    checkMember();
+  }, []);
+
   const handleAddNote = async (e) => {
     e.preventDefault();
     const data = await handlePostRequest(
@@ -183,6 +200,7 @@ const Card = (props) => {
       {
         taskID: props.content.id,
         details: e.target.notes.value,
+        acronym: app,
       }
     );
 
@@ -199,10 +217,13 @@ const Card = (props) => {
       <h4>{props.content.title}</h4>
       <h5>Plan: {props.content.planName}</h5>
       <h5>{props.content.description}</h5>
-      <form onSubmit={handleAddNote}>
-        <textarea id="notes" name="notes" maxLength="255" required />
-        <button className="btn">Add notes</button>
-      </form>
+      {isMember && (
+        <form onSubmit={handleAddNote}>
+          <textarea id="notes" name="notes" maxLength="255" required />
+          <button className="btn">Add notes</button>
+        </form>
+      )}
+
       {message}
       {props.content.isLead && props.content.state === "Open" && (
         <NavLink to={`/app/${app}/${props.content.id}/edit-task`}>

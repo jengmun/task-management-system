@@ -19,6 +19,7 @@ const {
   updateApp,
   userApplications,
   isGroup,
+  isMember,
 } = require("../controllers/taskController");
 const {
   checkAdmin,
@@ -28,6 +29,7 @@ const {
 } = require("../middleware/auth");
 
 // ================= APPLICATIONS ================= //
+
 router.post("/create-app", checkPM, createApplication);
 
 router.get("/all-apps", checkAdmin, allApplications);
@@ -50,7 +52,7 @@ router.post("/update-plan/:app", checkPM, updatePlan);
 
 // ================= TASKS ================= //
 
-router.post("/create-task", checkTaskPermissions, createTask);
+router.post("/create-task", checkTaskPermissions, createTask, createNotes);
 
 router.get("/all-tasks/:app", checkApplicationAccess, allAppTasks);
 
@@ -79,6 +81,9 @@ router.post("/create-notes/:task", checkApplicationAccess, createNotes);
 router.get("/all-notes/:task", checkApplicationAccess, allNotes);
 
 // ================= AUTH ================= //
+
+router.get("/is-member/:app", checkApplicationAccess, isMember);
+
 router.post("/is-group", isGroup);
 
 module.exports = router;

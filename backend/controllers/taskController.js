@@ -177,7 +177,8 @@ exports.createTask = async (req, res, next) => {
             if (err) {
               next(err);
             } else {
-              res.json("Task created");
+              req.body.taskID = `${req.body.acronym.toUpperCase()}_${runningNumber}`;
+              next();
             }
           }
         );
@@ -411,19 +412,6 @@ exports.taskStateProgression = async (req, res, next) => {
     }
   );
 
-  // Update owner of task
-  if (newState === "Doing") {
-    db.query("UPDATE tasks SET owner = ? WHERE task_id = ?", [
-      req.session.username,
-      taskID,
-    ]),
-      (err, results) => {
-        if (err) {
-          return next(err);
-        }
-      };
-  }
-
   const teamLeads = await new Promise((resolve) => {
     db.query(
       "SELECT accounts_groups.username, email FROM accounts_groups INNER JOIN accounts on accounts_groups.username = accounts.username WHERE acronym = ? AND group_name = 'Team Lead'",
@@ -455,6 +443,7 @@ exports.taskStateRegression = async (req, res, next) => {
 
   const currentState = await checkState(taskID);
 
+  // Only can demote from Done to Doing and Doing to Todo
   if (currentState !== "Doing" && currentState !== "Done") {
     res.json("State can't be demoted!");
     return;
@@ -487,13 +476,18 @@ exports.taskStateRegression = async (req, res, next) => {
 };
 
 exports.createNotes = async (req, res, next) => {
+  if (req.isMember === false) {
+    res.json("Not a member");
+    return;
+  }
+
   let { details, taskID } = req.body;
+
+  const state = await checkState(taskID);
 
   if (!taskID) {
     taskID = req.params.task;
   }
-
-  const state = await checkState(taskID);
 
   const runningNumber = await new Promise((resolve) => {
     db.query(
@@ -512,6 +506,18 @@ exports.createNotes = async (req, res, next) => {
     );
   });
 
+  if (state === "Doing") {
+    db.query("UPDATE tasks SET owner = ? WHERE task_id = ?", [
+      req.session.username,
+      taskID,
+    ]),
+      (err, results) => {
+        if (err) {
+          return next(err);
+        }
+      };
+  }
+
   db.query(
     "INSERT INTO notes (notes_id, running_number, details, creator, state, task_id) VALUES (?, ?, ?, ?, ?, ?)",
     [
@@ -526,7 +532,7 @@ exports.createNotes = async (req, res, next) => {
       if (err) {
         return next(err);
       }
-      res.json("Task updated");
+      res.json("Added note");
     }
   );
 };
@@ -557,4 +563,8 @@ exports.isGroup = async (req, res, next) => {
   } else {
     res.json(false);
   }
+};
+
+exports.isMember = async (req, res, next) => {
+  res.json(req.isMember);
 };

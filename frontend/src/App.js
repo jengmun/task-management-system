@@ -98,13 +98,11 @@ function App() {
                   component={EditTask}
                   permission="Lead"
                 />
-
                 <PermissionsRoute
                   path="/app/:app"
                   component={KanbanBoard}
                   permission="All"
                 />
-                {/* <Route path="/app/:app" component={KanbanBoard} /> */}
 
                 {/* ADMIN ROUTES */}
                 <AdminRoute

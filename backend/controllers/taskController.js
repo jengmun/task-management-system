@@ -95,7 +95,7 @@ exports.updateApp = (req, res, next) => {
 
 exports.createPlan = (req, res, next) => {
   db.query(
-    "INSERT INTO plans VALUES (?, ?, ?, ?)",
+    "INSERT INTO plans (plan_name, start_date, end_date, acronym) VALUES (?, ?, ?, ?)",
     [req.body.planName, req.body.startDate, req.body.endDate, req.body.acronym],
     (err, results) => {
       if (err) {

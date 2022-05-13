@@ -4,9 +4,35 @@ import { useEffect, useState } from "react";
 import { NavLink, useParams } from "react-router-dom";
 import handleGetRequest from "../../hooks/handleGetRequest";
 import handlePostRequest from "../../hooks/handlePostRequest";
+import EditTask from "./EditTask";
+import { useTheme } from "@mui/material/styles";
+import {
+  Box,
+  Button,
+  Typography,
+  Card,
+  Modal,
+  Chip,
+  Table,
+  TableHead,
+  TableRow,
+  TableBody,
+  TableCell,
+} from "@mui/material";
+import "./kanban.css";
 
 const KanbanBoard = () => {
   const { app } = useParams();
+
+  // ------------- Fetch app details -------------
+  const [appDetails, setAppDetails] = useState([]);
+
+  const fetchAppDetails = async () => {
+    const data = await handleGetRequest(`task/apps/${app}`);
+    if (data) {
+      setAppDetails(data);
+    }
+  };
 
   // ------------- Fetch all tasks -------------
   const [allTasks, setAllTasks] = useState([]);
@@ -54,6 +80,7 @@ const KanbanBoard = () => {
   };
 
   useEffect(() => {
+    fetchAppDetails();
     fetchTasks();
     fetchAllPlans();
     checkPM();
@@ -83,6 +110,7 @@ const KanbanBoard = () => {
           state: numOfCards[i].state,
           creator: numOfCards[i].creator,
           owner: numOfCards[i].owner,
+          isLead: isLead,
         });
       }
       columns.push({ id, title, cards });
@@ -98,7 +126,7 @@ const KanbanBoard = () => {
 
   useEffect(() => {
     createBoard();
-  }, [allTasks]);
+  }, [allTasks, isLead]);
 
   const handleCardMove = async (card, source, destination) => {
     let data;
@@ -131,102 +159,167 @@ const KanbanBoard = () => {
   };
 
   return (
-    <div>
-      <NavLink to={`/`}>
-        <button>Back</button>
+    <Box>
+      <NavLink to={`/`} style={{ textDecoration: "none" }}>
+        <Button>Back</Button>
       </NavLink>
-      <h1>{app}</h1>
-      {isPM && (
-        <NavLink to={`/app/${app}/edit-app`}>
-          <button>Edit app</button>
-        </NavLink>
-      )}
-      <h2>All Plans:</h2>
-      {isPM && (
-        <NavLink to={`/app/${app}/edit-plan`}>
-          <button>Edit plans</button>
-        </NavLink>
-      )}
-      {allPlans.map((plan) => {
-        return <h5 key={plan.plan_name}>{plan.plan_name}</h5>;
-      })}
-      {isPM && (
-        <NavLink to={`/app/${app}/create-plan`}>
-          <button>Create Plan</button>
-        </NavLink>
-      )}
+      <Typography variant="h2" sx={{ textAlign: "center" }}>
+        {app}
+      </Typography>
+      <Typography variant="body2" sx={{ textAlign: "center" }}>
+        {`${appDetails.start_date?.slice(0, 10)} -
+        ${appDetails.end_date?.slice(0, 10)}`}
+      </Typography>
+      <Typography variant="body1" sx={{ textAlign: "center" }}>
+        {appDetails.description}
+      </Typography>
+
+      {/* ------------- APP ------------- */}
+      <div style={{ textAlign: "center" }}>
+        {isPM && (
+          <NavLink
+            to={`/app/${app}/edit-app`}
+            style={{ textDecoration: "none" }}
+          >
+            <Button>Edit app</Button>
+          </NavLink>
+        )}
+
+        <Typography variant="h5">Permissions</Typography>
+        <Table>
+          <TableHead>
+            <TableRow>
+              <TableCell>Create</TableCell>
+              <TableCell>Open</TableCell>
+              <TableCell>Todo</TableCell>
+              <TableCell>Doing</TableCell>
+              <TableCell>Done</TableCell>
+            </TableRow>
+          </TableHead>
+          <TableBody>
+            <TableRow>
+              <TableCell sx={{ border: "none" }}>
+                <Typography variant="body1">
+                  {appDetails.permit_create}
+                </Typography>
+              </TableCell>
+              <TableCell sx={{ border: "none" }}>
+                <Typography variant="body1">
+                  {appDetails.permit_open}
+                </Typography>
+              </TableCell>
+              <TableCell sx={{ border: "none" }}>
+                <Typography variant="body1">
+                  {appDetails.permit_todo}
+                </Typography>
+              </TableCell>
+              <TableCell sx={{ border: "none" }}>
+                <Typography variant="body1">
+                  {appDetails.permit_doing}
+                </Typography>
+              </TableCell>
+              <TableCell sx={{ border: "none" }}>
+                <Typography variant="body1">
+                  {appDetails.permit_done}
+                </Typography>
+              </TableCell>
+            </TableRow>
+          </TableBody>
+        </Table>
+      </div>
+
+      {/* ------------- PLANS ------------- */}
+      <div
+        style={{
+          textAlign: "center",
+          flexDirection: "column",
+          width: "15vw",
+          position: "absolute",
+          left: 0,
+        }}
+      >
+        <Typography variant="h5">Plans</Typography>
+        {isPM && (
+          <Box>
+            <NavLink
+              to={`/app/${app}/create-plan`}
+              style={{ textDecoration: "none" }}
+            >
+              <Button>Create Plan</Button>
+            </NavLink>
+            <NavLink
+              to={`/app/${app}/edit-plan`}
+              style={{ textDecoration: "none" }}
+            >
+              <Button>Edit plans</Button>
+            </NavLink>
+          </Box>
+        )}
+        <Box
+          sx={{
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+          }}
+        >
+          {allPlans.map((plan) => {
+            return <Chip label={plan.plan_name} />;
+          })}
+        </Box>
+      </div>
+      {/* ------------- TASKS ------------- */}
       {isLead && (
-        <NavLink to={`/app/${app}/create-task`}>
-          <button>Create Task</button>
+        <NavLink
+          to={`/app/${app}/create-task`}
+          style={{ textDecoration: "none" }}
+        >
+          <Button>Create Task</Button>
         </NavLink>
       )}
       <Board
-        renderCard={(content) => <Card content={content} />}
+        renderCard={(content) => <TaskCard content={content} />}
         onCardDragEnd={handleCardMove}
         disableColumnDrag
       >
         {board}
       </Board>
-    </div>
+    </Box>
   );
 };
 
 export default KanbanBoard;
 
-const Card = (props) => {
+const TaskCard = (props) => {
   const { app } = useParams();
 
-  const [message, setMessage] = useState("");
-
-  // ------------- Check if Member -------------/
-  const [isMember, setIsMember] = useState(false);
-
-  const checkMember = async () => {
-    const data = await handleGetRequest(`task/is-member/${app}`);
-    if (data) {
-      setIsMember(data);
-    }
-  };
-
-  useEffect(() => {
-    checkMember();
-  }, []);
-
-  const handleAddNote = async (e) => {
-    e.preventDefault();
-    const data = await handlePostRequest(
-      `task/create-notes/${props.content.id}`,
-      {
-        taskID: props.content.id,
-        details: e.target.notes.value,
-        acronym: app,
-      }
-    );
-
-    if (data !== "Added note") {
-      setMessage("Note could not be added. ");
-    } else {
-      setMessage(data);
-      e.target.notes.value = "";
-    }
-  };
+  const [open, setOpen] = useState(false);
 
   return (
-    <div>
-      <h4>{props.content.title}</h4>
-      <h5>Plan: {props.content.planName}</h5>
-      <h5>{props.content.description}</h5>
-      {isMember && props.content.state !== "Closed" && (
-        <form onSubmit={handleAddNote}>
-          <textarea id="notes" name="notes" maxLength="255" required />
-          <button>Add notes</button>
-        </form>
-      )}
-
-      {message}
-      <NavLink to={`/app/${app}/${props.content.id}/edit-task`}>
-        <button>View details</button>
-      </NavLink>
-    </div>
+    <Card sx={{ p: 2, mt: 2, width: "100%" }}>
+      <Box
+        onClick={() => {
+          setOpen(true);
+        }}
+      >
+        <Typography variant="h6">{props.content.title}</Typography>
+        <Typography variant="body1">Plan: {props.content.planName}</Typography>
+        <Typography variant="body1">{props.content.description}</Typography>
+      </Box>
+      <Modal
+        open={open}
+        onClose={() => {
+          setOpen(false);
+        }}
+      >
+        <EditTask
+          app={app}
+          task={props.content.id}
+          isLead={props.content.isLead}
+          setClose={() => {
+            setOpen(false);
+          }}
+        />
+      </Modal>
+    </Card>
   );
 };

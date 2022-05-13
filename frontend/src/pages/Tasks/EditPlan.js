@@ -31,6 +31,7 @@ const EditPlan = () => {
             <th>Plan Name</th>
             <th>Start Date</th>
             <th>End Date</th>
+            <th>Status</th>
           </tr>
         </thead>
         <tbody>
@@ -54,6 +55,8 @@ const Plan = (props) => {
     endDate: props.plan.end_date.slice(0, 10),
   });
 
+  const [message, setMessage] = useState("");
+
   const handleUpdatePlan = async (e) => {
     e.preventDefault();
 
@@ -63,7 +66,21 @@ const Plan = (props) => {
       endDate: input.endDate,
       currentPlan: props.plan.plan_name,
     });
-    // console.log(data);
+    setMessage(data);
+  };
+
+  const handleUpdatePlanStatus = async () => {
+    if (props.plan.status === "Closed") {
+      setMessage("Status is already closed!");
+    }
+
+    const data = await handlePostRequest(`task/update-plan-status/${app}`, {
+      planName: input.planName,
+    });
+    if (data === "Plan status updated") {
+      props.plan.status = "Closed";
+    }
+    setMessage(data);
   };
 
   const [startDate, setStartDate] = useState("");
@@ -105,8 +122,16 @@ const Plan = (props) => {
         />
       </td>
       <td>
+        {props.plan.status ? (
+          props.plan.status
+        ) : (
+          <button onClick={handleUpdatePlanStatus}>Close Plan</button>
+        )}
+      </td>
+      <td>
         <button onClick={handleUpdatePlan}>Update</button>
       </td>
+      {message}
     </tr>
   );
 };

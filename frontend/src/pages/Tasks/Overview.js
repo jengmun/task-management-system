@@ -46,22 +46,35 @@ const Overview = () => {
   const theme = useTheme();
 
   return (
-    <Box>
-      {loginContext.isLoggedIn.account_type === "Admin" && (
-        <NavLink to="/app/assign-PM" style={{ textDecoration: "none " }}>
-          <Button variant="contained">Assign PM</Button>
-        </NavLink>
-      )}
+    <Box sx={{ p: 2 }}>
+      <Box
+        sx={{
+          display: "flex",
+          alignItems: "center",
+        }}
+      >
+        <Typography variant="h1">Applications</Typography>
+        {loginContext.isLoggedIn.account_type === "Admin" && (
+          <NavLink to="/app/assign-PM" style={{ textDecoration: "none " }}>
+            <Button variant="contained" sx={{ ml: 2 }} color="warning">
+              Assign PM
+            </Button>
+          </NavLink>
+        )}
 
-      {isPM && (
-        <NavLink to="/app/create-app" style={{ textDecoration: "none " }}>
-          <Button>Create App</Button>
-        </NavLink>
-      )}
+        {isPM && (
+          <NavLink to="/app/create-app" style={{ textDecoration: "none " }}>
+            <Button sx={{ ml: 2 }} variant="contained" color="warning">
+              Create App
+            </Button>
+          </NavLink>
+        )}
+      </Box>
       <Box sx={{ display: "flex" }}>
         {allApps.map((app) => {
           return (
             <NavLink
+              key={app.acronym}
               to={`/app/${app.acronym}`}
               style={{ textDecoration: "none" }}
             >
@@ -70,12 +83,20 @@ const Overview = () => {
                   width: "200px",
                   height: "150px",
                   p: 2,
-                  m: 2,
+                  mr: 2,
+                  mt: 2,
                   borderRadius: "10px",
                   backgroundColor: theme.palette.primary.main,
+                  display: "flex",
+                  justifyContent: "center",
                 }}
               >
-                <Typography>{app.acronym}</Typography>
+                <Typography
+                  variant="h4"
+                  sx={{ display: "flex", alignItems: "center" }}
+                >
+                  {app.acronym}
+                </Typography>
               </Box>
             </NavLink>
           );

@@ -1,10 +1,25 @@
 import { useState, useEffect } from "react";
-import { NavLink, useParams } from "react-router-dom";
 import handleGetRequest from "../../hooks/handleGetRequest";
 import handlePostRequest from "../../hooks/handlePostRequest";
+import {
+  Button,
+  Typography,
+  TextareaAutosize,
+  Chip,
+  Card,
+  Box,
+  Accordion,
+  AccordionSummary,
+  AccordionDetails,
+  Table,
+  TableHead,
+  TableRow,
+  TableBody,
+  TableCell,
+} from "@mui/material";
 
-const EditTask = () => {
-  const { app, task } = useParams();
+const EditTask = (props) => {
+  const { app, task, isLead, setClose } = props;
 
   // ------------- Fetch task details -------------
   const [taskDetails, setTaskDetails] = useState([]);
@@ -37,16 +52,13 @@ const EditTask = () => {
     console.log(data);
   };
 
-  // ------------- Check if Lead -------------/
-  const [isLead, setIsLead] = useState(false);
+  // ------------- Check if Member -------------/
+  const [isMember, setIsMember] = useState(false);
 
-  const checkLead = async () => {
-    const data = await handlePostRequest("task/is-group", {
-      group: "Team Lead",
-      acronym: app,
-    });
+  const checkMember = async () => {
+    const data = await handleGetRequest(`task/is-member/${app}`);
     if (data) {
-      setIsLead(data);
+      setIsMember(data);
     }
   };
 
@@ -54,7 +66,7 @@ const EditTask = () => {
     fetchTaskDetails();
     fetchAllNotes();
     fetchAllPlans();
-    checkLead();
+    checkMember();
   }, []);
 
   // ------------- Update task details -------------
@@ -83,32 +95,95 @@ const EditTask = () => {
 
   useEffect(() => {
     setPermissions();
-  }, [isLead, taskDetails]);
+  }, [taskDetails]);
+
+  const [notesMessage, setNotesMessage] = useState("");
+
+  const handleAddNote = async (e) => {
+    e.preventDefault();
+    const data = await handlePostRequest(`task/create-notes/${task}`, {
+      taskID: task,
+      details: e.target.notes.value,
+      acronym: app,
+    });
+    if (data !== "Added note") {
+      setNotesMessage(data);
+    } else {
+      setNotesMessage(data);
+      e.target.notes.value = "";
+      fetchAllNotes();
+    }
+  };
 
   return (
-    <div>
-      <NavLink to={`/app/${app}`}>
-        <button>Back</button>
-      </NavLink>
-      Task Name: {taskDetails.task_name}
-      Task ID: {taskDetails.task_id}
-      Application: {taskDetails.acronym}
-      State: {taskDetails.state}
-      Created by: {taskDetails.creator}
-      Created date: {taskDetails.create_date}
-      Task owner: {taskDetails.owner}
+    <Card
+      sx={{
+        width: "80vw",
+        height: "90vh",
+        position: "absolute",
+        left: "10vw",
+        top: "4vh",
+        overflow: "scroll",
+        p: 1,
+      }}
+    >
+      <Typography variant="h2" sx={{ textAlign: "center" }}>
+        Task - {taskDetails.task_name}
+      </Typography>
+
+      <Table>
+        <TableHead>
+          <TableRow>
+            <TableCell>Task ID</TableCell>
+            <TableCell>Application</TableCell>
+            <TableCell>State</TableCell>
+            <TableCell>Creator</TableCell>
+            <TableCell>Date Created</TableCell>
+            <TableCell>Owner</TableCell>
+          </TableRow>
+        </TableHead>
+        <TableBody>
+          <TableRow>
+            <TableCell sx={{ border: "none" }}>
+              <Chip label={taskDetails.task_id} />
+            </TableCell>
+            <TableCell sx={{ border: "none" }}>
+              <Chip label={taskDetails.acronym} />
+            </TableCell>
+            <TableCell sx={{ border: "none" }}>
+              <Chip label={taskDetails.state} />
+            </TableCell>
+            <TableCell sx={{ border: "none" }}>
+              <Chip label={taskDetails.creator} />
+            </TableCell>
+            <TableCell sx={{ border: "none" }}>
+              <Chip label={taskDetails.create_date?.slice(0, 10)} />
+            </TableCell>
+            <TableCell sx={{ border: "none" }}>
+              <Chip label={taskDetails.owner ? taskDetails.owner : "N/A"} />
+            </TableCell>
+          </TableRow>
+        </TableBody>
+      </Table>
+
       <form onSubmit={handleTaskUpdate}>
-        <label htmlFor="description">Description</label>
-        <textarea
-          defaultValue={taskDetails.description}
-          id="description"
-          name="description"
-          readOnly={readOnly}
-        />
         {readOnly ? (
-          <h5>Plan Name: {taskDetails.plan_name}</h5>
+          <>
+            <Typography variant="body1">
+              Description: {taskDetails.description}
+            </Typography>
+            <Typography variant="body1">
+              Plan Name: {taskDetails.plan_name}
+            </Typography>
+          </>
         ) : (
           <>
+            <TextareaAutosize
+              id="description"
+              defaultValue={taskDetails.description}
+              maxLength="255"
+              minRows={2}
+            />
             <label htmlFor="planName">Plan Name</label>
             <select id="planName" name="planName">
               <option
@@ -130,23 +205,38 @@ const EditTask = () => {
                 );
               })}
             </select>
-            <button>Update task</button>
+            <Button type="submit">Update task</Button>
           </>
         )}
       </form>
       {message}
+      {isMember && taskDetails.state !== "Closed" && (
+        <form
+          onSubmit={handleAddNote}
+          style={{ display: "flex", flexDirection: "column" }}
+        >
+          <TextareaAutosize id="notes" maxLength="255" minRows={2} required />
+          <Button type="submit">Add notes</Button>
+        </form>
+      )}
+      <Typography variant="body2">{notesMessage}</Typography>
       {allNotes.map((note) => {
         return (
-          <div>
-            <h5>Note ID: {note.notes_id}</h5>
-            <h5>Description: {note.details}</h5>
-            <h5>Author: {note.creator}</h5>
-            <h5>Date: {note.date}</h5>
-            <h5>Current State: {note.state}</h5>
-          </div>
+          <Accordion>
+            <AccordionSummary>
+              <Typography variant="body1">{note.details}</Typography>
+              <Typography variant="body1">{note.date.slice(0, 10)}</Typography>
+            </AccordionSummary>
+            <AccordionDetails>
+              <Typography variant="body1">Author: {note.creator}</Typography>
+              <Typography variant="body1">
+                Current State: {note.state}
+              </Typography>
+            </AccordionDetails>
+          </Accordion>
         );
       })}
-    </div>
+    </Card>
   );
 };
 

@@ -109,7 +109,7 @@ exports.createPlan = (req, res, next) => {
 
 exports.updatePlan = (req, res, next) => {
   db.query(
-    "UPDATE plans SET plan_name = ?, start_date = ?, end_date = ? WHERE plan_name = ?",
+    "UPDATE plans SET plan_name = ?, start_date = ?, end_date = ? WHERE plan_name = ? AND status IS NULL",
     [
       req.body.planName,
       req.body.startDate,
@@ -120,10 +120,50 @@ exports.updatePlan = (req, res, next) => {
       if (err) {
         next(err);
       } else {
-        res.json("Plan updated");
+        if (result.affectedRows) {
+          res.json("Plan updated");
+        } else {
+          res.json("No open plan found!");
+        }
       }
     }
   );
+};
+
+exports.updatePlanStatus = async (req, res, next) => {
+  const allTasksClosed = await new Promise((resolve) => {
+    db.query(
+      "SELECT task_id FROM tasks WHERE plan_name = ? AND acronym = ? AND state != 'Closed'",
+      [req.body.planName, req.params.app],
+      (err, results) => {
+        if (err) {
+          next(err);
+        } else if (results.length) {
+          resolve(false);
+        } else {
+          resolve(true);
+        }
+      }
+    );
+  });
+
+  console.log("allTaskClosed", allTasksClosed);
+
+  if (allTasksClosed) {
+    db.query(
+      "UPDATE plans SET status = 'Closed' WHERE plan_name = ?",
+      [req.body.planName],
+      (err, result) => {
+        if (err) {
+          next(err);
+        } else {
+          res.json("Plan status updated");
+        }
+      }
+    );
+  } else {
+    res.json("There are pending open tasks");
+  }
 };
 
 exports.allPlans = (req, res, next) => {
@@ -140,7 +180,46 @@ exports.allPlans = (req, res, next) => {
   );
 };
 
+exports.allOpenPlans = (req, res, next) => {
+  db.query(
+    `SELECT * FROM plans WHERE acronym = ? AND status IS NULL`,
+    req.params.app,
+    (err, result) => {
+      if (err) {
+        next(err);
+      } else {
+        res.json(result);
+      }
+    }
+  );
+};
+
 exports.createTask = async (req, res, next) => {
+  if (req.body.planName) {
+    const validPlan = await new Promise((resolve) => {
+      db.query(
+        `SELECT plan_name FROM plans WHERE acronym = ? AND plan_name = ? AND status IS NULL`,
+        [req.body.acronym, req.body.planName],
+        (err, result) => {
+          if (err) {
+            next(err);
+          } else {
+            if (result.length) {
+              resolve(true);
+            } else {
+              resolve(false);
+            }
+          }
+        }
+      );
+    });
+
+    if (!validPlan) {
+      res.json("No valid open plan found!");
+      return;
+    }
+  }
+
   const runningNumber = await new Promise((resolve, reject) => {
     db.query(
       "SELECT running_number FROM applications WHERE acronym = ?",
@@ -294,7 +373,7 @@ exports.updateTask = async (req, res, next) => {
   if (planName !== "null") {
     const validPlan = await new Promise((resolve) => {
       db.query(
-        `SELECT plan_name FROM plans WHERE acronym = ? AND plan_name = ?`,
+        `SELECT plan_name FROM plans WHERE acronym = ? AND plan_name = ? AND status IS NULL`,
         [taskID.slice(0, 3), planName],
         (err, result) => {
           if (err) {
@@ -311,7 +390,7 @@ exports.updateTask = async (req, res, next) => {
     });
 
     if (!validPlan) {
-      res.json("Invalid plan selected");
+      res.json("Invalid plan selected or plan is closed!");
       return;
     }
   } else {
@@ -489,26 +568,14 @@ exports.createNotes = async (req, res, next) => {
     return;
   }
 
+  if (!details) {
+    res.json("Please enter some notes");
+    return;
+  }
+
   if (!taskID) {
     taskID = req.params.task;
   }
-
-  const runningNumber = await new Promise((resolve) => {
-    db.query(
-      "SELECT running_number FROM notes WHERE task_id = ?",
-      taskID,
-      (err, results) => {
-        if (err) {
-          return next(err);
-        }
-        if (results.length) {
-          resolve(results[results.length - 1].running_number + 1);
-        } else {
-          resolve(1);
-        }
-      }
-    );
-  });
 
   if (state === "Doing") {
     db.query("UPDATE tasks SET owner = ? WHERE task_id = ?", [
@@ -522,16 +589,38 @@ exports.createNotes = async (req, res, next) => {
       };
   }
 
-  db.query(
-    "INSERT INTO notes (notes_id, running_number, details, creator, state, task_id) VALUES (?, ?, ?, ?, ?, ?)",
-    [
-      `${taskID}_${runningNumber}`,
-      runningNumber,
-      details,
-      req.session.username,
-      state,
+  const existingNotes = await new Promise((resolve) => {
+    db.query(
+      "SELECT notes FROM tasks WHERE task_id = ?",
       taskID,
-    ],
+      (err, results) => {
+        if (err) {
+          return next();
+        } else {
+          resolve(results[0].notes);
+        }
+      }
+    );
+  });
+
+  const parsedNotes = JSON.parse(existingNotes);
+  let newNotes = [];
+  const date = new Date().toISOString();
+
+  if (existingNotes) {
+    newNotes = [
+      { details, date, creator: req.session.username, state, taskID },
+      ...parsedNotes,
+    ];
+  } else {
+    newNotes = [
+      { details, date, creator: req.session.username, state, taskID },
+    ];
+  }
+
+  db.query(
+    "UPDATE tasks SET notes = ? WHERE task_id = ?",
+    [JSON.stringify(newNotes), taskID],
     (err, results) => {
       if (err) {
         return next(err);
@@ -543,12 +632,16 @@ exports.createNotes = async (req, res, next) => {
 
 exports.allNotes = (req, res, next) => {
   const taskID = req.params.task;
-  db.query("SELECT * FROM notes WHERE task_id = ?", taskID, (err, results) => {
-    if (err) {
-      return next(err);
+  db.query(
+    "SELECT notes FROM tasks WHERE task_id = ?",
+    taskID,
+    (err, results) => {
+      if (err) {
+        return next(err);
+      }
+      res.json(JSON.parse(results[0].notes));
     }
-    res.json(results);
-  });
+  );
 };
 
 exports.isGroup = async (req, res, next) => {

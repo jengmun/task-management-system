@@ -5,6 +5,7 @@ const {
   allApplications,
   createPlan,
   allPlans,
+  allOpenPlans,
   createTask,
   updatePermissions,
   taskStateProgression,
@@ -20,6 +21,7 @@ const {
   userApplications,
   isGroup,
   isMember,
+  updatePlanStatus,
 } = require("../controllers/taskController");
 const {
   checkAdmin,
@@ -48,7 +50,11 @@ router.post("/create-plan", checkPM, createPlan);
 
 router.get("/all-plans/:app", checkApplicationAccess, allPlans);
 
+router.get("/all-open-plans/:app", checkApplicationAccess, allOpenPlans);
+
 router.post("/update-plan/:app", checkPM, updatePlan);
+
+router.post("/update-plan-status/:app", checkPM, updatePlanStatus);
 
 // ================= TASKS ================= //
 

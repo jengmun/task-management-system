@@ -5,6 +5,7 @@ import { NavLink, useParams } from "react-router-dom";
 import handleGetRequest from "../../hooks/handleGetRequest";
 import handlePostRequest from "../../hooks/handlePostRequest";
 import EditTask from "./EditTask";
+import CreatePlan from "./CreatePlan";
 import { useTheme } from "@mui/material/styles";
 import {
   Box,
@@ -18,6 +19,7 @@ import {
   TableRow,
   TableBody,
   TableCell,
+  Tooltip,
 } from "@mui/material";
 import "./kanban.css";
 
@@ -158,6 +160,8 @@ const KanbanBoard = () => {
     setBoard(updatedBoard);
   };
 
+  const [openCreatePlan, setOpenCreatePlan] = useState(false);
+
   return (
     <Box>
       <NavLink to={`/`} style={{ textDecoration: "none" }}>
@@ -173,7 +177,6 @@ const KanbanBoard = () => {
       <Typography variant="body1" sx={{ textAlign: "center" }}>
         {appDetails.description}
       </Typography>
-
       {/* ------------- APP ------------- */}
       <div style={{ textAlign: "center" }}>
         {isPM && (
@@ -227,7 +230,6 @@ const KanbanBoard = () => {
           </TableBody>
         </Table>
       </div>
-
       {/* ------------- PLANS ------------- */}
       <div
         style={{
@@ -241,12 +243,26 @@ const KanbanBoard = () => {
         <Typography variant="h5">Plans</Typography>
         {isPM && (
           <Box>
-            <NavLink
-              to={`/app/${app}/create-plan`}
-              style={{ textDecoration: "none" }}
+            <Modal
+              open={openCreatePlan}
+              onClose={() => {
+                setOpenCreatePlan(false);
+              }}
+              sx={{
+                display: "flex",
+                justifyContent: "center",
+                alignItems: "center",
+              }}
             >
-              <Button>Create Plan</Button>
-            </NavLink>
+              <CreatePlan fetchAllPlans={fetchAllPlans} />
+            </Modal>
+            <Button
+              onClick={() => {
+                setOpenCreatePlan(true);
+              }}
+            >
+              Create Plan
+            </Button>
             <NavLink
               to={`/app/${app}/edit-plan`}
               style={{ textDecoration: "none" }}
@@ -262,8 +278,21 @@ const KanbanBoard = () => {
             alignItems: "center",
           }}
         >
-          {allPlans.map((plan) => {
-            return <Chip label={plan.plan_name} />;
+          {allPlans.map((plan, i) => {
+            return (
+              <Tooltip
+                key={i}
+                title={
+                  <>
+                    <div>Status: {plan.status}</div>
+                    <div>Start Date: {plan.start_date.slice(0, 10)}</div>
+                    <div>End Date: {plan.end_date.slice(0, 10)}</div>
+                  </>
+                }
+              >
+                <Chip label={plan.plan_name} />
+              </Tooltip>
+            );
           })}
         </Box>
       </div>

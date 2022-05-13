@@ -1,8 +1,9 @@
 import { useState } from "react";
-import { useParams, NavLink } from "react-router-dom";
+import { useParams } from "react-router-dom";
 import handlePostRequest from "../../hooks/handlePostRequest";
+import { Button, Card, TextField, Typography } from "@mui/material";
 
-const CreatePlan = () => {
+const CreatePlan = (props) => {
   const { app } = useParams();
 
   const [message, setMessage] = useState("");
@@ -16,47 +17,71 @@ const CreatePlan = () => {
       endDate: e.target.endDate.value,
       acronym: app,
     });
-    setMessage(data);
 
     if (data === "Plan created") {
       e.target.startDate.value = "";
       e.target.endDate.value = "";
       e.target.planName.value = "";
+      setMessage(data);
+      props.fetchAllPlans();
+    } else if (data.includes("Duplicate")) {
+      setMessage("Plan name already exists");
+    } else {
+      setMessage(data);
     }
   };
 
-  const [startDate, setStartDate] = useState("");
+  const [startDate, setStartDate] = useState(
+    new Date().toISOString().slice(0, 10)
+  );
 
   return (
-    <>
-      <NavLink to={`/app/${app}`}>
-        <button>Back</button>
-      </NavLink>
-      <form onSubmit={handleCreatePlan}>
-        <label htmlFor="planName">Plan Name</label>
-        <input id="planName" name="planName" required />
-        <label htmlFor="startDate">Start Date</label>
-        <input
-          type="date"
-          id="startDate"
-          name="startDate"
+    <Card
+      sx={{
+        p: 3,
+        width: "max-content",
+      }}
+    >
+      <Typography variant="h6" sx={{ textAlign: "center" }}>
+        Create New Plan
+      </Typography>
+      <form
+        onSubmit={handleCreatePlan}
+        style={{ display: "flex", flexDirection: "column" }}
+      >
+        <TextField
+          id="planName"
+          label="Plan Name"
+          variant="outlined"
           required
+          sx={{ mt: 2 }}
+        />
+        <TextField
+          id="startDate"
+          label="Start Date"
+          variant="outlined"
+          required
+          type="date"
           onChange={(e) => {
             setStartDate(e.target.value);
           }}
+          defaultValue={new Date().toISOString().slice(0, 10)}
+          sx={{ mt: 2 }}
         />
-        <label htmlFor="endDate">End Date</label>
-        <input
-          type="date"
+        <TextField
           id="endDate"
-          name="endDate"
+          label="End Date"
+          variant="outlined"
           required
-          min={startDate}
+          type="date"
+          InputProps={{ inputProps: { min: startDate } }}
+          defaultValue={new Date().toISOString().slice(0, 10)}
+          sx={{ mt: 2 }}
         />
-        <button>Submit</button>
+        <Button type="submit">Submit</Button>
       </form>
-      {message}
-    </>
+      <Typography sx={{ textAlign: "center" }}>{message}</Typography>
+    </Card>
   );
 };
 

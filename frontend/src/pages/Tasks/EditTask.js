@@ -45,7 +45,7 @@ const EditTask = (props) => {
   const [allPlans, setAllPlans] = useState([]);
 
   const fetchAllPlans = async () => {
-    const data = await handleGetRequest(`task/all-plans/${app}`);
+    const data = await handleGetRequest(`task/all-open-plans/${app}`);
     if (data) {
       setAllPlans(data);
     }

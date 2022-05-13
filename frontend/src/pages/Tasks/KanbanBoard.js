@@ -23,6 +23,7 @@ import {
 } from "@mui/material";
 import "./kanban.css";
 import EditPlan from "./EditPlan";
+import EditApp from "./EditApp";
 
 const KanbanBoard = () => {
   const { app } = useParams();
@@ -162,6 +163,7 @@ const KanbanBoard = () => {
   };
 
   // ------------- Modals -------------
+  const [openEditApp, setOpenEditApp] = useState(false);
   const [openCreatePlan, setOpenCreatePlan] = useState(false);
   const [openEditPlan, setOpenEditPlan] = useState(false);
 
@@ -183,12 +185,28 @@ const KanbanBoard = () => {
       {/* ------------- APP ------------- */}
       <div style={{ textAlign: "center" }}>
         {isPM && (
-          <NavLink
-            to={`/app/${app}/edit-app`}
-            style={{ textDecoration: "none" }}
-          >
-            <Button>Edit app</Button>
-          </NavLink>
+          <>
+            <Modal
+              open={openEditApp}
+              onClose={() => {
+                setOpenEditApp(false);
+              }}
+              sx={{
+                display: "flex",
+                justifyContent: "center",
+                alignItems: "center",
+              }}
+            >
+              <EditApp fetchAppDetails={fetchAppDetails} />
+            </Modal>
+            <Button
+              onClick={() => {
+                setOpenEditApp(true);
+              }}
+            >
+              Edit app
+            </Button>
+          </>
         )}
 
         <Typography variant="h5">Permissions</Typography>

@@ -1,9 +1,10 @@
 import { useState, useEffect } from "react";
-import { useParams, NavLink } from "react-router-dom";
+import { useParams } from "react-router-dom";
 import handleGetRequest from "../../hooks/handleGetRequest";
 import handlePostRequest from "../../hooks/handlePostRequest";
+import { Card, Button } from "@mui/material";
 
-const EditApp = () => {
+const EditApp = (props) => {
   const { app } = useParams();
 
   // ------------- Fetch app details -------------
@@ -39,9 +40,10 @@ const EditApp = () => {
     "permitDone",
   ];
 
+  const [message, setMessage] = useState("");
+
   const handleEditApp = async (e) => {
     e.preventDefault();
-    console.log(e.target.startDate.value);
 
     const data = await handlePostRequest(`task/update-app/${app}`, {
       description: e.target.description.value,
@@ -53,15 +55,13 @@ const EditApp = () => {
       permitDoing: e.target.permitDoing.value,
       permitDone: e.target.permitDone.value,
     });
-    console.log(data);
+    setMessage(data);
+    props.fetchAppDetails();
   };
   const [startDate, setStartDate] = useState("");
 
   return (
-    <div>
-      <NavLink to={`/app/${app}`}>
-        <button>Back</button>
-      </NavLink>
+    <Card>
       <h1>{app}</h1>
       {appDetails.end_date && (
         <form onSubmit={handleEditApp}>
@@ -117,10 +117,11 @@ const EditApp = () => {
               </>
             );
           })}
-          <button>Submit</button>
+          <Button type="submit">Submit</Button>
         </form>
       )}
-    </div>
+      {message}
+    </Card>
   );
 };
 

@@ -22,6 +22,7 @@ import {
   Tooltip,
 } from "@mui/material";
 import "./kanban.css";
+import EditPlan from "./EditPlan";
 
 const KanbanBoard = () => {
   const { app } = useParams();
@@ -160,7 +161,9 @@ const KanbanBoard = () => {
     setBoard(updatedBoard);
   };
 
+  // ------------- Modals -------------
   const [openCreatePlan, setOpenCreatePlan] = useState(false);
+  const [openEditPlan, setOpenEditPlan] = useState(false);
 
   return (
     <Box>
@@ -263,12 +266,27 @@ const KanbanBoard = () => {
             >
               Create Plan
             </Button>
-            <NavLink
-              to={`/app/${app}/edit-plan`}
-              style={{ textDecoration: "none" }}
+            <Modal
+              open={openEditPlan}
+              onClose={() => {
+                setOpenEditPlan(false);
+              }}
+              sx={{
+                display: "flex",
+                justifyContent: "center",
+                alignItems: "center",
+              }}
             >
-              <Button>Edit plans</Button>
-            </NavLink>
+              <EditPlan fetchAllPlans={fetchAllPlans} />
+            </Modal>
+
+            <Button
+              onClick={() => {
+                setOpenEditPlan(true);
+              }}
+            >
+              Edit plans
+            </Button>
           </Box>
         )}
         <Box

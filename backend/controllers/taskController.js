@@ -109,7 +109,7 @@ exports.createPlan = (req, res, next) => {
 
 exports.updatePlan = (req, res, next) => {
   db.query(
-    "UPDATE plans SET plan_name = ?, start_date = ?, end_date = ? WHERE plan_name = ? AND status IS NULL",
+    "UPDATE plans SET plan_name = ?, start_date = ?, end_date = ? WHERE plan_name = ? AND status = 'Open'",
     [
       req.body.planName,
       req.body.startDate,
@@ -182,7 +182,7 @@ exports.allPlans = (req, res, next) => {
 
 exports.allOpenPlans = (req, res, next) => {
   db.query(
-    `SELECT * FROM plans WHERE acronym = ? AND status IS NULL`,
+    `SELECT * FROM plans WHERE acronym = ? AND status = 'Open'`,
     req.params.app,
     (err, result) => {
       if (err) {
@@ -198,7 +198,7 @@ exports.createTask = async (req, res, next) => {
   if (req.body.planName) {
     const validPlan = await new Promise((resolve) => {
       db.query(
-        `SELECT plan_name FROM plans WHERE acronym = ? AND plan_name = ? AND status IS NULL`,
+        `SELECT plan_name FROM plans WHERE acronym = ? AND plan_name = ? AND status = 'Open'`,
         [req.body.acronym, req.body.planName],
         (err, result) => {
           if (err) {

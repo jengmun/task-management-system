@@ -1,9 +1,20 @@
+import {
+  Card,
+  Table,
+  TableHead,
+  TableRow,
+  TableBody,
+  TableCell,
+  Button,
+  Typography,
+  TextField,
+} from "@mui/material";
 import { useState, useEffect } from "react";
-import { useParams, NavLink } from "react-router-dom";
+import { useParams } from "react-router-dom";
 import handleGetRequest from "../../hooks/handleGetRequest";
 import handlePostRequest from "../../hooks/handlePostRequest";
 
-const EditPlan = () => {
+const EditPlan = (props) => {
   const { app } = useParams();
 
   // ------------- Fetch all plans -------------
@@ -21,26 +32,30 @@ const EditPlan = () => {
   }, []);
 
   return (
-    <div>
-      <NavLink to={`/app/${app}`}>
-        <button>Back</button>
-      </NavLink>
-      <table>
-        <thead>
-          <tr>
-            <th>Plan Name</th>
-            <th>Start Date</th>
-            <th>End Date</th>
-            <th>Status</th>
-          </tr>
-        </thead>
-        <tbody>
+    <Card
+      sx={{
+        p: 3,
+        width: "max-content",
+        height: "90vh",
+        overflow: "scroll",
+      }}
+    >
+      <Table>
+        <TableHead>
+          <TableRow>
+            <TableCell>Plan Name</TableCell>
+            <TableCell>Start Date</TableCell>
+            <TableCell>End Date</TableCell>
+            <TableCell>Status</TableCell>
+          </TableRow>
+        </TableHead>
+        <TableBody>
           {allPlans.map((plan) => {
-            return <Plan plan={plan} />;
+            return <Plan plan={plan} fetchAllPlans={props.fetchAllPlans} />;
           })}
-        </tbody>
-      </table>
-    </div>
+        </TableBody>
+      </Table>
+    </Card>
   );
 };
 
@@ -67,18 +82,25 @@ const Plan = (props) => {
       currentPlan: props.plan.plan_name,
     });
     setMessage(data);
+
+    if (data === "Plan updated") {
+      props.fetchAllPlans();
+    }
   };
 
   const handleUpdatePlanStatus = async () => {
     if (props.plan.status === "Closed") {
       setMessage("Status is already closed!");
+      return;
     }
 
     const data = await handlePostRequest(`task/update-plan-status/${app}`, {
       planName: input.planName,
     });
+
     if (data === "Plan status updated") {
       props.plan.status = "Closed";
+      props.fetchAllPlans();
     }
     setMessage(data);
   };
@@ -86,52 +108,58 @@ const Plan = (props) => {
   const [startDate, setStartDate] = useState("");
 
   return (
-    <tr>
-      <td>
-        <input
+    <TableRow>
+      <TableCell>
+        <TextField
           id="planName"
-          name="planName"
+          label="Plan Name"
+          variant="outlined"
           defaultValue={props.plan.plan_name}
           onChange={(e) => {
             setInput({ ...input, planName: e.target.value });
           }}
+          sx={{ mt: 2 }}
         />
-      </td>
-      <td>
-        <input
+      </TableCell>
+      <TableCell>
+        <TextField
           id="startDate"
-          name="startDate"
+          label="Start Date"
+          variant="outlined"
           type="date"
-          defaultValue={`${props.plan.start_date.slice(0, 10)}`}
           onChange={(e) => {
             setInput({ ...input, startDate: e.target.value });
             setStartDate(e.target.value);
           }}
+          defaultValue={`${props.plan.start_date.slice(0, 10)}`}
+          sx={{ mt: 2 }}
         />
-      </td>
-      <td>
-        <input
+      </TableCell>
+      <TableCell>
+        <TextField
           id="endDate"
-          name="endDate"
+          label="End Date"
+          variant="outlined"
           type="date"
+          InputProps={{ inputProps: { min: startDate } }}
           defaultValue={`${props.plan.end_date.slice(0, 10)}`}
           onChange={(e) => {
             setInput({ ...input, endDate: e.target.value });
           }}
-          min={startDate}
+          sx={{ mt: 2 }}
         />
-      </td>
-      <td>
-        {props.plan.status ? (
+      </TableCell>
+      <TableCell>
+        {props.plan.status === "Closed" ? (
           props.plan.status
         ) : (
-          <button onClick={handleUpdatePlanStatus}>Close Plan</button>
+          <Button onClick={handleUpdatePlanStatus}>Close Plan</Button>
         )}
-      </td>
-      <td>
-        <button onClick={handleUpdatePlan}>Update</button>
-      </td>
-      {message}
-    </tr>
+      </TableCell>
+      <TableCell>
+        <Button onClick={handleUpdatePlan}>Update</Button>
+      </TableCell>
+      <Typography variant="body2">{message}</Typography>
+    </TableRow>
   );
 };

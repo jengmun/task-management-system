@@ -23,6 +23,7 @@ const {
   isGroup,
   isMember,
   updatePlanStatus,
+  hasPermissions,
 } = require("../controllers/taskController");
 const {
   checkAdmin,
@@ -44,6 +45,8 @@ router.get("/uncreated-apps/user", uncreatedApplications);
 router.get("/apps/:app", checkApplicationAccess, applicationDetails);
 
 router.post("/update-app/:app", checkPM, updateApp);
+
+router.post("/check-permissions", hasPermissions);
 
 router.post("/update-permissions", checkPM, updatePermissions);
 

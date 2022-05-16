@@ -22,8 +22,7 @@ exports.createApplication = (req, res, next) => {
       if (err) {
         next(err);
       } else {
-        console.log(results);
-        res.json(results);
+        res.json("Application successfully created");
       }
     }
   );
@@ -457,6 +456,38 @@ exports.updateTask = async (req, res, next) => {
   );
 };
 
+exports.hasPermissions = async (req, res, next) => {
+  const { app, permission } = req.body;
+
+  const appDetails = await new Promise((resolve) => {
+    db.query(
+      "SELECT * FROM applications WHERE acronym = ?",
+      [app],
+      (err, results) => {
+        if (err) {
+          return next(err);
+        }
+        resolve(results[0]);
+      }
+    );
+  });
+
+  db.query(
+    "SELECT group_name FROM accounts_groups WHERE acronym = ? AND group_name = ? AND username = ?",
+    [app, appDetails[permission], req.session.username],
+    (err, results) => {
+      if (err) {
+        return next(err);
+      }
+      if (results.length) {
+        res.json(true);
+      } else {
+        res.json(false);
+      }
+    }
+  );
+};
+
 exports.updatePermissions = (req, res, next) => {
   const { create, open, todo, doing, done, acronym } = req.body;
 
@@ -527,26 +558,43 @@ exports.taskStateProgression = async (req, res, next) => {
     }
   );
 
-  const teamLeads = await new Promise((resolve) => {
-    db.query(
-      "SELECT accounts_groups.username, email FROM accounts_groups INNER JOIN accounts on accounts_groups.username = accounts.username WHERE acronym = ? AND group_name = 'Team Lead'",
-      acronym,
-      (err, results) => {
-        if (err) {
-          return next(err);
+  // Send email to approvers
+  if (newState === "Done") {
+    const approverGroup = await new Promise((resolve) => {
+      db.query(
+        "SELECT permit_done FROM applications WHERE acronym = ?",
+        [acronym],
+        (err, results) => {
+          if (err) {
+            return next(err);
+          }
+          resolve(results[0].permit_done);
         }
-        resolve(results);
-      }
-    );
-  });
+      );
+    });
 
-  // for (const teamLead of teamLeads) {
-  //   sendEmail(
-  //     teamLead.email,
-  //     `${acronym}: Task promoted to Done`,
-  //     `Task ${taskID} of Application ${acronym} has been promoted to Done by ${req.session.username}.`
-  //   );
-  // }
+    const allApprovers = await new Promise((resolve) => {
+      db.query(
+        "SELECT accounts_groups.username, email FROM accounts_groups INNER JOIN accounts on accounts_groups.username = accounts.username WHERE acronym = ? AND group_name = ?",
+        [acronym, approverGroup],
+        (err, results) => {
+          if (err) {
+            return next(err);
+          }
+          console.log(results);
+          resolve(results);
+        }
+      );
+    });
+
+    // for (const approver of allApprovers) {
+    //   sendEmail(
+    //     approver.email,
+    //     `${acronym}: Task promoted to Done`,
+    //     `Task ${taskID} of Application ${acronym} has been promoted to Done by ${req.session.username}.`
+    //   );
+    // }
+  }
 
   req.body.details = `Task updated from ${currentState} to ${newState}`;
 

@@ -2,19 +2,20 @@ import { useContext, useState } from "react";
 import { NavLink, useHistory } from "react-router-dom";
 import LoginContext from "../../context/login-context";
 import handlePostRequest from "../../hooks/handlePostRequest";
-import { useTheme } from "@mui/material/styles";
-import { Box, TextField, Button, Typography } from "@mui/material";
+import { TextField, Button, Typography } from "@mui/material";
 
 const Login = () => {
   const loginContext = useContext(LoginContext);
-  const [username, setUsername] = useState(null);
-  const [password, setPassword] = useState(null);
 
   const [message, setMessage] = useState("");
   const history = useHistory();
 
-  const handleLogin = async () => {
-    const data = await handlePostRequest("user/login", { username, password });
+  const handleLogin = async (e) => {
+    e.preventDefault();
+    const data = await handlePostRequest("user/login", {
+      username: e.target.username.value,
+      password: e.target.password.value,
+    });
 
     if (data.username) {
       loginContext.setIsLoggedIn(data);
@@ -24,41 +25,38 @@ const Login = () => {
     }
   };
 
-  const theme = useTheme();
-
   return (
-    <Box
-      sx={{
+    <form
+      style={{
         display: "flex",
         flexDirection: "column",
         alignItems: "center",
         justifyContent: "center",
         height: "100%",
       }}
+      onSubmit={handleLogin}
     >
       <Typography variant="h3" sx={{ mb: 2 }}>
         Login
       </Typography>
       <TextField
         required
-        id="outlined-search"
+        id="username"
         label="Username"
-        onChange={(e) => setUsername(e.target.value)}
         sx={{ mt: 1, mb: 1 }}
       />
       <TextField
         required
-        id="outlined-search"
+        id="password"
         label="Password"
         type="password"
-        onChange={(e) => setPassword(e.target.value)}
         sx={{ mt: 1, mb: 1 }}
       />
       <Typography variant="body1" color="error">
         {message}
       </Typography>
       <Button
-        onClick={handleLogin}
+        type="submit"
         variant="contained"
         color="warning"
         sx={{ mt: 1, mb: 1 }}
@@ -70,7 +68,7 @@ const Login = () => {
           Forgot password
         </Button>
       </NavLink>
-    </Box>
+    </form>
   );
 };
 

@@ -98,7 +98,6 @@ function App() {
                     <PermissionsRoute
                       path="/app/:app"
                       component={KanbanBoard}
-                      permission="All"
                     />
 
                     {/* ADMIN ROUTES */}

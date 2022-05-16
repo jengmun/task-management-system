@@ -1,19 +1,20 @@
 import { useState, useEffect } from "react";
-import { NavLink } from "react-router-dom";
 import handleGetRequest from "../../hooks/handleGetRequest";
 import handlePostRequest from "../../hooks/handlePostRequest";
 import {
   Box,
   Button,
+  Card,
   FormControl,
   InputLabel,
   MenuItem,
   Select,
   TextareaAutosize,
   TextField,
+  Typography,
 } from "@mui/material";
 
-const CreateApp = () => {
+const CreateApp = (props) => {
   // ------------- Fetch all groups -------------
   const [allGroups, setAllGroups] = useState([]);
 
@@ -22,11 +23,20 @@ const CreateApp = () => {
     if (data) {
       setAllGroups(data);
     }
-    console.log(data);
+  };
+
+  const [uncreatedApps, setUncreatedApps] = useState([]);
+
+  const fetchUncreatedApps = async () => {
+    const data = await handleGetRequest("task/uncreated-apps/user");
+    if (data) {
+      setUncreatedApps(data);
+    }
   };
 
   useEffect(() => {
     fetchAllGroups();
+    fetchUncreatedApps();
   }, []);
 
   const permissions = [
@@ -37,29 +47,53 @@ const CreateApp = () => {
     "permitDone",
   ];
 
+  const [newApp, setNewApp] = useState("");
+  const [selectedPermissions, setSelectedPermissions] = useState({
+    permitCreate: "",
+    permitOpen: "",
+    permitTodo: "",
+    permitDoing: "",
+    permitDone: "",
+  });
+
+  const [message, setMessage] = useState("");
+
   const handleCreateApp = async (e) => {
     e.preventDefault();
 
+    for (const permission of permissions) {
+      if (!selectedPermissions[permission] || !newApp) {
+        setMessage("Please fill in all details");
+        return;
+      }
+    }
+
     const data = await handlePostRequest("task/create-app", {
-      acronym: e.target.acronym.value,
+      acronym: newApp,
       description: e.target.description.value,
       startDate: e.target.startDate.value,
       endDate: e.target.endDate.value,
-      permitCreate: e.target.permitCreate.value,
-      permitOpen: e.target.permitOpen.value,
-      permitTodo: e.target.permitTodo.value,
-      permitDoing: e.target.permitDoing.value,
-      permitDone: e.target.permitDone.value,
+      permitCreate: selectedPermissions.permitCreate,
+      permitOpen: selectedPermissions.permitOpen,
+      permitTodo: selectedPermissions.permitTodo,
+      permitDoing: selectedPermissions.permitDoing,
+      permitDone: selectedPermissions.permitDone,
     });
-    console.log(data);
+    setMessage(data);
+    props.fetchAllApps();
   };
+
   const [startDate, setStartDate] = useState("");
 
   return (
-    <>
-      <NavLink to="/" style={{ textDecoration: "none" }}>
-        <Button>Back</Button>
-      </NavLink>
+    <Card
+      sx={{
+        p: 3,
+        width: "max-content",
+        maxHeight: "90vh",
+        overflow: "scroll",
+      }}
+    >
       <Box
         onSubmit={handleCreateApp}
         component="form"
@@ -69,13 +103,26 @@ const CreateApp = () => {
           alignItems: "center",
         }}
       >
-        <TextField
-          required
-          InputProps={{ inputProps: { minLength: 3, maxLength: 3 } }}
-          id="acronym"
-          label="Application Acronym"
-          sx={{ mt: 1, mb: 1 }}
-        />
+        <FormControl sx={{ mt: 1, mb: 1 }}>
+          <InputLabel id="acronym">Acronym</InputLabel>
+          <Select
+            id="acronym"
+            label="acronym"
+            sx={{ width: "200px" }}
+            value={newApp}
+            onChange={(e) => {
+              setNewApp(e.target.value);
+            }}
+          >
+            {uncreatedApps.map((app) => {
+              return (
+                <MenuItem value={app} key={app}>
+                  {app}
+                </MenuItem>
+              );
+            })}
+          </Select>
+        </FormControl>
         <TextareaAutosize
           required
           maxLength="255"
@@ -106,19 +153,28 @@ const CreateApp = () => {
           defaultValue={new Date().toISOString().slice(0, 10)}
           sx={{ mt: 2 }}
         />
+        <Typography>Permissions</Typography>
         {permissions.map((permission) => {
           return (
-            <FormControl>
-              <InputLabel id={permission}>{permission}</InputLabel>
+            <FormControl key={permission} sx={{ mt: 1, mb: 1 }}>
+              <InputLabel id={permission}>{`${permission.slice(
+                6
+              )}`}</InputLabel>
               <Select
                 id={permission}
-                labelId={permission}
                 label={permission}
-                sx={{ width: "min-content" }}
+                sx={{ width: "200px" }}
+                value={selectedPermissions[permission]}
+                onChange={(e) => {
+                  setSelectedPermissions({
+                    ...selectedPermissions,
+                    [permission]: e.target.value,
+                  });
+                }}
               >
                 {allGroups.map((group) => {
                   return (
-                    <MenuItem value={group.group_name}>
+                    <MenuItem value={group.group_name} key={group.group_name}>
                       {group.group_name}
                     </MenuItem>
                   );
@@ -128,8 +184,9 @@ const CreateApp = () => {
           );
         })}
         <Button type="submit">Submit</Button>
+        <Typography variant="body1">{message}</Typography>
       </Box>
-    </>
+    </Card>
   );
 };
 

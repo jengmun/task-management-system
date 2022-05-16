@@ -2,7 +2,17 @@ import { useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
 import handleGetRequest from "../../hooks/handleGetRequest";
 import handlePostRequest from "../../hooks/handlePostRequest";
-import { Card, Button } from "@mui/material";
+import {
+  Card,
+  Button,
+  Typography,
+  TextField,
+  TextareaAutosize,
+  FormControl,
+  InputLabel,
+  Select,
+  MenuItem,
+} from "@mui/material";
 
 const EditApp = (props) => {
   const { app } = useParams();
@@ -14,6 +24,15 @@ const EditApp = (props) => {
     const data = await handleGetRequest(`task/apps/${app}`);
     if (data) {
       setAppDetails(data);
+      if (!selectedPermissions.permitCreate) {
+        setSelectedPermissions({
+          permitCreate: data.permit_create,
+          permitOpen: data.permit_open,
+          permitTodo: data.permit_todo,
+          permitDoing: data.permit_doing,
+          permitDone: data.permit_done,
+        });
+      }
     }
   };
 
@@ -40,6 +59,14 @@ const EditApp = (props) => {
     "permitDone",
   ];
 
+  const [selectedPermissions, setSelectedPermissions] = useState({
+    permitCreate: "",
+    permitOpen: "",
+    permitTodo: "",
+    permitDoing: "",
+    permitDone: "",
+  });
+
   const [message, setMessage] = useState("");
 
   const handleEditApp = async (e) => {
@@ -49,11 +76,11 @@ const EditApp = (props) => {
       description: e.target.description.value,
       startDate: e.target.startDate.value,
       endDate: e.target.endDate.value,
-      permitCreate: e.target.permitCreate.value,
-      permitOpen: e.target.permitOpen.value,
-      permitTodo: e.target.permitTodo.value,
-      permitDoing: e.target.permitDoing.value,
-      permitDone: e.target.permitDone.value,
+      permitCreate: selectedPermissions.permitCreate,
+      permitOpen: selectedPermissions.permitOpen,
+      permitTodo: selectedPermissions.permitTodo,
+      permitDoing: selectedPermissions.permitDoing,
+      permitDone: selectedPermissions.permitDone,
     });
     setMessage(data);
     props.fetchAppDetails();
@@ -61,60 +88,71 @@ const EditApp = (props) => {
   const [startDate, setStartDate] = useState("");
 
   return (
-    <Card>
-      <h1>{app}</h1>
+    <Card
+      sx={{
+        p: 3,
+      }}
+    >
+      <Typography variant="h4">{app}</Typography>
       {appDetails.end_date && (
         <form onSubmit={handleEditApp}>
-          <label htmlFor="description">Description</label>
-          <textarea
-            id="description"
-            name="description"
+          <TextareaAutosize
+            required
             maxLength="255"
+            minRows={3}
+            id="description"
             defaultValue={appDetails.description}
+            sx={{ mt: 1, mb: 1 }}
           />
-          <label htmlFor="startDate">Start Date</label>
-          <input
-            type="date"
+          <TextField
             id="startDate"
-            name="startDate"
+            label="Start Date"
+            variant="outlined"
+            type="date"
+            required
             defaultValue={`${appDetails.start_date.slice(0, 10)}`}
             onChange={(e) => {
               setStartDate(e.target.value);
             }}
+            sx={{ mt: 2 }}
           />
-          <label htmlFor="endDate">End Date</label>
-          <input
-            type="date"
+          <TextField
             id="endDate"
-            name="endDate"
+            label="End Date"
+            variant="outlined"
+            required
+            type="date"
+            InputProps={{ inputProps: { min: startDate } }}
             defaultValue={`${appDetails.end_date.slice(0, 10)}`}
-            min={startDate}
+            sx={{ mt: 2 }}
           />
           {permissions.map((permission) => {
             return (
-              <>
-                <label htmlFor={permission}>{permission}</label>
-                <select name={permission} id={permission}>
+              <FormControl key={permission} sx={{ mt: 1, mb: 1 }}>
+                <InputLabel id={permission}>{`${permission.slice(
+                  6
+                )}`}</InputLabel>
+                <Select
+                  label={permission}
+                  id={permission}
+                  sx={{ width: "200px" }}
+                  value={selectedPermissions[permission]}
+                  onChange={(e) => {
+                    setSelectedPermissions({
+                      ...selectedPermissions,
+                      [permission]: e.target.value,
+                    });
+                  }}
+                >
                   {allGroups.map((group) => {
                     return (
-                      <option
-                        value={group.group_name}
-                        selected={
-                          appDetails[
-                            `${permission.slice(0, 6)}_${permission
-                              .slice(6)
-                              .toLowerCase()}`
-                          ] === group.group_name
-                            ? true
-                            : false
-                        }
-                      >
+                      <MenuItem value={group.group_name} key={group.group_name}>
                         {group.group_name}
-                      </option>
+                      </MenuItem>
                     );
                   })}
-                </select>
-              </>
+                </Select>
+              </FormControl>
             );
           })}
           <Button type="submit">Submit</Button>

@@ -3,6 +3,8 @@ const router = express.Router();
 const {
   createApplication,
   allApplications,
+  userApplications,
+  uncreatedApplications,
   createPlan,
   allPlans,
   allOpenPlans,
@@ -18,7 +20,6 @@ const {
   updatePlan,
   applicationDetails,
   updateApp,
-  userApplications,
   isGroup,
   isMember,
   updatePlanStatus,
@@ -37,6 +38,8 @@ router.post("/create-app", checkPM, createApplication);
 router.get("/all-apps", checkAdmin, allApplications);
 
 router.get("/all-apps/user", userApplications);
+
+router.get("/uncreated-apps/user", uncreatedApplications);
 
 router.get("/apps/:app", checkApplicationAccess, applicationDetails);
 

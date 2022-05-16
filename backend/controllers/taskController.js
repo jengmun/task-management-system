@@ -41,7 +41,7 @@ exports.allApplications = (req, res, next) => {
 
 exports.userApplications = (req, res, next) => {
   db.query(
-    `SELECT DISTINCT acronym FROM accounts_groups WHERE username = ?`,
+    `SELECT DISTINCT accounts_groups.acronym FROM accounts_groups INNER JOIN applications ON applications.acronym = accounts_groups.acronym WHERE accounts_groups.username = ?`,
     req.session.username,
     (err, result) => {
       if (err) {
@@ -51,6 +51,42 @@ exports.userApplications = (req, res, next) => {
       }
     }
   );
+};
+
+exports.uncreatedApplications = async (req, res, next) => {
+  const assignedApps = await new Promise((resolve) => {
+    db.query(
+      "SELECT DISTINCT acronym FROM accounts_groups WHERE username = ?",
+      req.session.username,
+      (err, result) => {
+        if (err) {
+          next(err);
+        } else {
+          resolve(result);
+        }
+      }
+    );
+  });
+
+  const uncreatedApps = [];
+
+  for (let i = 0; i < assignedApps.length; i++) {
+    db.query(
+      "SELECT acronym FROM applications WHERE acronym = ?",
+      assignedApps[i].acronym,
+      (err, result) => {
+        if (err) {
+          next(err);
+        } else if (!result.length) {
+          uncreatedApps.push(assignedApps[i].acronym);
+        }
+
+        if (i === assignedApps.length - 1) {
+          res.json(uncreatedApps);
+        }
+      }
+    );
+  }
 };
 
 exports.applicationDetails = (req, res, next) => {

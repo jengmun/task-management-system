@@ -16,13 +16,7 @@ import ForgotPassword from "./pages/User/ForgotPassword";
 import GroupManagement from "./pages/User/GroupManagement";
 import Overview from "./pages/Tasks/Overview";
 import AssignPM from "./pages/Tasks/AssignPM";
-import CreateApp from "./pages/Tasks/CreateApp";
-import CreatePlan from "./pages/Tasks/CreatePlan";
-import CreateTask from "./pages/Tasks/CreateTask";
 import KanbanBoard from "./pages/Tasks/KanbanBoard";
-import EditTask from "./pages/Tasks/EditTask";
-import EditPlan from "./pages/Tasks/EditPlan";
-import EditApp from "./pages/Tasks/EditApp";
 import { ThemeProvider, createTheme } from "@mui/material/styles";
 import { Box } from "@mui/material";
 
@@ -99,43 +93,13 @@ function App() {
                 {isLoggedIn.account_type && (
                   <Switch>
                     {/* TASK MANAGEMENT ROUTES */}
-                    <AdminRoute path="/app/assign-PM" component={AssignPM} />
-
-                    <PermissionsRoute
-                      path="/app/create-app"
-                      component={CreateApp}
-                      permission="PM"
-                    />
-                    <PermissionsRoute
-                      path="/app/:app/edit-app"
-                      component={EditApp}
-                      permission="PM"
-                    />
-                    <PermissionsRoute
-                      path="/app/:app/create-plan"
-                      component={CreatePlan}
-                      permission="PM"
-                    />
-                    <PermissionsRoute
-                      path="/app/:app/edit-plan"
-                      component={EditPlan}
-                      permission="PM"
-                    />
-                    <PermissionsRoute
-                      path="/app/:app/create-task"
-                      component={CreateTask}
-                      permission="Lead"
-                    />
-                    <PermissionsRoute
-                      path="/app/:app/:task/edit-task"
-                      component={EditTask}
-                      permission="Lead"
-                    />
                     <PermissionsRoute
                       path="/app/:app"
                       component={KanbanBoard}
                       permission="All"
                     />
+
+                    <AdminRoute path="/app/assign-PM" component={AssignPM} />
 
                     {/* ADMIN ROUTES */}
                     <AdminRoute

@@ -1,3 +1,4 @@
+import { Button, TextField, Typography } from "@mui/material";
 import { useContext, useState } from "react";
 import LoginContext from "../../context/login-context";
 import handlePostRequest from "../../hooks/handlePostRequest";
@@ -8,9 +9,11 @@ const Profile = () => {
   const [passwordMessage, setPasswordMessage] = useState("");
 
   // ------------ Update email ------------
-  const [updateEmail, setUpdateEmail] = useState("");
+  const handleEmailChange = async (e) => {
+    e.preventDefault();
 
-  const handleEmailChange = () => {
+    const updateEmail = e.target.updateEmail.value;
+
     if (updateEmail === loginContext.isLoggedIn.email) {
       setEmailMessage("No change in email");
       return;
@@ -21,18 +24,26 @@ const Profile = () => {
       return;
     }
 
-    handlePostRequest("user/update-email", {
+    const data = await handlePostRequest("user/update-email", {
       username: loginContext.isLoggedIn.username,
       email: updateEmail,
     });
-    loginContext.isLoggedIn.email = updateEmail;
+
+    if (data === "Email updated successfully") {
+      setEmailMessage(data);
+      loginContext.isLoggedIn.email = updateEmail;
+    } else {
+      setEmailMessage(data);
+    }
   };
 
   // ------------ Update password ------------
-  const [changePassword, setChangePassword] = useState("");
-  const [confirmPassword, setConfirmPassword] = useState("");
+  const handlePasswordChange = async (e) => {
+    e.preventDefault();
 
-  const handlePasswordChange = async () => {
+    const changePassword = e.target.updatePassword.value;
+    const confirmPassword = e.target.confirmPassword.value;
+
     // Step 1 - check that both passwords match
     if (changePassword !== confirmPassword) {
       setPasswordMessage("Passwords do not match");
@@ -65,40 +76,41 @@ const Profile = () => {
   return (
     <div>
       <h1>Account management</h1>
-      <label htmlFor="username">Username</label>
-      <input
-        id="username"
-        name="username"
-        defaultValue={loginContext.isLoggedIn.username}
-        readOnly
-      />
-      <h1>Update email information</h1>
 
-      <label htmlFor="update-email">Email</label>
-      <input
-        id="update-email"
-        name="update-email"
-        defaultValue={loginContext.isLoggedIn.email}
-        onChange={(e) => setUpdateEmail(e.target.value)}
-      />
-      <button onClick={() => handleEmailChange()}>Update</button>
+      <Typography variant="h6">
+        Username: {loginContext.isLoggedIn.username}
+      </Typography>
+      <h1>Update email information</h1>
+      <form onSubmit={handleEmailChange}>
+        <TextField
+          required
+          id="updateEmail"
+          label="Email"
+          defaultValue={loginContext.isLoggedIn.email}
+          sx={{ mt: 1, mb: 1 }}
+        />
+        <Button type="submit">Update</Button>
+      </form>
       <p>{emailMessage}</p>
+
       <h1>Change password</h1>
-      <label htmlFor="update-password">Password</label>
-      <input
-        id="update-password"
-        name="update-password"
-        type="password"
-        onChange={(e) => setChangePassword(e.target.value)}
-      />
-      <label htmlFor="confirm-password">Re-enter Password</label>
-      <input
-        id="confirm-password"
-        name="confirm-password"
-        type="password"
-        onChange={(e) => setConfirmPassword(e.target.value)}
-      />
-      <button onClick={() => handlePasswordChange()}>Update password</button>
+      <form onSubmit={handlePasswordChange}>
+        <TextField
+          required
+          id="updatePassword"
+          label="Password"
+          type="password"
+          sx={{ mt: 1, mb: 1 }}
+        />
+        <TextField
+          required
+          id="confirmPassword"
+          label="Re-enter Password"
+          type="password"
+          sx={{ mt: 1, mb: 1 }}
+        />
+        <Button type="submit">Update password</Button>
+      </form>
       <p>{passwordMessage}</p>
     </div>
   );

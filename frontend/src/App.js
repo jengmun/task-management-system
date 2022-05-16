@@ -85,13 +85,13 @@ function App() {
                   path="/reset-password/:username"
                   component={ResetPassword}
                 />
-                <Route path="/profile">
-                  {isLoggedIn.username ? <Profile /> : <Redirect to="/" />}
-                </Route>
 
                 {/* Required for refreshes */}
                 {isLoggedIn.account_type && (
                   <Switch>
+                    <Route path="/profile">
+                      {isLoggedIn.username ? <Profile /> : <Redirect to="/" />}
+                    </Route>
                     {/* TASK MANAGEMENT ROUTES */}
                     <AdminRoute path="/app/assign-PM" component={AssignPM} />
 

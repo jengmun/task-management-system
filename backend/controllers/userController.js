@@ -84,7 +84,7 @@ exports.updateEmail = async (req, res, next) => {
       if (err) {
         next(err);
       } else {
-        res.json(result);
+        res.json("Email updated successfully");
       }
     }
   );

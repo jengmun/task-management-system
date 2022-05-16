@@ -4,7 +4,8 @@ import LoginContext from "../../context/login-context";
 import handleGetRequest from "../../hooks/handleGetRequest";
 import handlePostRequest from "../../hooks/handlePostRequest";
 import { useTheme } from "@mui/material/styles";
-import { Box, Button, Typography } from "@mui/material";
+import { Box, Button, Typography, Modal } from "@mui/material";
+import CreateApp from "./CreateApp";
 
 const Overview = () => {
   const loginContext = useContext(LoginContext);
@@ -45,6 +46,8 @@ const Overview = () => {
 
   const theme = useTheme();
 
+  const [openCreateApp, setOpenCreateApp] = useState(false);
+
   return (
     <Box sx={{ p: 2 }}>
       <Box
@@ -63,11 +66,31 @@ const Overview = () => {
         )}
 
         {isPM && (
-          <NavLink to="/app/create-app" style={{ textDecoration: "none " }}>
-            <Button sx={{ ml: 2 }} variant="contained" color="warning">
+          <>
+            <Modal
+              open={openCreateApp}
+              onClose={() => {
+                setOpenCreateApp(false);
+              }}
+              sx={{
+                display: "flex",
+                justifyContent: "center",
+                alignItems: "center",
+              }}
+            >
+              <CreateApp />
+            </Modal>
+            <Button
+              onClick={() => {
+                setOpenCreateApp(true);
+              }}
+              sx={{ ml: 2 }}
+              variant="contained"
+              color="warning"
+            >
               Create App
             </Button>
-          </NavLink>
+          </>
         )}
       </Box>
       <Box sx={{ display: "flex" }}>

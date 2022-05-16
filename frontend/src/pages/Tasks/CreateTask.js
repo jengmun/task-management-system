@@ -1,9 +1,10 @@
+import { Button, Card } from "@mui/material";
 import { useState, useEffect } from "react";
-import { NavLink, useParams } from "react-router-dom";
+import { useParams } from "react-router-dom";
 import handleGetRequest from "../../hooks/handleGetRequest";
 import handlePostRequest from "../../hooks/handlePostRequest";
 
-const CreateTask = () => {
+const CreateTask = (props) => {
   const { app } = useParams();
 
   // ------------- Fetch all plans -------------
@@ -35,19 +36,17 @@ const CreateTask = () => {
     });
     setMessage(data);
 
-    if (data === "Task created") {
+    if (data === "Added note") {
       e.target.taskName.value = "";
       e.target.description.value = "";
       e.target.notes.value = "";
       e.target.planName.value = "";
+      props.fetchTasks();
     }
   };
 
   return (
-    <>
-      <NavLink to={`/app/${app}`}>
-        <button>Back</button>
-      </NavLink>
+    <Card>
       <form onSubmit={handleCreateTask}>
         <label htmlFor="taskName">Task Name</label>
         <input id="taskName" name="taskName" required />
@@ -68,10 +67,10 @@ const CreateTask = () => {
             return <option value={plan.plan_name}>{plan.plan_name}</option>;
           })}
         </select>
-        <button>Submit</button>
+        <Button type="submit">Submit</Button>
       </form>
       {message}
-    </>
+    </Card>
   );
 };
 

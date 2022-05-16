@@ -24,6 +24,7 @@ import {
 import "./kanban.css";
 import EditPlan from "./EditPlan";
 import EditApp from "./EditApp";
+import CreateTask from "./CreateTask";
 
 const KanbanBoard = () => {
   const { app } = useParams();
@@ -70,17 +71,16 @@ const KanbanBoard = () => {
     }
   };
 
-  // ------------- Check if Lead -------------/
-  const [isLead, setIsLead] = useState(false);
+  // ------------- Check permission to Create Task -------------
+  const [createTaskPermission, setCreateTaskPermission] = useState(false);
 
-  const checkLead = async () => {
-    const data = await handlePostRequest("task/is-group", {
-      group: "Team Lead",
-      acronym: app,
+  const checkCreateTaskPermission = async () => {
+    const data = await handlePostRequest("task/check-permissions", {
+      app: app,
+      permission: "permit_create",
     });
-    if (data) {
-      setIsLead(data);
-    }
+
+    setCreateTaskPermission(data);
   };
 
   useEffect(() => {
@@ -88,7 +88,7 @@ const KanbanBoard = () => {
     fetchTasks();
     fetchAllPlans();
     checkPM();
-    checkLead();
+    checkCreateTaskPermission();
   }, []);
 
   // ------------- Create Kanban Board -------------
@@ -114,7 +114,7 @@ const KanbanBoard = () => {
           state: numOfCards[i].state,
           creator: numOfCards[i].creator,
           owner: numOfCards[i].owner,
-          isLead: isLead,
+          createTaskPermission: createTaskPermission,
         });
       }
       columns.push({ id, title, cards });
@@ -130,7 +130,7 @@ const KanbanBoard = () => {
 
   useEffect(() => {
     createBoard();
-  }, [allTasks, isLead]);
+  }, [allTasks, createTaskPermission]);
 
   const handleCardMove = async (card, source, destination) => {
     let data;
@@ -152,8 +152,6 @@ const KanbanBoard = () => {
       });
     }
 
-    console.log(data);
-
     if (data !== "Added note") {
       return;
     }
@@ -166,6 +164,7 @@ const KanbanBoard = () => {
   const [openEditApp, setOpenEditApp] = useState(false);
   const [openCreatePlan, setOpenCreatePlan] = useState(false);
   const [openEditPlan, setOpenEditPlan] = useState(false);
+  const [openCreateTask, setOpenCreateTask] = useState(false);
 
   return (
     <Box>
@@ -333,13 +332,29 @@ const KanbanBoard = () => {
         </Box>
       </div>
       {/* ------------- TASKS ------------- */}
-      {isLead && (
-        <NavLink
-          to={`/app/${app}/create-task`}
-          style={{ textDecoration: "none" }}
-        >
-          <Button>Create Task</Button>
-        </NavLink>
+      {createTaskPermission && (
+        <>
+          <Modal
+            open={openCreateTask}
+            onClose={() => {
+              setOpenCreateTask(false);
+            }}
+            sx={{
+              display: "flex",
+              justifyContent: "center",
+              alignItems: "center",
+            }}
+          >
+            <CreateTask fetchTasks={fetchTasks} />
+          </Modal>
+          <Button
+            onClick={() => {
+              setOpenCreateTask(true);
+            }}
+          >
+            Create Task
+          </Button>
+        </>
       )}
       <Board
         renderCard={(content) => <TaskCard content={content} />}
@@ -379,7 +394,7 @@ const TaskCard = (props) => {
         <EditTask
           app={app}
           task={props.content.id}
-          isLead={props.content.isLead}
+          createTaskPermission={props.content.createTaskPermission}
           setClose={() => {
             setOpen(false);
           }}

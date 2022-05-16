@@ -19,7 +19,7 @@ import {
 } from "@mui/material";
 
 const EditTask = (props) => {
-  const { app, task, isLead, setClose } = props;
+  const { app, task, createTaskPermission, setClose } = props;
 
   // ------------- Fetch task details -------------
   const [taskDetails, setTaskDetails] = useState([]);
@@ -88,7 +88,7 @@ const EditTask = (props) => {
   };
 
   const setPermissions = () => {
-    if (isLead && taskDetails.state === "Open") {
+    if (createTaskPermission && taskDetails.state === "Open") {
       setReadOnly(false);
     }
   };

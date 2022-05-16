@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import handleGetRequest from "../../hooks/handleGetRequest";
 import handlePostRequest from "../../hooks/handlePostRequest";
+import { Typography } from "@mui/material";
 
 const AssignPM = () => {
   // ------------- Fetch all users -------------
@@ -17,6 +18,8 @@ const AssignPM = () => {
     fetchAllUsers();
   }, []);
 
+  const [message, setMessage] = useState("");
+
   const handleAssignPM = async (e) => {
     e.preventDefault();
 
@@ -24,7 +27,7 @@ const AssignPM = () => {
       acronym: e.target.acronym.value,
       username: e.target.user.value,
     });
-    console.log(data);
+    setMessage(data);
   };
 
   return (
@@ -47,6 +50,7 @@ const AssignPM = () => {
         </select>
         <button>Submit</button>
       </form>
+      <Typography variant="body1">{message}</Typography>
     </div>
   );
 };

@@ -93,13 +93,13 @@ function App() {
                 {isLoggedIn.account_type && (
                   <Switch>
                     {/* TASK MANAGEMENT ROUTES */}
+                    <AdminRoute path="/app/assign-PM" component={AssignPM} />
+
                     <PermissionsRoute
                       path="/app/:app"
                       component={KanbanBoard}
                       permission="All"
                     />
-
-                    <AdminRoute path="/app/assign-PM" component={AssignPM} />
 
                     {/* ADMIN ROUTES */}
                     <AdminRoute

@@ -78,7 +78,7 @@ const Overview = () => {
                 alignItems: "center",
               }}
             >
-              <CreateApp />
+              <CreateApp fetchAllApps={fetchAllApps} />
             </Modal>
             <Button
               onClick={() => {

@@ -472,6 +472,11 @@ exports.hasPermissions = async (req, res, next) => {
     );
   });
 
+  if (!appDetails) {
+    res.json("App does not exist");
+    return;
+  }
+
   db.query(
     "SELECT group_name FROM accounts_groups WHERE acronym = ? AND group_name = ? AND username = ?",
     [app, appDetails[permission], req.session.username],

@@ -493,6 +493,19 @@ exports.hasPermissions = async (req, res, next) => {
   );
 };
 
+exports.getPermissions = (req, res, next) => {
+  db.query(
+    "SELECT group_name FROM accounts_groups WHERE acronym = ? AND username = ?",
+    [req.params.app, req.session.username],
+    (err, results) => {
+      if (err) {
+        return next(err);
+      }
+      res.json(results);
+    }
+  );
+};
+
 exports.updatePermissions = (req, res, next) => {
   const { create, open, todo, doing, done, acronym } = req.body;
 

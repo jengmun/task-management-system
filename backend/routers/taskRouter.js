@@ -24,6 +24,7 @@ const {
   isMember,
   updatePlanStatus,
   hasPermissions,
+  getPermissions,
 } = require("../controllers/taskController");
 const {
   checkAdmin,
@@ -47,6 +48,8 @@ router.get("/apps/:app", checkApplicationAccess, applicationDetails);
 router.post("/update-app/:app", checkPM, updateApp);
 
 router.post("/check-permissions", hasPermissions);
+
+router.get("/get-permissions/:app", getPermissions);
 
 router.post("/update-permissions", checkPM, updatePermissions);
 

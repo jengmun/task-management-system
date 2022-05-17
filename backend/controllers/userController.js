@@ -346,8 +346,7 @@ exports.addGroupMember = (req, res, next) => {
   const firstSeparator = group.indexOf("_");
   const app = group.slice(0, firstSeparator);
 
-  const secondSeparator = group.indexOf("_", firstSeparator + 1);
-  const groupName = group.slice(firstSeparator + 1, secondSeparator);
+  const groupName = group.slice(firstSeparator + 1);
 
   db.query(
     "INSERT INTO accounts_groups (user_group, username, group_name, acronym) VALUES (?, ?, ?, ?)",

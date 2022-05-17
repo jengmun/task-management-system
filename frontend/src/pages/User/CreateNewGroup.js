@@ -1,5 +1,6 @@
 import { useState } from "react";
 import handlePostRequest from "../../hooks/handlePostRequest";
+import { Button, Card, TextField, Typography } from "@mui/material";
 
 const CreateNewGroup = (props) => {
   const [message, setMessage] = useState("");
@@ -17,12 +18,23 @@ const CreateNewGroup = (props) => {
     }
   };
   return (
-    <form onSubmit={handleCreateGroup}>
-      <label htmlFor="groupName">Create New Group</label>
-      <input name="groupName" />
-      <button>Submit</button>
-      <p>{message}</p>
-    </form>
+    <Card sx={{ width: "30%", p: 2 }}>
+      <form
+        onSubmit={handleCreateGroup}
+        style={{ marginBottom: 10, display: "flex", flexDirection: "column" }}
+      >
+        <TextField
+          id="groupName"
+          label="Create New Group"
+          variant="outlined"
+          required
+        />
+        <Button type="submit" sx={{ mt: 2 }}>
+          Submit
+        </Button>
+        <Typography>{message}</Typography>
+      </form>
+    </Card>
   );
 };
 

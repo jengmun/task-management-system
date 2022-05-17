@@ -89,7 +89,7 @@ const CreateApp = (props) => {
     <Card
       sx={{
         p: 3,
-        width: "max-content",
+        maxWidth: "90vw",
         maxHeight: "90vh",
         overflow: "scroll",
       }}

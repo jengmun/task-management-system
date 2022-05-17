@@ -3,6 +3,21 @@ import Dropdown from "../../components/Dropdown";
 import handleGetRequest from "../../hooks/handleGetRequest";
 import handlePostRequest from "../../hooks/handlePostRequest";
 import CreateNewGroup from "./CreateNewGroup";
+import {
+  Box,
+  Button,
+  Modal,
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableRow,
+  Typography,
+} from "@mui/material";
+import GroupAddRoundedIcon from "@mui/icons-material/GroupAddRounded";
+import GroupRemoveRoundedIcon from "@mui/icons-material/GroupRemoveRounded";
+import CircleRoundedIcon from "@mui/icons-material/CircleRounded";
+import AddBoxIcon from "@mui/icons-material/AddBox";
 
 const GroupManagement = () => {
   // ------------- Fetch all groups -------------
@@ -98,80 +113,140 @@ const GroupManagement = () => {
     });
   };
 
+  const [open, setOpen] = useState(false);
+
   return (
-    <div>
-      <CreateNewGroup fetchAllGroups={fetchAllGroups} />
+    <div style={{ width: "95%", marginTop: 10 }}>
+      <Box
+        sx={{
+          display: "flex",
+          mb: 2,
+          flexDirection: "column",
+          alignItems: "center",
+        }}
+      >
+        <Typography variant="h4">Group Management</Typography>
+        <Modal
+          open={open}
+          onClose={() => {
+            setOpen(false);
+          }}
+          sx={{
+            display: "flex",
+            justifyContent: "center",
+            alignItems: "center",
+            height: "100%",
+          }}
+        >
+          <CreateNewGroup fetchAllGroups={fetchAllGroups} />
+        </Modal>
+        <Button
+          onClick={() => {
+            setOpen(true);
+          }}
+        >
+          <AddBoxIcon sx={{ mr: 0.5 }} />
+          New Group
+        </Button>
+      </Box>
       <Dropdown
         multi={false}
         options={options}
         closeMenuOnSelect={true}
         callback={setSelectedGroup}
       />
-      <h3>Group: {selectedGroup.label}</h3>
+      <Typography variant="h5" sx={{ textAlign: "center", mb: 2, mt: 2 }}>
+        Group: {selectedGroup.label}
+      </Typography>
       {selectedGroup.value && (
-        <>
-          <h4>Current Members:</h4>
-          <table>
-            <thead>
-              <tr>
-                <th>Username</th>
-                <th>Email</th>
-                <th>Status</th>
-              </tr>
-            </thead>
+        <Box
+          sx={{
+            display: "flex",
+            alignItems: "flex-start",
+            justifyContent: "space-around",
+          }}
+        >
+          <Box>
+            <Typography>Current Members:</Typography>
+            <Table>
+              <TableHead>
+                <TableRow>
+                  <TableCell>Username</TableCell>
+                  <TableCell>Email</TableCell>
+                  <TableCell>Status</TableCell>
+                  <TableCell>Action</TableCell>
+                </TableRow>
+              </TableHead>
 
-            <tbody>
-              {groupMembers.map((member, index) => {
-                return (
-                  <tr key={member.username}>
-                    <td>{member.username}</td>
-                    <td>{member.email}</td>
-                    <td>{member.status}</td>
-                    <td>
-                      <button
-                        onClick={() => {
-                          handleRemoveMember(member.username, index);
-                        }}
-                      >
-                        Remove
-                      </button>
-                    </td>
-                  </tr>
-                );
-              })}
-            </tbody>
-          </table>
-          <h4> Other Members:</h4>
-          <table>
-            <thead>
-              <tr>
-                <th>Username</th>
-                <th>Email</th>
-                <th>Status</th>
-              </tr>
-            </thead>
-            <tbody>
-              {remainingUsers.map((member, index) => {
-                return (
-                  <tr key={member.username}>
-                    <td>{member.username}</td>
-                    <td>{member.email}</td>
-                    <td>{member.status}</td>
-                    <td>
-                      <button
-                        onClick={() => {
-                          handleAddMember(member.username, index);
-                        }}
-                      >
-                        Add
-                      </button>
-                    </td>
-                  </tr>
-                );
-              })}
-            </tbody>
-          </table>
-        </>
+              <TableBody>
+                {groupMembers.map((member, index) => {
+                  return (
+                    <TableRow key={member.username}>
+                      <TableCell>{member.username}</TableCell>
+                      <TableCell>{member.email}</TableCell>
+                      <TableCell>
+                        <CircleRoundedIcon
+                          color={
+                            member.status === "Active" ? "success" : "error"
+                          }
+                        />
+                      </TableCell>
+                      <TableCell>
+                        <Button
+                          onClick={() => {
+                            handleRemoveMember(member.username, index);
+                          }}
+                        >
+                          <GroupRemoveRoundedIcon />
+                        </Button>
+                      </TableCell>
+                    </TableRow>
+                  );
+                })}
+              </TableBody>
+            </Table>
+          </Box>
+          <Box>
+            <Typography> Other Members:</Typography>
+            <Table>
+              <TableHead>
+                <TableRow>
+                  <TableCell>Username</TableCell>
+                  <TableCell>Email</TableCell>
+                  <TableCell>Status</TableCell>
+                  <TableCell>Action</TableCell>
+                </TableRow>
+              </TableHead>
+
+              <TableBody>
+                {remainingUsers.map((member, index) => {
+                  return (
+                    <TableRow key={member.username}>
+                      <TableCell>{member.username}</TableCell>
+                      <TableCell>{member.email}</TableCell>
+                      <TableCell>
+                        <CircleRoundedIcon
+                          color={
+                            member.status === "Active" ? "success" : "error"
+                          }
+                        />
+                      </TableCell>
+                      <TableCell>
+                        <Button
+                          onClick={() => {
+                            handleAddMember(member.username, index);
+                          }}
+                        >
+                          <GroupAddRoundedIcon />
+                        </Button>
+                      </TableCell>
+                    </TableRow>
+                  );
+                })}
+              </TableBody>
+            </Table>
+          </Box>
+        </Box>
       )}
     </div>
   );

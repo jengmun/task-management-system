@@ -6,6 +6,7 @@ import handlePostRequest from "../../hooks/handlePostRequest";
 import { useTheme } from "@mui/material/styles";
 import { Box, Button, Typography, Modal } from "@mui/material";
 import CreateApp from "./CreateApp";
+import AssignPM from "./AssignPM";
 
 const Overview = () => {
   const loginContext = useContext(LoginContext);
@@ -46,23 +47,46 @@ const Overview = () => {
 
   const theme = useTheme();
 
+  const [openAssignPM, setOpenAssignPM] = useState(false);
   const [openCreateApp, setOpenCreateApp] = useState(false);
 
   return (
     <Box sx={{ p: 2 }}>
+      <Typography variant="h1" sx={{ textAlign: "center", mb: 2 }}>
+        Applications
+      </Typography>
       <Box
         sx={{
           display: "flex",
-          alignItems: "center",
+          justifyContent: "center",
         }}
       >
-        <Typography variant="h1">Applications</Typography>
         {loginContext.isLoggedIn.account_type === "Admin" && (
-          <NavLink to="/app/assign-PM" style={{ textDecoration: "none " }}>
-            <Button variant="contained" sx={{ ml: 2 }} color="warning">
+          <>
+            <Modal
+              open={openAssignPM}
+              onClose={() => {
+                setOpenAssignPM(false);
+              }}
+              sx={{
+                display: "flex",
+                justifyContent: "center",
+                alignItems: "center",
+              }}
+            >
+              <AssignPM />
+            </Modal>
+            <Button
+              variant="contained"
+              sx={{ ml: 2 }}
+              color="warning"
+              onClick={() => {
+                setOpenAssignPM(true);
+              }}
+            >
               Assign PM
             </Button>
-          </NavLink>
+          </>
         )}
 
         {isPM && (
@@ -93,7 +117,7 @@ const Overview = () => {
           </>
         )}
       </Box>
-      <Box sx={{ display: "flex" }}>
+      <Box sx={{ display: "flex", justifyContent: "center" }}>
         {allApps.map((app) => {
           return (
             <NavLink

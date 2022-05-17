@@ -91,18 +91,30 @@ const EditApp = (props) => {
     <Card
       sx={{
         p: 3,
+        maxWidth: "90vw",
+        maxHeight: "90vh",
+        overflow: "scroll",
       }}
     >
-      <Typography variant="h4">{app}</Typography>
+      <Typography variant="h4" sx={{ textAlign: "center" }}>
+        {app}
+      </Typography>
       {appDetails.end_date && (
-        <form onSubmit={handleEditApp}>
+        <form
+          onSubmit={handleEditApp}
+          style={{
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+            marginTop: 2,
+          }}
+        >
           <TextareaAutosize
             required
             maxLength="255"
             minRows={3}
             id="description"
             defaultValue={appDetails.description}
-            sx={{ mt: 1, mb: 1 }}
           />
           <TextField
             id="startDate"
@@ -128,7 +140,7 @@ const EditApp = (props) => {
           />
           {permissions.map((permission) => {
             return (
-              <FormControl key={permission} sx={{ mt: 1, mb: 1 }}>
+              <FormControl key={permission} sx={{ mt: 2 }}>
                 <InputLabel id={permission}>{`${permission.slice(
                   6
                 )}`}</InputLabel>

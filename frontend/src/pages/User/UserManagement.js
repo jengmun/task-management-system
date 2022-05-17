@@ -3,6 +3,25 @@ import { NavLink } from "react-router-dom";
 import Dropdown from "../../components/Dropdown";
 import handleGetRequest from "../../hooks/handleGetRequest";
 import handlePostRequest from "../../hooks/handlePostRequest";
+import {
+  Box,
+  Button,
+  Table,
+  TableHead,
+  TableRow,
+  TableBody,
+  TableCell,
+  TextField,
+  Switch,
+  Tooltip,
+  Typography,
+} from "@mui/material";
+import EditIcon from "@mui/icons-material/Edit";
+import SaveRoundedIcon from "@mui/icons-material/SaveRounded";
+import CancelRoundedIcon from "@mui/icons-material/CancelRounded";
+import LockResetRoundedIcon from "@mui/icons-material/LockResetRounded";
+import CircleRoundedIcon from "@mui/icons-material/CircleRounded";
+import PersonAddRoundedIcon from "@mui/icons-material/PersonAddRounded";
 
 const UserManagement = () => {
   // ------------- Fetch all users -------------
@@ -65,23 +84,48 @@ const UserManagement = () => {
   };
 
   return (
-    <div>
-      <NavLink to="/admin/create-user">
-        <button>Create New User</button>
-      </NavLink>
-      <label>Filter</label>
-      <input onChange={handleFilterUsers} />
-      <table>
-        <thead>
-          <tr>
-            <th>Username</th>
-            <th>Email</th>
-            <th>Groups</th>
-            <th>Status</th>
-            <th>Password reset</th>
-          </tr>
-        </thead>
-        <tbody>
+    <div
+      style={{
+        display: "flex",
+        flexDirection: "column",
+        alignItems: "center",
+        width: "95%",
+      }}
+    >
+      <Box
+        sx={{
+          p: 2,
+          pb: 0,
+          display: "flex",
+          justifyContent: "space-between",
+          width: "100%",
+        }}
+      >
+        <NavLink to="/admin/create-user" style={{ textDecoration: "none" }}>
+          <Button>
+            <PersonAddRoundedIcon />
+            <Typography sx={{ ml: 1 }} variant="body1">
+              Add new user
+            </Typography>
+          </Button>
+        </NavLink>
+        <TextField
+          label="Filter"
+          variant="outlined"
+          onChange={handleFilterUsers}
+        />
+      </Box>
+      <Table>
+        <TableHead>
+          <TableRow>
+            <TableCell sx={{ textAlign: "center" }}>Username</TableCell>
+            <TableCell sx={{ textAlign: "center" }}>Email</TableCell>
+            <TableCell sx={{ textAlign: "center" }}>Groups</TableCell>
+            <TableCell sx={{ textAlign: "center" }}>Status</TableCell>
+            <TableCell sx={{ textAlign: "center" }}>Action</TableCell>
+          </TableRow>
+        </TableHead>
+        <TableBody>
           {filterUsers.map((user, index) => {
             if (!user.formatted_groups) {
               user.formatted_groups = [];
@@ -104,8 +148,8 @@ const UserManagement = () => {
               />
             );
           })}
-        </tbody>
-      </table>
+        </TableBody>
+      </Table>
     </div>
   );
 };
@@ -175,30 +219,38 @@ const User = (props) => {
   };
 
   return (
-    <tr>
-      <td>
-        <input
-          value={userData.username}
-          readOnly
-          style={{ backgroundColor: readOnly ? "grey" : "white" }}
-        />
-      </td>
-      <td>
-        <input
-          value={reactData.email}
-          readOnly={readOnly}
-          style={{ backgroundColor: readOnly ? "grey" : "white" }}
-          onChange={(e) => {
-            setReactData({ ...reactData, email: e.target.value });
-          }}
-        />
-        {/* WEIRD!!! */}
-      </td>
-      <td>
+    <TableRow>
+      <TableCell sx={{ textAlign: "center" }}>{userData.username}</TableCell>
+      <TableCell sx={{ textAlign: "center" }}>
         {readOnly ? (
-          reactData.formatted_groups.map((group) => {
-            return <div>{group.label}</div>;
-          })
+          <>{reactData.email}</>
+        ) : (
+          <TextField
+            variant="outlined"
+            required
+            value={reactData.email}
+            InputProps={{ inputProps: { readOnly: readOnly } }}
+            onChange={(e) => {
+              setReactData({ ...reactData, email: e.target.value });
+            }}
+          />
+        )}
+      </TableCell>
+      <TableCell sx={{ textAlign: "center" }}>
+        {readOnly ? (
+          <>
+            {reactData.formatted_groups.length ? (
+              <Tooltip
+                title={reactData.formatted_groups.map((group) => {
+                  return <div>{group.label}</div>;
+                })}
+              >
+                <div>Hover to view more</div>
+              </Tooltip>
+            ) : (
+              <div>No groups assigned!</div>
+            )}
+          </>
         ) : (
           <Dropdown
             multi={true}
@@ -208,16 +260,18 @@ const User = (props) => {
             callback={(e) => {
               setReactData({ ...reactData, formatted_groups: e });
             }}
-          ></Dropdown>
+          />
         )}
-      </td>
-      <td>
+      </TableCell>
+      <TableCell sx={{ textAlign: "center" }}>
         {readOnly ? (
-          <div>{reactData.status}</div>
+          <>
+            <CircleRoundedIcon
+              color={reactData.status === "Active" ? "success" : "error"}
+            />
+          </>
         ) : (
-          <input
-            type="checkbox"
-            checked={reactData.status === "Active" ? true : false}
+          <Switch
             onChange={() => {
               if (reactData.status === "Active") {
                 setReactData({ ...reactData, status: "Inactive" });
@@ -225,26 +279,43 @@ const User = (props) => {
                 setReactData({ ...reactData, status: "Active" });
               }
             }}
+            defaultChecked={reactData.status === "Active" ? true : false}
+            color="success"
           />
         )}
-      </td>
-      <td>
-        <button onClick={handleResetPassword} disabled={passwordReset}>
-          {passwordReset ? "Password resetted" : "Reset password"}
-        </button>
-      </td>
-      <td>
+      </TableCell>
+      <TableCell sx={{ textAlign: "center" }}>
         {readOnly ? (
-          <button onClick={handleEditUser}>Edit</button>
+          <Button>
+            <EditIcon fontSize="small" onClick={handleEditUser} />
+          </Button>
         ) : (
           <>
-            <button btn onClick={handleUpdateUser}>
-              Save
-            </button>
-            <button onClick={handleCancelChanges}>Cancel</button>
+            <Tooltip title="Save changes">
+              <Button>
+                <SaveRoundedIcon onClick={handleUpdateUser} sx={{ mr: 1 }} />
+              </Button>
+            </Tooltip>
+            <Tooltip title="Cancel changes">
+              <Button>
+                <CancelRoundedIcon
+                  onClick={handleCancelChanges}
+                  sx={{ mr: 1 }}
+                />
+              </Button>
+            </Tooltip>
+            {passwordReset ? (
+              "Password resetted"
+            ) : (
+              <Tooltip title="Reset password">
+                <Button>
+                  <LockResetRoundedIcon onClick={handleResetPassword} />
+                </Button>
+              </Tooltip>
+            )}
           </>
         )}
-      </td>
-    </tr>
+      </TableCell>
+    </TableRow>
   );
 };

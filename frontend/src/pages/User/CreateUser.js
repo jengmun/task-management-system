@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import handleGetRequest from "../../hooks/handleGetRequest";
 import handlePostRequest from "../../hooks/handlePostRequest";
 import Dropdown from "../../components/Dropdown";
+import { Typography, TextField, Button, Card, Box } from "@mui/material";
 
 const CreateUser = () => {
   // ------------- Fetch all groups -------------
@@ -63,26 +64,66 @@ const CreateUser = () => {
   };
 
   return (
-    <div>
-      <form onSubmit={handleSubmit}>
-        <h1>Create New User</h1>
-        <label htmlFor="username">Username</label>
-        <input id="username" name="username" required />
-        <label htmlFor="password">Password</label>
-        <input id="password" name="password" type="password" required />
-        <label htmlFor="email">Email</label>
-        <input id="email" name="email" required />
-        <p>Assign group</p>
-        <Dropdown
-          multi={true}
-          options={options}
-          closeMenuOnSelect={false}
-          callback={setSelectedGroups}
-        />
-        <button>Submit</button>
-      </form>
-      <p>{message}</p>
-    </div>
+    <Box
+      sx={{
+        display: "flex",
+        justifyContent: "center",
+        alignItems: "center",
+        justifyContent: "center",
+        height: "100%",
+      }}
+    >
+      <Card
+        sx={{
+          display: "flex",
+          flexDirection: "column",
+          maxWidth: "70%",
+          p: 5,
+        }}
+      >
+        <form
+          onSubmit={handleSubmit}
+          style={{ display: "flex", flexDirection: "column" }}
+        >
+          <Typography variant="h5">Create New User</Typography>
+          <TextField
+            id="username"
+            label="Username"
+            variant="outlined"
+            required
+            sx={{ mt: 2 }}
+          />
+          <TextField
+            id="password"
+            label="Password"
+            type="password"
+            variant="outlined"
+            required
+            sx={{ mt: 2 }}
+          />
+          <TextField
+            id="email"
+            label="Email"
+            variant="outlined"
+            required
+            sx={{ mt: 2 }}
+          />
+          <Typography variant="h6" sx={{ mt: 2, mb: 2 }}>
+            Assign group
+          </Typography>
+          <Dropdown
+            multi={true}
+            options={options}
+            closeMenuOnSelect={false}
+            callback={setSelectedGroups}
+          />
+          <Button type="submit" sx={{ mt: 2 }}>
+            Submit
+          </Button>
+        </form>
+        <Typography variant="body2">{message}</Typography>
+      </Card>
+    </Box>
   );
 };
 

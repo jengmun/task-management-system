@@ -1,4 +1,4 @@
-import { Button, TextField, Typography } from "@mui/material";
+import { Box, Button, TextField, Typography } from "@mui/material";
 import { useContext, useState } from "react";
 import LoginContext from "../../context/login-context";
 import handlePostRequest from "../../hooks/handlePostRequest";
@@ -74,45 +74,82 @@ const Profile = () => {
   };
 
   return (
-    <div>
-      <h1>Account management</h1>
+    <Box
+      sx={{
+        display: "flex",
+        justifyContent: "center",
+        alignItems: "center",
+        height: "100%",
+      }}
+    >
+      <Box
+        sx={{
+          display: "flex",
+          flexDirection: "column",
+          justifyContent: "center",
+          alignItems: "center",
+          border: "1px solid black",
+          borderRadius: "10px",
+          p: 3,
+        }}
+      >
+        <Typography variant="h4">Account management</Typography>
 
-      <Typography variant="h6">
-        Username: {loginContext.isLoggedIn.username}
-      </Typography>
-      <h1>Update email information</h1>
-      <form onSubmit={handleEmailChange}>
-        <TextField
-          required
-          id="updateEmail"
-          label="Email"
-          defaultValue={loginContext.isLoggedIn.email}
-          sx={{ mt: 1, mb: 1 }}
-        />
-        <Button type="submit">Update</Button>
-      </form>
-      <p>{emailMessage}</p>
+        <Typography variant="body1">
+          Username: {loginContext.isLoggedIn.username}
+        </Typography>
+        <Box sx={{ display: "flex" }}>
+          <form
+            onSubmit={handleEmailChange}
+            style={{ display: "flex", flexDirection: "column", padding: 10 }}
+          >
+            <Typography
+              variant="body1"
+              sx={{ mt: 1, mb: 1, textAlign: "center" }}
+            >
+              Update email information
+            </Typography>
+            <TextField
+              required
+              id="updateEmail"
+              label="Email"
+              defaultValue={loginContext.isLoggedIn.email}
+              sx={{ mt: 1, mb: 1 }}
+            />
+            <Button type="submit">Update</Button>
+          </form>
+          <Typography variant="body2">{emailMessage}</Typography>
 
-      <h1>Change password</h1>
-      <form onSubmit={handlePasswordChange}>
-        <TextField
-          required
-          id="updatePassword"
-          label="Password"
-          type="password"
-          sx={{ mt: 1, mb: 1 }}
-        />
-        <TextField
-          required
-          id="confirmPassword"
-          label="Re-enter Password"
-          type="password"
-          sx={{ mt: 1, mb: 1 }}
-        />
-        <Button type="submit">Update password</Button>
-      </form>
-      <p>{passwordMessage}</p>
-    </div>
+          <form
+            onSubmit={handlePasswordChange}
+            style={{ display: "flex", flexDirection: "column", padding: 10 }}
+          >
+            <Typography
+              variant="body1"
+              sx={{ mt: 1, mb: 1, textAlign: "center" }}
+            >
+              Change password
+            </Typography>
+            <TextField
+              required
+              id="updatePassword"
+              label="Password"
+              type="password"
+              sx={{ mt: 1, mb: 1 }}
+            />
+            <TextField
+              required
+              id="confirmPassword"
+              label="Re-enter Password"
+              type="password"
+              sx={{ mt: 1, mb: 1 }}
+            />
+            <Button type="submit">Update password</Button>
+          </form>
+          <Typography variant="body2">{passwordMessage}</Typography>
+        </Box>
+      </Box>
+    </Box>
   );
 };
 

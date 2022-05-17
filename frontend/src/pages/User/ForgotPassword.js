@@ -1,3 +1,4 @@
+import { Button } from "@mui/material";
 import { useState } from "react";
 import handlePostRequest from "../../hooks/handlePostRequest";
 
@@ -23,7 +24,7 @@ const ResetPassword = () => {
       <label htmlFor="email">Email</label>
       <input id="email" name="email" />
 
-      <button>Submit</button>
+      <Button type="submit">Submit</Button>
       <p>{message}</p>
     </form>
   );

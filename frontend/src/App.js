@@ -64,9 +64,16 @@ function App() {
     <ThemeProvider theme={theme}>
       <LoginContext.Provider value={{ isLoggedIn, setIsLoggedIn }}>
         <BrowserRouter>
-          <Box sx={{ display: "flex", height: "100vh", width: "100vw" }}>
+          <Box sx={{ display: "flex", height: "100vh", width: "100%" }}>
             <Nav />
-            <Box sx={{ width: "85%", ml: "15%" }}>
+            <Box
+              sx={{
+                width: "95%",
+                ml: "5%",
+                display: "flex",
+                justifyContent: "center",
+              }}
+            >
               <Switch>
                 <Route exact path="/">
                   {isLoggedIn.username ? (

@@ -3,11 +3,12 @@ import handleGetRequest from "../../hooks/handleGetRequest";
 import handlePostRequest from "../../hooks/handlePostRequest";
 import {
   Button,
+  Box,
   Typography,
   TextareaAutosize,
+  InputLabel,
   Chip,
   Card,
-  Box,
   Accordion,
   AccordionSummary,
   AccordionDetails,
@@ -16,6 +17,8 @@ import {
   TableRow,
   TableBody,
   TableCell,
+  Select,
+  MenuItem,
 } from "@mui/material";
 
 const EditTask = (props) => {
@@ -28,6 +31,7 @@ const EditTask = (props) => {
     const data = await handleGetRequest(`task/task-details/${task}`);
     if (data) {
       setTaskDetails(data);
+      setSelectedPlan(taskDetails.plan_name ? taskDetails.plan_name : "null");
     }
   };
 
@@ -49,7 +53,6 @@ const EditTask = (props) => {
     if (data) {
       setAllPlans(data);
     }
-    console.log(data);
   };
 
   // ------------- Check if Member -------------/
@@ -97,6 +100,8 @@ const EditTask = (props) => {
     setPermissions();
   }, [taskDetails]);
 
+  const [selectedPlan, setSelectedPlan] = useState("");
+
   const [notesMessage, setNotesMessage] = useState("");
 
   const handleAddNote = async (e) => {
@@ -118,13 +123,11 @@ const EditTask = (props) => {
   return (
     <Card
       sx={{
-        width: "80vw",
-        height: "90vh",
-        position: "absolute",
-        left: "10vw",
-        top: "4vh",
+        minWidth: "120px",
+        width: "50vw",
+        maxHeight: "90vh",
         overflow: "scroll",
-        p: 1,
+        p: 5,
       }}
     >
       <Typography variant="h2" sx={{ textAlign: "center" }}>
@@ -172,60 +175,91 @@ const EditTask = (props) => {
             <Typography variant="body1">
               Description: {taskDetails.description}
             </Typography>
-            <Typography variant="body1">
-              Plan Name: {taskDetails.plan_name}
+            <Typography variant="body1" sx={{ mb: 2 }}>
+              Plan Name:{" "}
+              {taskDetails.plan_name
+                ? taskDetails.plan_name
+                : "No plan allocated"}
             </Typography>
           </>
         ) : (
-          <>
-            <TextareaAutosize
-              id="description"
-              defaultValue={taskDetails.description}
-              maxLength="255"
-              minRows={2}
-            />
-            <label htmlFor="planName">Plan Name</label>
-            <select id="planName" name="planName">
-              <option
-                value="null"
-                selected={taskDetails.plan_name ? true : false}
-              >
-                No plan
-              </option>
-              {allPlans.map((plan) => {
-                return (
-                  <option
-                    selected={
-                      plan.plan_name === taskDetails.plan_name ? true : false
-                    }
-                    value={plan.plan_name}
+          <Box sx={{ display: "flex", justifyContent: "space-around" }}>
+            <Box
+              sx={{
+                display: "flex",
+                flexDirection: "column",
+                width: "70%",
+              }}
+            >
+              <Box sx={{ display: "flex", justifyContent: "space-around" }}>
+                <Box>
+                  <InputLabel id="description">Description</InputLabel>
+                  <TextareaAutosize
+                    id="description"
+                    defaultValue={taskDetails.description}
+                    maxLength="255"
+                    minRows={2}
+                  />
+                </Box>{" "}
+                <Box>
+                  <InputLabel id="planName">Plan Name</InputLabel>
+                  <Select
+                    id="planName"
+                    label="Plan Name"
+                    value={selectedPlan}
+                    onChange={(e) => {
+                      setSelectedPlan(e.target.value);
+                    }}
                   >
-                    {plan.plan_name}
-                  </option>
-                );
-              })}
-            </select>
-            <Button type="submit">Update task</Button>
-          </>
+                    <MenuItem value="null">No plan</MenuItem>
+                    {allPlans.map((plan) => {
+                      return (
+                        <MenuItem key={plan.plan_name} value={plan.plan_name}>
+                          {plan.plan_name}
+                        </MenuItem>
+                      );
+                    })}
+                  </Select>
+                </Box>
+              </Box>
+              <Button type="submit" variant="contained" sx={{ mt: 2 }}>
+                Update task
+              </Button>
+            </Box>
+            {isMember && taskDetails.state !== "Closed" && (
+              <form
+                onSubmit={handleAddNote}
+                style={{ display: "flex", flexDirection: "column" }}
+              >
+                <InputLabel id="notes">Add notes</InputLabel>
+                <TextareaAutosize
+                  id="notes"
+                  maxLength="255"
+                  minRows={2}
+                  required
+                />
+                <Button type="submit" variant="contained" sx={{ mt: 2 }}>
+                  Add
+                </Button>
+              </form>
+            )}
+          </Box>
         )}
       </form>
       {message}
-      {isMember && taskDetails.state !== "Closed" && (
-        <form
-          onSubmit={handleAddNote}
-          style={{ display: "flex", flexDirection: "column" }}
-        >
-          <TextareaAutosize id="notes" maxLength="255" minRows={2} required />
-          <Button type="submit">Add notes</Button>
-        </form>
-      )}
+
       <Typography variant="body2">{notesMessage}</Typography>
       {allNotes.map((note) => {
         return (
           <Accordion>
-            <AccordionSummary>
+            <AccordionSummary sx={{ display: "flex", alignItems: "center" }}>
               <Typography variant="body1">{note.details}</Typography>
-              <Typography variant="body1">{note.date.slice(0, 10)}</Typography>
+              <Typography
+                variant="body1"
+                sx={{ position: "absolute", right: 20 }}
+              >
+                {note.date.slice(0, 10)}
+              </Typography>
             </AccordionSummary>
             <AccordionDetails>
               <Typography variant="body1">Author: {note.creator}</Typography>

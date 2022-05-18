@@ -6,4 +6,7 @@
 .react-kanban-column{
     width: 13vw;
     display: flex;
+    align-items: center;
+    justify-content: center;
 }
+

@@ -1,4 +1,14 @@
-import { Button, Card } from "@mui/material";
+import {
+  Button,
+  Card,
+  FormControl,
+  InputLabel,
+  MenuItem,
+  Select,
+  TextareaAutosize,
+  TextField,
+  Typography,
+} from "@mui/material";
 import { useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
 import handleGetRequest from "../../hooks/handleGetRequest";
@@ -22,6 +32,8 @@ const CreateTask = (props) => {
     fetchAllPlans();
   }, []);
 
+  const [selectedPlan, setSelectedPlan] = useState("");
+
   const [message, setMessage] = useState("");
 
   const handleCreateTask = async (e) => {
@@ -31,45 +43,82 @@ const CreateTask = (props) => {
       acronym: app,
       taskName: e.target.taskName.value,
       description: e.target.description.value,
-      details: e.target.notes.value,
-      planName: e.target.planName.value,
+      // details: e.target.notes.value,
+      planName: selectedPlan,
     });
     setMessage(data);
 
     if (data === "Added note") {
       e.target.taskName.value = "";
       e.target.description.value = "";
-      e.target.notes.value = "";
-      e.target.planName.value = "";
+      // e.target.notes.value = "";
+      setSelectedPlan("");
       props.fetchTasks();
     }
   };
 
   return (
-    <Card>
-      <form onSubmit={handleCreateTask}>
-        <label htmlFor="taskName">Task Name</label>
-        <input id="taskName" name="taskName" required />
-        <label htmlFor="description">Description</label>
-        <textarea
-          id="description"
-          name="description"
-          maxLength="255"
+    <Card
+      sx={{
+        p: 3,
+        maxWidth: "90vw",
+        maxHeight: "90vh",
+        overflow: "scroll",
+      }}
+    >
+      <Typography variant="h5" sx={{ textAlign: "center" }}>
+        Create New Task
+      </Typography>
+      <form
+        onSubmit={handleCreateTask}
+        style={{
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "center",
+          marginTop: 2,
+        }}
+      >
+        <TextField
+          id="taskName"
+          label="Task Name"
+          variant="outlined"
           required
+          sx={{ mt: 2, mb: 2 }}
         />
-        <label htmlFor="notes">Notes</label>
-        <input id="notes" name="notes" required />
+        <TextareaAutosize
+          required
+          maxLength="255"
+          minRows={3}
+          id="description"
+          placeholder="Description"
+        />
+        {/* <label htmlFor="notes">Notes</label>
+        <input id="notes" name="notes" required /> */}
         {/* needed? */}
-        <label htmlFor="planName">Plan Name</label>
-        <select id="planName" name="planName">
-          <option value="">No Plan Selected</option>
-          {allPlans.map((plan) => {
-            return <option value={plan.plan_name}>{plan.plan_name}</option>;
-          })}
-        </select>
+        <FormControl sx={{ mt: 2 }}>
+          <InputLabel id="planName">Plan Name</InputLabel>
+          <Select
+            id="planName"
+            label="Plan Name"
+            sx={{ width: "200px" }}
+            value={selectedPlan}
+            onChange={(e) => {
+              setSelectedPlan(e.target.value);
+            }}
+          >
+            <MenuItem value="">No Plan Selected</MenuItem>
+            {allPlans.map((plan) => {
+              return (
+                <MenuItem value={plan.plan_name} key={plan.plan_name}>
+                  {plan.plan_name}
+                </MenuItem>
+              );
+            })}
+          </Select>
+        </FormControl>
         <Button type="submit">Submit</Button>
       </form>
-      {message}
+      <Typography variant="body1">{message}</Typography>
     </Card>
   );
 };

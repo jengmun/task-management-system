@@ -256,6 +256,9 @@ exports.updateGroups = async (req, res, next) => {
     toDelete = [...oldGroups];
   } else if (oldGroups.length && currentGroups.length) {
     for (let i = 0; i < oldGroups.length; i++) {
+      if (!currentGroups.length) {
+        toDelete.push(oldGroups[i]);
+      }
       for (let j = 0; j < currentGroups.length; j++) {
         if (oldGroups[i] === currentGroups[j].value) {
           currentGroups.splice(j, 1);
@@ -271,6 +274,8 @@ exports.updateGroups = async (req, res, next) => {
     const separatorIndex = group.value.indexOf("_");
     const acronym = group.value.slice(0, separatorIndex);
     const groupName = group.value.slice(separatorIndex + 1);
+
+    console.log("insert ", acronym, groupName);
 
     return await new Promise((resolve) => {
       db.query(
@@ -304,6 +309,8 @@ exports.updateGroups = async (req, res, next) => {
       );
     });
   };
+
+  console.log("to Delete", toDelete);
 
   async function runQueries() {
     for (const group of currentGroups) {

@@ -65,7 +65,6 @@ const Plan = (props) => {
   const { app } = useParams();
 
   const [input, setInput] = useState({
-    planName: props.plan.plan_name,
     startDate: props.plan.start_date.slice(0, 10),
     endDate: props.plan.end_date.slice(0, 10),
   });
@@ -75,8 +74,12 @@ const Plan = (props) => {
   const handleUpdatePlan = async (e) => {
     e.preventDefault();
 
+    if (new Date(input.endDate) - new Date(input.startDate) < 0) {
+      setMessage("End date must be later than start date!");
+      return;
+    }
+
     const data = await handlePostRequest(`task/update-plan/${app}`, {
-      planName: input.planName,
       startDate: input.startDate,
       endDate: input.endDate,
       currentPlan: props.plan.plan_name,
@@ -95,7 +98,7 @@ const Plan = (props) => {
     }
 
     const data = await handlePostRequest(`task/update-plan-status/${app}`, {
-      planName: input.planName,
+      planName: props.plan.plan_name,
     });
 
     if (data === "Plan status updated") {
@@ -110,16 +113,7 @@ const Plan = (props) => {
   return (
     <TableRow>
       <TableCell>
-        <TextField
-          id="planName"
-          label="Plan Name"
-          variant="outlined"
-          defaultValue={props.plan.plan_name}
-          onChange={(e) => {
-            setInput({ ...input, planName: e.target.value });
-          }}
-          sx={{ mt: 2 }}
-        />
+        <Typography>{props.plan.plan_name}</Typography>
       </TableCell>
       <TableCell>
         <TextField
@@ -133,6 +127,9 @@ const Plan = (props) => {
           }}
           defaultValue={`${props.plan.start_date.slice(0, 10)}`}
           sx={{ mt: 2 }}
+          InputProps={{
+            inputProps: { readOnly: props.plan.status === "Closed" },
+          }}
         />
       </TableCell>
       <TableCell>
@@ -141,7 +138,12 @@ const Plan = (props) => {
           label="End Date"
           variant="outlined"
           type="date"
-          InputProps={{ inputProps: { min: startDate } }}
+          InputProps={{
+            inputProps: {
+              min: startDate,
+              readOnly: props.plan.status === "Closed",
+            },
+          }}
           defaultValue={`${props.plan.end_date.slice(0, 10)}`}
           onChange={(e) => {
             setInput({ ...input, endDate: e.target.value });
@@ -157,7 +159,9 @@ const Plan = (props) => {
         )}
       </TableCell>
       <TableCell>
-        <Button onClick={handleUpdatePlan}>Update</Button>
+        {props.plan.status !== "Closed" && (
+          <Button onClick={handleUpdatePlan}>Update</Button>
+        )}
       </TableCell>
       <Typography variant="body2">{message}</Typography>
     </TableRow>

@@ -69,7 +69,6 @@ const CreateUser = () => {
         display: "flex",
         justifyContent: "center",
         alignItems: "center",
-        justifyContent: "center",
         height: "100%",
       }}
     >

@@ -144,13 +144,8 @@ exports.createPlan = (req, res, next) => {
 
 exports.updatePlan = (req, res, next) => {
   db.query(
-    "UPDATE plans SET plan_name = ?, start_date = ?, end_date = ? WHERE plan_name = ? AND status = 'Open'",
-    [
-      req.body.planName,
-      req.body.startDate,
-      req.body.endDate,
-      req.body.currentPlan,
-    ],
+    "UPDATE plans SET start_date = ?, end_date = ? WHERE plan_name = ? AND status = 'Open'",
+    [req.body.startDate, req.body.endDate, req.body.currentPlan],
     (err, result) => {
       if (err) {
         next(err);

@@ -6,7 +6,10 @@ import handleGetRequest from "../../hooks/handleGetRequest";
 import handlePostRequest from "../../hooks/handlePostRequest";
 import EditTask from "./EditTask";
 import CreatePlan from "./CreatePlan";
-import { useTheme } from "@mui/material/styles";
+import "./kanban.css";
+import EditPlan from "./EditPlan";
+import EditApp from "./EditApp";
+import CreateTask from "./CreateTask";
 import {
   Box,
   Button,
@@ -14,17 +17,15 @@ import {
   Card,
   Modal,
   Chip,
-  Table,
-  TableHead,
-  TableRow,
-  TableBody,
-  TableCell,
   Tooltip,
+  SpeedDial,
+  SpeedDialAction,
+  SpeedDialIcon,
 } from "@mui/material";
-import "./kanban.css";
-import EditPlan from "./EditPlan";
-import EditApp from "./EditApp";
-import CreateTask from "./CreateTask";
+import AddIcon from "@mui/icons-material/Add";
+import AppRegistrationIcon from "@mui/icons-material/AppRegistration";
+import NoteAddRoundedIcon from "@mui/icons-material/NoteAddRounded";
+import EditRoundedIcon from "@mui/icons-material/EditRounded";
 
 const KanbanBoard = () => {
   const { app } = useParams();
@@ -59,18 +60,6 @@ const KanbanBoard = () => {
     }
   };
 
-  // ------------- Check if PM -------------/
-  const [isPM, setIsPM] = useState(false);
-
-  const checkPM = async () => {
-    const data = await handlePostRequest("task/is-group", {
-      group: "Project Manager",
-    });
-    if (data) {
-      setIsPM(data);
-    }
-  };
-
   // ------------- Check permission to Create Task -------------
   const [createTaskPermission, setCreateTaskPermission] = useState(false);
 
@@ -83,12 +72,28 @@ const KanbanBoard = () => {
     setCreateTaskPermission(data);
   };
 
+  // ------------- Fetch user permissions -------------
+  const [userPermissions, setUserPermissions] = useState([]);
+  const [isPM, setIsPM] = useState(false);
+
+  const fetchUserPermissions = async () => {
+    const data = await handleGetRequest(`task/get-permissions/${app}`);
+
+    setUserPermissions(data);
+
+    if (
+      data.some((permission) => permission.group_name === "Project Manager")
+    ) {
+      setIsPM(true);
+    }
+  };
+
   useEffect(() => {
     fetchAppDetails();
     fetchTasks();
     fetchAllPlans();
-    checkPM();
     checkCreateTaskPermission();
+    fetchUserPermissions();
   }, []);
 
   // ------------- Create Kanban Board -------------
@@ -167,145 +172,23 @@ const KanbanBoard = () => {
   const [openCreateTask, setOpenCreateTask] = useState(false);
 
   return (
-    <Box>
-      <NavLink to={`/`} style={{ textDecoration: "none" }}>
-        <Button>Back</Button>
-      </NavLink>
-      <Typography variant="h2" sx={{ textAlign: "center" }}>
-        {app}
-      </Typography>
-      <Typography variant="body2" sx={{ textAlign: "center" }}>
-        {`${appDetails.start_date?.slice(0, 10)} -
-        ${appDetails.end_date?.slice(0, 10)}`}
-      </Typography>
-      <Typography variant="body1" sx={{ textAlign: "center" }}>
-        {appDetails.description}
-      </Typography>
-      {/* ------------- APP ------------- */}
-      <div style={{ textAlign: "center" }}>
-        {isPM && (
-          <>
-            <Modal
-              open={openEditApp}
-              onClose={() => {
-                setOpenEditApp(false);
-              }}
-              sx={{
-                display: "flex",
-                justifyContent: "center",
-                alignItems: "center",
-              }}
-            >
-              <EditApp fetchAppDetails={fetchAppDetails} />
-            </Modal>
-            <Button
-              onClick={() => {
-                setOpenEditApp(true);
-              }}
-            >
-              Edit app
-            </Button>
-          </>
-        )}
-
-        <Typography variant="h5">Permissions</Typography>
-        <Table>
-          <TableHead>
-            <TableRow>
-              <TableCell>Create</TableCell>
-              <TableCell>Open</TableCell>
-              <TableCell>Todo</TableCell>
-              <TableCell>Doing</TableCell>
-              <TableCell>Done</TableCell>
-            </TableRow>
-          </TableHead>
-          <TableBody>
-            <TableRow>
-              <TableCell sx={{ border: "none" }}>
-                <Typography variant="body1">
-                  {appDetails.permit_create}
-                </Typography>
-              </TableCell>
-              <TableCell sx={{ border: "none" }}>
-                <Typography variant="body1">
-                  {appDetails.permit_open}
-                </Typography>
-              </TableCell>
-              <TableCell sx={{ border: "none" }}>
-                <Typography variant="body1">
-                  {appDetails.permit_todo}
-                </Typography>
-              </TableCell>
-              <TableCell sx={{ border: "none" }}>
-                <Typography variant="body1">
-                  {appDetails.permit_doing}
-                </Typography>
-              </TableCell>
-              <TableCell sx={{ border: "none" }}>
-                <Typography variant="body1">
-                  {appDetails.permit_done}
-                </Typography>
-              </TableCell>
-            </TableRow>
-          </TableBody>
-        </Table>
-      </div>
-      {/* ------------- PLANS ------------- */}
-      <div
-        style={{
+    <Box sx={{ width: "100%" }}>
+      {/* ================== PLANS ================== */}
+      <Box
+        sx={{
           textAlign: "center",
           flexDirection: "column",
-          width: "15vw",
+          width: "10vw",
           position: "absolute",
-          left: 0,
+          left: "5vw",
+          minHeight: "100%",
+          backgroundColor: "green",
         }}
       >
-        <Typography variant="h5">Plans</Typography>
-        {isPM && (
-          <Box>
-            <Modal
-              open={openCreatePlan}
-              onClose={() => {
-                setOpenCreatePlan(false);
-              }}
-              sx={{
-                display: "flex",
-                justifyContent: "center",
-                alignItems: "center",
-              }}
-            >
-              <CreatePlan fetchAllPlans={fetchAllPlans} />
-            </Modal>
-            <Button
-              onClick={() => {
-                setOpenCreatePlan(true);
-              }}
-            >
-              Create Plan
-            </Button>
-            <Modal
-              open={openEditPlan}
-              onClose={() => {
-                setOpenEditPlan(false);
-              }}
-              sx={{
-                display: "flex",
-                justifyContent: "center",
-                alignItems: "center",
-              }}
-            >
-              <EditPlan fetchAllPlans={fetchAllPlans} />
-            </Modal>
+        <Typography variant="h6" sx={{ mt: 2 }}>
+          Plans
+        </Typography>
 
-            <Button
-              onClick={() => {
-                setOpenEditPlan(true);
-              }}
-            >
-              Edit plans
-            </Button>
-          </Box>
-        )}
         <Box
           sx={{
             display: "flex",
@@ -324,45 +207,296 @@ const KanbanBoard = () => {
                     <div>End Date: {plan.end_date.slice(0, 10)}</div>
                   </>
                 }
+                sx={{ mb: 0.5 }}
               >
-                <Chip label={plan.plan_name} />
+                <Typography
+                  variant="body2"
+                  sx={{ backgroundColor: "orange", mb: 1, pr: 0.5, pl: 0.5 }}
+                >
+                  {plan.plan_name}
+                </Typography>
               </Tooltip>
             );
           })}
         </Box>
-      </div>
-      {/* ------------- TASKS ------------- */}
-      {createTaskPermission && (
-        <>
-          <Modal
-            open={openCreateTask}
-            onClose={() => {
-              setOpenCreateTask(false);
-            }}
+      </Box>
+
+      <Box sx={{ ml: "10vw", width: "90%" }}>
+        <NavLink to={`/`} style={{ textDecoration: "none" }}>
+          <Button>Back</Button>
+        </NavLink>
+
+        <Box sx={{ mt: 0.5, mb: 2, display: "flex", justifyContent: "center" }}>
+          {/* ================== APP ================== */}
+          <Box
             sx={{
               display: "flex",
+              flexDirection: "column",
               justifyContent: "center",
               alignItems: "center",
+              width: "35%",
+              borderRadius: "10px",
+              border: "1px solid black",
+              p: 2,
+              mr: 2,
             }}
           >
-            <CreateTask fetchTasks={fetchTasks} />
-          </Modal>
-          <Button
+            <Typography variant="h2" sx={{ textAlign: "center" }}>
+              {app}
+            </Typography>
+            <Typography variant="body2" sx={{ textAlign: "center" }}>
+              {`${appDetails.start_date?.slice(0, 10)} -
+        ${appDetails.end_date?.slice(0, 10)}`}
+            </Typography>
+            <Typography variant="body1" sx={{ textAlign: "center" }}>
+              {appDetails.description}
+            </Typography>
+          </Box>
+
+          {/* ================== PERMISSIONS ================== */}
+          <Box
+            sx={{
+              width: "35%",
+              display: "flex",
+              flexDirection: "column",
+              borderRadius: "10px",
+              border: "1px solid black",
+              p: 2,
+              mr: 2,
+            }}
+          >
+            <Typography variant="h6">Permissions</Typography>
+            <Box
+              sx={{
+                display: "flex",
+                flexWrap: "wrap",
+                justifyContent: "space-around",
+              }}
+            >
+              <Box
+                sx={{
+                  display: "flex",
+                  justifyContent: "space-around",
+                  alignItems: "center",
+                  backgroundColor: "pink",
+                  p: 1,
+                  mb: 1,
+                  mr: 1,
+                  borderRadius: "7px",
+                  width: "40%",
+                }}
+              >
+                <Typography color="white">Create</Typography>
+                <Chip label={appDetails.permit_create} />
+              </Box>
+              <Box
+                sx={{
+                  display: "flex",
+                  justifyContent: "space-around",
+                  alignItems: "center",
+                  backgroundColor: "pink",
+                  p: 1,
+                  mb: 1,
+                  mr: 1,
+                  borderRadius: "7px",
+                  width: "40%",
+                }}
+              >
+                <Typography color="white">Open</Typography>
+                <Chip label={appDetails.permit_open} />
+              </Box>
+              <Box
+                sx={{
+                  display: "flex",
+                  justifyContent: "space-around",
+                  alignItems: "center",
+                  backgroundColor: "pink",
+                  p: 1,
+                  mb: 1,
+                  mr: 1,
+                  borderRadius: "7px",
+                  width: "40%",
+                }}
+              >
+                <Typography color="white">Todo</Typography>
+                <Chip label={appDetails.permit_todo} />
+              </Box>
+              <Box
+                sx={{
+                  display: "flex",
+                  justifyContent: "space-around",
+                  alignItems: "center",
+                  backgroundColor: "pink",
+                  p: 1,
+                  mb: 1,
+                  mr: 1,
+                  borderRadius: "7px",
+                  width: "40%",
+                }}
+              >
+                <Typography color="white">Doing</Typography>
+                <Chip label={appDetails.permit_doing} />
+              </Box>
+              <Box
+                sx={{
+                  display: "flex",
+                  justifyContent: "space-around",
+                  alignItems: "center",
+                  backgroundColor: "pink",
+                  p: 1,
+                  mb: 1,
+                  mr: 1,
+                  borderRadius: "7px",
+                  width: "40%",
+                }}
+              >
+                <Typography color="white">Done</Typography>
+                <Chip label={appDetails.permit_done} />
+              </Box>
+            </Box>
+          </Box>
+
+          {/* ================== USER PERMISSIONS ================== */}
+          <Box
+            sx={{
+              width: "10%",
+              p: 2,
+              borderRadius: "10px",
+              border: "1px solid black",
+            }}
+          >
+            <Typography variant="h6">User Permissions</Typography>
+            {userPermissions.map((permission) => {
+              return (
+                <Typography variant="body2">{permission.group_name}</Typography>
+              );
+            })}
+          </Box>
+        </Box>
+
+        {/* ================== MODALS ================== */}
+        {createTaskPermission && (
+          <>
+            <Modal
+              open={openCreateTask}
+              onClose={() => {
+                setOpenCreateTask(false);
+              }}
+              sx={{
+                display: "flex",
+                justifyContent: "center",
+                alignItems: "center",
+              }}
+            >
+              <CreateTask fetchTasks={fetchTasks} />
+            </Modal>
+          </>
+        )}
+        {isPM && (
+          <>
+            <Modal
+              open={openEditApp}
+              onClose={() => {
+                setOpenEditApp(false);
+              }}
+              sx={{
+                display: "flex",
+                justifyContent: "center",
+                alignItems: "center",
+              }}
+            >
+              <EditApp fetchAppDetails={fetchAppDetails} />
+            </Modal>
+          </>
+        )}
+        {isPM && (
+          <Box>
+            <Modal
+              open={openCreatePlan}
+              onClose={() => {
+                setOpenCreatePlan(false);
+              }}
+              sx={{
+                display: "flex",
+                justifyContent: "center",
+                alignItems: "center",
+              }}
+            >
+              <CreatePlan fetchAllPlans={fetchAllPlans} />
+            </Modal>
+            <Modal
+              open={openEditPlan}
+              onClose={() => {
+                setOpenEditPlan(false);
+              }}
+              sx={{
+                display: "flex",
+                justifyContent: "center",
+                alignItems: "center",
+              }}
+            >
+              <EditPlan fetchAllPlans={fetchAllPlans} />
+            </Modal>
+          </Box>
+        )}
+
+        {/* ================== BOARD ================== */}
+        <Board
+          renderCard={(content) => <TaskCard content={content} />}
+          onCardDragEnd={handleCardMove}
+          disableColumnDrag
+        >
+          {board}
+        </Board>
+      </Box>
+
+      {/* ================== SPEED DIAL ================== */}
+      <SpeedDial
+        ariaLabel="SpeedDial"
+        icon={<SpeedDialIcon />}
+        sx={{ position: "fixed", bottom: "2%", right: "2%" }}
+      >
+        {createTaskPermission && (
+          <SpeedDialAction
+            key="Create Task"
+            tooltipTitle="Create Task"
+            icon={<AddIcon />}
             onClick={() => {
               setOpenCreateTask(true);
             }}
-          >
-            Create Task
-          </Button>
-        </>
-      )}
-      <Board
-        renderCard={(content) => <TaskCard content={content} />}
-        onCardDragEnd={handleCardMove}
-        disableColumnDrag
-      >
-        {board}
-      </Board>
+          />
+        )}
+        {isPM && (
+          <SpeedDialAction
+            key="Create Plan"
+            tooltipTitle="Create Plan"
+            icon={<NoteAddRoundedIcon />}
+            onClick={() => {
+              setOpenCreatePlan(true);
+            }}
+          />
+        )}
+        {isPM && (
+          <SpeedDialAction
+            key="Edit Plan"
+            tooltipTitle="Edit Plan"
+            icon={<EditRoundedIcon />}
+            onClick={() => {
+              setOpenEditPlan(true);
+            }}
+          />
+        )}
+        {isPM && (
+          <SpeedDialAction
+            key="Edit App"
+            tooltipTitle="Edit App"
+            icon={<AppRegistrationIcon />}
+            onClick={() => {
+              setOpenEditApp(true);
+            }}
+          />
+        )}
+      </SpeedDial>
     </Box>
   );
 };
@@ -375,7 +509,7 @@ const TaskCard = (props) => {
   const [open, setOpen] = useState(false);
 
   return (
-    <Card sx={{ p: 2, mt: 2, width: "100%" }}>
+    <Card sx={{ p: 2, width: "calc(13vw - 30px)" }}>
       <Box
         onClick={() => {
           setOpen(true);
@@ -383,13 +517,13 @@ const TaskCard = (props) => {
       >
         <Typography variant="h6">{props.content.title}</Typography>
         <Typography variant="body1">Plan: {props.content.planName}</Typography>
-        <Typography variant="body1">{props.content.description}</Typography>
       </Box>
       <Modal
         open={open}
         onClose={() => {
           setOpen(false);
         }}
+        sx={{ display: "flex", justifyContent: "center", alignItems: "center" }}
       >
         <EditTask
           app={app}

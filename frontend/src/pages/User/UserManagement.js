@@ -286,30 +286,27 @@ const User = (props) => {
       </TableCell>
       <TableCell sx={{ textAlign: "center" }}>
         {readOnly ? (
-          <Button>
-            <EditIcon fontSize="small" onClick={handleEditUser} />
+          <Button onClick={handleEditUser}>
+            <EditIcon fontSize="small" />
           </Button>
         ) : (
           <>
             <Tooltip title="Save changes">
-              <Button>
-                <SaveRoundedIcon onClick={handleUpdateUser} sx={{ mr: 1 }} />
+              <Button onClick={handleUpdateUser}>
+                <SaveRoundedIcon sx={{ mr: 1 }} />
               </Button>
             </Tooltip>
             <Tooltip title="Cancel changes">
-              <Button>
-                <CancelRoundedIcon
-                  onClick={handleCancelChanges}
-                  sx={{ mr: 1 }}
-                />
+              <Button onClick={handleCancelChanges}>
+                <CancelRoundedIcon sx={{ mr: 1 }} />
               </Button>
             </Tooltip>
             {passwordReset ? (
               "Password resetted"
             ) : (
               <Tooltip title="Reset password">
-                <Button>
-                  <LockResetRoundedIcon onClick={handleResetPassword} />
+                <Button onClick={handleResetPassword}>
+                  <LockResetRoundedIcon />
                 </Button>
               </Tooltip>
             )}

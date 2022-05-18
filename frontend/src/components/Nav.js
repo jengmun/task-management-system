@@ -17,7 +17,7 @@ const Nav = () => {
   return (
     <List
       sx={{
-        position: "absolute",
+        position: "fixed",
         display: "flex",
         flexDirection: "column",
         alignItems: "center",

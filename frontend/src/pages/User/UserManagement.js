@@ -80,6 +80,7 @@ const UserManagement = () => {
         user.status.includes(e.target.value)
       );
     });
+
     setFilterUsers(filteredArr);
   };
 
@@ -142,6 +143,10 @@ const UserManagement = () => {
                 options={options}
                 setAllUsers={(user) => {
                   const allUsersArr = [...allUsers];
+                  const oldUser = allUsers.find(({ username }) => {
+                    return username === user.username;
+                  });
+                  const index = allUsers.indexOf(oldUser);
                   allUsersArr[index] = user;
                   setAllUsers(allUsersArr);
                 }}

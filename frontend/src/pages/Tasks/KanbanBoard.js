@@ -221,7 +221,7 @@ const KanbanBoard = () => {
         </Box>
       </Box>
 
-      <Box sx={{ ml: "10vw", width: "90%" }}>
+      <Box sx={{ ml: "10vw" }}>
         <NavLink to={`/`} style={{ textDecoration: "none" }}>
           <Button>Back</Button>
         </NavLink>

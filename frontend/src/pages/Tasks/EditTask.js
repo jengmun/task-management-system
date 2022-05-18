@@ -76,13 +76,14 @@ const EditTask = (props) => {
 
   const [readOnly, setReadOnly] = useState(true);
   const [message, setMessage] = useState("");
+  const [selectedPlan, setSelectedPlan] = useState("");
 
   const handleTaskUpdate = async (e) => {
     e.preventDefault();
 
     const data = await handlePostRequest(`task/update-task`, {
       description: e.target.description.value,
-      planName: e.target.planName.value,
+      planName: selectedPlan,
       acronym: app,
       taskID: task,
     });
@@ -100,12 +101,11 @@ const EditTask = (props) => {
     setPermissions();
   }, [taskDetails]);
 
-  const [selectedPlan, setSelectedPlan] = useState("");
-
   const [notesMessage, setNotesMessage] = useState("");
 
   const handleAddNote = async (e) => {
     e.preventDefault();
+
     const data = await handlePostRequest(`task/create-notes/${task}`, {
       taskID: task,
       details: e.target.notes.value,
@@ -169,83 +169,83 @@ const EditTask = (props) => {
         </TableBody>
       </Table>
 
-      <form onSubmit={handleTaskUpdate}>
-        {readOnly ? (
-          <>
-            <Typography variant="body1">
-              Description: {taskDetails.description}
-            </Typography>
-            <Typography variant="body1" sx={{ mb: 2 }}>
-              Plan Name:{" "}
-              {taskDetails.plan_name
-                ? taskDetails.plan_name
-                : "No plan allocated"}
-            </Typography>
-          </>
-        ) : (
-          <Box sx={{ display: "flex", justifyContent: "space-around" }}>
-            <Box
-              sx={{
-                display: "flex",
-                flexDirection: "column",
-                width: "70%",
-              }}
-            >
-              <Box sx={{ display: "flex", justifyContent: "space-around" }}>
-                <Box>
-                  <InputLabel id="description">Description</InputLabel>
-                  <TextareaAutosize
-                    id="description"
-                    defaultValue={taskDetails.description}
-                    maxLength="255"
-                    minRows={2}
-                  />
-                </Box>{" "}
-                <Box>
-                  <InputLabel id="planName">Plan Name</InputLabel>
-                  <Select
-                    id="planName"
-                    label="Plan Name"
-                    value={selectedPlan}
-                    onChange={(e) => {
-                      setSelectedPlan(e.target.value);
-                    }}
-                  >
-                    <MenuItem value="null">No plan</MenuItem>
-                    {allPlans.map((plan) => {
-                      return (
-                        <MenuItem key={plan.plan_name} value={plan.plan_name}>
-                          {plan.plan_name}
-                        </MenuItem>
-                      );
-                    })}
-                  </Select>
-                </Box>
-              </Box>
-              <Button type="submit" variant="contained" sx={{ mt: 2 }}>
-                Update task
-              </Button>
-            </Box>
-            {isMember && taskDetails.state !== "Closed" && (
-              <form
-                onSubmit={handleAddNote}
-                style={{ display: "flex", flexDirection: "column" }}
-              >
-                <InputLabel id="notes">Add notes</InputLabel>
+      {readOnly ? (
+        <>
+          <Typography variant="body1">
+            Description: {taskDetails.description}
+          </Typography>
+          <Typography variant="body1" sx={{ mb: 2 }}>
+            Plan Name:{" "}
+            {taskDetails.plan_name
+              ? taskDetails.plan_name
+              : "No plan allocated"}
+          </Typography>
+        </>
+      ) : (
+        <Box sx={{ display: "flex", justifyContent: "space-around" }}>
+          <form
+            onSubmit={handleTaskUpdate}
+            style={{
+              display: "flex",
+              flexDirection: "column",
+              width: "70%",
+            }}
+          >
+            <Box sx={{ display: "flex", justifyContent: "space-around" }}>
+              <Box>
+                <InputLabel id="description">Description</InputLabel>
                 <TextareaAutosize
-                  id="notes"
+                  id="description"
+                  defaultValue={taskDetails.description}
                   maxLength="255"
                   minRows={2}
-                  required
                 />
-                <Button type="submit" variant="contained" sx={{ mt: 2 }}>
-                  Add
-                </Button>
-              </form>
-            )}
-          </Box>
-        )}
-      </form>
+              </Box>{" "}
+              <Box>
+                <InputLabel id="planName">Plan Name</InputLabel>
+                <Select
+                  id="planName"
+                  label="Plan Name"
+                  value={selectedPlan}
+                  onChange={(e) => {
+                    setSelectedPlan(e.target.value);
+                  }}
+                >
+                  <MenuItem value="null">No plan</MenuItem>
+                  {allPlans.map((plan) => {
+                    return (
+                      <MenuItem key={plan.plan_name} value={plan.plan_name}>
+                        {plan.plan_name}
+                      </MenuItem>
+                    );
+                  })}
+                </Select>
+              </Box>
+            </Box>
+            <Button type="submit" variant="contained" sx={{ mt: 2 }}>
+              Update task
+            </Button>
+          </form>
+          {isMember && taskDetails.state !== "Closed" && (
+            <form
+              onSubmit={handleAddNote}
+              style={{ display: "flex", flexDirection: "column" }}
+            >
+              <InputLabel id="notes">Add notes</InputLabel>
+              <TextareaAutosize
+                id="notes"
+                maxLength="255"
+                minRows={2}
+                required
+              />
+              <Button type="submit" variant="contained" sx={{ mt: 2 }}>
+                Add
+              </Button>
+            </form>
+          )}
+        </Box>
+      )}
+
       {message}
 
       <Typography variant="body2">{notesMessage}</Typography>
@@ -258,7 +258,7 @@ const EditTask = (props) => {
                 variant="body1"
                 sx={{ position: "absolute", right: 20 }}
               >
-                {note.date.slice(0, 10)}
+                {note.timestamp}
               </Typography>
             </AccordionSummary>
             <AccordionDetails>

@@ -287,6 +287,7 @@ exports.createTask = async (req, res, next) => {
               next(err);
             } else {
               req.body.taskID = `${req.body.acronym.toUpperCase()}_${runningNumber}`;
+              req.body.details = "Task created";
               next();
             }
           }
@@ -702,16 +703,18 @@ exports.createNotes = async (req, res, next) => {
 
   const parsedNotes = JSON.parse(existingNotes);
   let newNotes = [];
-  const date = new Date().toISOString();
+  const date = new Date().toISOString().slice(0, 10);
+  const time = new Date().toLocaleTimeString();
+  const timestamp = date + " " + time;
 
   if (existingNotes) {
     newNotes = [
-      { details, date, creator: req.session.username, state, taskID },
+      { details, timestamp, creator: req.session.username, state, taskID },
       ...parsedNotes,
     ];
   } else {
     newNotes = [
-      { details, date, creator: req.session.username, state, taskID },
+      { details, timestamp, creator: req.session.username, state, taskID },
     ];
   }
 

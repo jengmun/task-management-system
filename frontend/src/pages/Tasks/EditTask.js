@@ -22,7 +22,7 @@ import {
 } from "@mui/material";
 
 const EditTask = (props) => {
-  const { app, task, createTaskPermission, setClose } = props;
+  const { app, task, createTaskPermission } = props;
 
   // ------------- Fetch task details -------------
   const [taskDetails, setTaskDetails] = useState([]);
@@ -31,7 +31,7 @@ const EditTask = (props) => {
     const data = await handleGetRequest(`task/task-details/${task}`);
     if (data) {
       setTaskDetails(data);
-      setSelectedPlan(taskDetails.plan_name ? taskDetails.plan_name : "null");
+      setSelectedPlan(data.plan_name ? data.plan_name : "null");
     }
   };
 
@@ -89,6 +89,7 @@ const EditTask = (props) => {
     });
     setMessage(data);
     fetchAllNotes();
+    props.fetchTasks();
   };
 
   const setPermissions = () => {
@@ -117,6 +118,7 @@ const EditTask = (props) => {
       setNotesMessage(data);
       e.target.notes.value = "";
       fetchAllNotes();
+      fetchTaskDetails();
     }
   };
 
@@ -169,86 +171,84 @@ const EditTask = (props) => {
         </TableBody>
       </Table>
 
-      {readOnly ? (
-        <>
-          <Typography variant="body1">
-            Description: {taskDetails.description}
-          </Typography>
-          <Typography variant="body1" sx={{ mb: 2 }}>
-            Plan Name:{" "}
-            {taskDetails.plan_name
-              ? taskDetails.plan_name
-              : "No plan allocated"}
-          </Typography>
-        </>
-      ) : (
-        <Box sx={{ display: "flex", justifyContent: "space-around" }}>
-          <form
-            onSubmit={handleTaskUpdate}
-            style={{
-              display: "flex",
-              flexDirection: "column",
-              width: "70%",
-            }}
-          >
-            <Box sx={{ display: "flex", justifyContent: "space-around" }}>
-              <Box>
-                <InputLabel id="description">Description</InputLabel>
-                <TextareaAutosize
-                  id="description"
-                  defaultValue={taskDetails.description}
-                  maxLength="255"
-                  minRows={2}
-                />
-              </Box>{" "}
-              <Box>
-                <InputLabel id="planName">Plan Name</InputLabel>
-                <Select
-                  id="planName"
-                  label="Plan Name"
-                  value={selectedPlan}
-                  onChange={(e) => {
-                    setSelectedPlan(e.target.value);
-                  }}
-                >
-                  <MenuItem value="null">No plan</MenuItem>
-                  {allPlans.map((plan) => {
-                    return (
-                      <MenuItem key={plan.plan_name} value={plan.plan_name}>
-                        {plan.plan_name}
-                      </MenuItem>
-                    );
-                  })}
-                </Select>
-              </Box>
-            </Box>
-            <Button type="submit" variant="contained" sx={{ mt: 2 }}>
-              Update task
-            </Button>
-          </form>
-          {isMember && taskDetails.state !== "Closed" && (
+      <Box sx={{ display: "flex", justifyContent: "space-around" }}>
+        {readOnly ? (
+          <>
+            <Typography variant="body1">
+              Description: {taskDetails.description}
+            </Typography>
+            <Typography variant="body1" sx={{ mb: 2 }}>
+              Plan Name:{" "}
+              {taskDetails.plan_name
+                ? taskDetails.plan_name
+                : "No plan allocated"}
+            </Typography>
+          </>
+        ) : (
+          <>
             <form
-              onSubmit={handleAddNote}
-              style={{ display: "flex", flexDirection: "column" }}
+              onSubmit={handleTaskUpdate}
+              style={{
+                display: "flex",
+                flexDirection: "column",
+                width: "70%",
+              }}
             >
-              <InputLabel id="notes">Add notes</InputLabel>
-              <TextareaAutosize
-                id="notes"
-                maxLength="255"
-                minRows={2}
-                required
-              />
+              <Box sx={{ display: "flex", justifyContent: "space-around" }}>
+                <Box>
+                  <InputLabel id="description">Description</InputLabel>
+                  <TextareaAutosize
+                    id="description"
+                    defaultValue={taskDetails.description}
+                    maxLength="255"
+                    minRows={2}
+                  />
+                </Box>{" "}
+                <Box>
+                  <InputLabel id="planName">Plan Name</InputLabel>
+                  <Select
+                    id="planName"
+                    label="Plan Name"
+                    value={selectedPlan}
+                    onChange={(e) => {
+                      setSelectedPlan(e.target.value);
+                    }}
+                  >
+                    <MenuItem value="null">No plan</MenuItem>
+                    {allPlans.map((plan) => {
+                      return (
+                        <MenuItem key={plan.plan_name} value={plan.plan_name}>
+                          {plan.plan_name}
+                        </MenuItem>
+                      );
+                    })}
+                  </Select>
+                </Box>
+              </Box>
               <Button type="submit" variant="contained" sx={{ mt: 2 }}>
-                Add
+                Update task
               </Button>
             </form>
-          )}
-        </Box>
-      )}
-
+          </>
+        )}
+        {isMember && taskDetails.state !== "Closed" && (
+          <form
+            onSubmit={handleAddNote}
+            style={{ display: "flex", flexDirection: "column" }}
+          >
+            <InputLabel id="notes">Add notes</InputLabel>
+            <TextareaAutosize id="notes" maxLength="255" minRows={2} required />
+            <Button type="submit" variant="contained" sx={{ mt: 2 }}>
+              Add
+            </Button>
+          </form>
+        )}
+      </Box>
       {message}
 
-      <Typography variant="body2">{notesMessage}</Typography>
+      <Typography variant="body2" sx={{ mb: 2 }}>
+        {notesMessage}
+      </Typography>
       {allNotes.map((note) => {
         return (
           <Accordion>

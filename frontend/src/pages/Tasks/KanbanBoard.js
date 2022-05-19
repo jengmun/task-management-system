@@ -373,7 +373,9 @@ const KanbanBoard = () => {
             <Typography variant="h6">User Permissions</Typography>
             {userPermissions.map((permission) => {
               return (
-                <Typography variant="body2">{permission.group_name}</Typography>
+                <Typography variant="body2" key={permission.group_name}>
+                  {permission.group_name}
+                </Typography>
               );
             })}
           </Box>

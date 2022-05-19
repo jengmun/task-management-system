@@ -259,7 +259,9 @@ const EditTask = (props) => {
         return (
           <Accordion>
             <AccordionSummary sx={{ display: "flex", alignItems: "center" }}>
-              <Typography variant="body1">{note.details}</Typography>
+              <Typography variant="body1" sx={{ maxWidth: "80%" }}>
+                {note.details}
+              </Typography>
               <Typography
                 variant="body1"
                 sx={{ position: "absolute", right: 20 }}

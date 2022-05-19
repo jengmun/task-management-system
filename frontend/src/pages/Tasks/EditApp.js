@@ -149,7 +149,9 @@ const EditApp = (props) => {
                   label={permission}
                   id={permission}
                   sx={{ width: "200px" }}
-                  value={selectedPermissions[permission]}
+                  value={
+                    allGroups.length ? selectedPermissions[permission] : ""
+                  }
                   onChange={(e) => {
                     setSelectedPermissions({
                       ...selectedPermissions,

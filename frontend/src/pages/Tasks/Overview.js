@@ -132,10 +132,12 @@ const Overview = () => {
                   p: 2,
                   mr: 2,
                   mt: 2,
-                  borderRadius: "10px",
+                  borderRadius: "20px",
                   backgroundColor: theme.palette.background.default,
                   display: "flex",
                   justifyContent: "center",
+                  color: theme.palette.primary.dark,
+                  ":active": { color: theme.palette.primary.main },
                 }}
               >
                 <Typography

@@ -42,17 +42,18 @@ function App() {
   const theme = createTheme({
     palette: {
       primary: {
+        dark: "rgb(100 100 100)",
         main: "rgb(167 167 167)",
         light: "rgb(192 192 192)",
       },
       secondary: { main: "rgb(255, 255, 255)" },
-      info: { main: "rgb(191 226 230)" },
+      info: { main: "rgb(171 216 229)" },
       error: { main: "rgb(232 176 185)" },
       warning: { main: "rgb(252 244 181)" },
       success: { main: "rgb(213 231 184)" },
       background: {
         default: "rgba(255, 255, 255, 0.5)",
-        paper: "rgba(255, 255, 255, 0.2)",
+        paper: "rgba(255, 255, 255, 0.3)",
       },
     },
     typography: {

@@ -45,6 +45,7 @@ const Login = () => {
           height: "fit-content",
           backgroundColor: "rgba(255,255,255, 0.6)",
           borderRadius: "20px",
+          boxShadow: "1px 1px 1px white",
         }}
         onSubmit={handleLogin}
       >
@@ -76,7 +77,7 @@ const Login = () => {
           Submit
         </Button>
         <NavLink to="/forgot-password" style={{ textDecoration: "none" }}>
-          <Button variant="outlined" color="info" sx={{ mt: 1, mb: 1 }}>
+          <Button variant="contained" color="info" sx={{ mt: 1, mb: 1 }}>
             Forgot password
           </Button>
         </NavLink>

@@ -177,16 +177,31 @@ const KanbanBoard = () => {
 
   return (
     <Box sx={{ width: "100%" }}>
+      <NavLink
+        to={`/`}
+        style={{
+          textDecoration: "none",
+          position: "fixed",
+          left: "6vw",
+          top: "0.5vh",
+        }}
+      >
+        <Button>Back</Button>
+      </NavLink>
       {/* ================== PLANS ================== */}
       <Box
         sx={{
           textAlign: "center",
           flexDirection: "column",
           width: "10vw",
-          position: "absolute",
+          position: "fixed",
+          top: "5vh",
           left: "6vw",
-          minHeight: "100%",
+          minHeight: "80%",
+          maxHeight: "90%",
           backgroundColor: theme.palette.background.paper,
+          borderRadius: "15px",
+          overflow: "scroll",
         }}
       >
         <Typography variant="h6" sx={{ mt: 2 }}>
@@ -219,7 +234,12 @@ const KanbanBoard = () => {
               >
                 <Typography
                   variant="body2"
-                  sx={{ backgroundColor: "orange", mb: 1, pr: 0.5, pl: 0.5 }}
+                  sx={{
+                    mb: 1,
+                    pr: 0.5,
+                    pl: 0.5,
+                    color: theme.palette.primary.dark,
+                  }}
                 >
                   {plan.plan_name}
                 </Typography>
@@ -229,12 +249,8 @@ const KanbanBoard = () => {
         </Box>
       </Box>
 
-      <Box sx={{ ml: "11vw" }}>
-        <NavLink to={`/`} style={{ textDecoration: "none" }}>
-          <Button>Back</Button>
-        </NavLink>
-
-        <Box sx={{ mt: 0.5, mb: 2, display: "flex", justifyContent: "center" }}>
+      <Box sx={{ ml: "11vw", mt: "5vh" }}>
+        <Box sx={{ mb: 2, display: "flex", justifyContent: "center" }}>
           {/* ================== APP ================== */}
           <Box
             sx={{
@@ -286,7 +302,7 @@ const KanbanBoard = () => {
                   display: "flex",
                   justifyContent: "space-around",
                   alignItems: "center",
-                  backgroundColor: "pink",
+                  backgroundColor: theme.palette.error.main,
                   p: 1,
                   mb: 1,
                   mr: 1,
@@ -302,7 +318,7 @@ const KanbanBoard = () => {
                   display: "flex",
                   justifyContent: "space-around",
                   alignItems: "center",
-                  backgroundColor: "pink",
+                  backgroundColor: theme.palette.info.main,
                   p: 1,
                   mb: 1,
                   mr: 1,
@@ -318,7 +334,7 @@ const KanbanBoard = () => {
                   display: "flex",
                   justifyContent: "space-around",
                   alignItems: "center",
-                  backgroundColor: "pink",
+                  backgroundColor: theme.palette.warning.main,
                   p: 1,
                   mb: 1,
                   mr: 1,
@@ -334,7 +350,7 @@ const KanbanBoard = () => {
                   display: "flex",
                   justifyContent: "space-around",
                   alignItems: "center",
-                  backgroundColor: "pink",
+                  backgroundColor: theme.palette.success.main,
                   p: 1,
                   mb: 1,
                   mr: 1,

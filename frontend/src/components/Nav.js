@@ -1,5 +1,5 @@
 import React, { useContext } from "react";
-import { NavLink } from "react-router-dom";
+import { NavLink, useLocation } from "react-router-dom";
 import LoginContext from "../context/login-context";
 import handleGetRequest from "../hooks/handleGetRequest";
 import { useTheme } from "@mui/material/styles";
@@ -28,11 +28,11 @@ const Nav = () => {
       }}
     >
       <ListItem sx={{ display: "flex", justifyContent: "center" }}>
-        <NavButton link="/" text={<HomeRoundedIcon />} />
+        <NavButton link="/" text={HomeRoundedIcon} />
       </ListItem>
       {loginContext.isLoggedIn.username && (
         <ListItem sx={{ display: "flex", justifyContent: "center" }}>
-          <NavButton link="/profile" text={<AccountCircleRoundedIcon />} />
+          <NavButton link="/profile" text={AccountCircleRoundedIcon} />
         </ListItem>
       )}
       {loginContext.isLoggedIn.account_type === "Admin" && (
@@ -40,13 +40,13 @@ const Nav = () => {
           <ListItem sx={{ display: "flex", justifyContent: "center" }}>
             <NavButton
               link="/admin/user-management"
-              text={<ManageAccountsRoundedIcon />}
+              text={ManageAccountsRoundedIcon}
             />
           </ListItem>
           <ListItem sx={{ display: "flex", justifyContent: "center" }}>
             <NavButton
               link="/admin/group-management"
-              text={<GroupsRoundedIcon />}
+              text={GroupsRoundedIcon}
             />
           </ListItem>
         </>
@@ -55,13 +55,18 @@ const Nav = () => {
         <ListItem sx={{ display: "flex", justifyContent: "center" }}>
           <NavLink
             to="/"
-            style={{ textDecoration: "none" }}
+            style={{ textDecoration: "none", marginTop: 10 }}
             onClick={() => {
               handleGetRequest("user/logout");
               loginContext.setIsLoggedIn("");
             }}
           >
-            <Button>
+            <Button
+              sx={{
+                minWidth: "24px",
+                borderRadius: "10px",
+              }}
+            >
               <LogoutRoundedIcon />
             </Button>
           </NavLink>
@@ -74,9 +79,20 @@ const Nav = () => {
 export default Nav;
 
 const NavButton = (props) => {
+  const location = useLocation();
+  console.log(location.pathname);
+
   return (
-    <NavLink to={props.link} style={{ textDecoration: "none" }}>
-      <Button>{props.text}</Button>
+    <NavLink to={props.link} style={{ textDecoration: "none", marginTop: 10 }}>
+      <Button
+        sx={{
+          minWidth: "24px",
+          borderRadius: "10px",
+          backgroundColor: location.pathname.includes(props.link) && "white",
+        }}
+      >
+        <props.text />
+      </Button>
     </NavLink>
   );
 };

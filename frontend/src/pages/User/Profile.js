@@ -1,12 +1,29 @@
 import { Box, Button, TextField, Typography } from "@mui/material";
 import { useContext, useState } from "react";
+import CustomSnackbar from "../../components/CustomSnackbar";
 import LoginContext from "../../context/login-context";
 import handlePostRequest from "../../hooks/handlePostRequest";
 
 const Profile = () => {
   const loginContext = useContext(LoginContext);
-  const [emailMessage, setEmailMessage] = useState("");
-  const [passwordMessage, setPasswordMessage] = useState("");
+
+  // ------------- Snackbar -------------
+  const [message, setMessage] = useState("");
+  const [openSnackbar, setOpenSnackbar] = useState(false);
+  const [severity, setSeverity] = useState("");
+
+  const handleOpenSnackbar = (severity) => {
+    setOpenSnackbar(true);
+    setSeverity(severity);
+  };
+
+  const handleCloseSnackbar = (event, reason) => {
+    if (reason === "clickaway") {
+      return;
+    }
+
+    setOpenSnackbar(false);
+  };
 
   // ------------ Update email ------------
   const handleEmailChange = async (e) => {
@@ -15,12 +32,14 @@ const Profile = () => {
     const updateEmail = e.target.updateEmail.value;
 
     if (updateEmail === loginContext.isLoggedIn.email) {
-      setEmailMessage("No change in email");
+      setMessage("No change in email");
+      handleOpenSnackbar("info");
       return;
     }
 
     if (!updateEmail) {
-      setEmailMessage("Please enter an email address");
+      setMessage("Please enter an email address");
+      handleOpenSnackbar("error");
       return;
     }
 
@@ -29,11 +48,12 @@ const Profile = () => {
       email: updateEmail,
     });
 
+    setMessage(data);
     if (data === "Email updated successfully") {
-      setEmailMessage(data);
       loginContext.isLoggedIn.email = updateEmail;
+      handleOpenSnackbar("success");
     } else {
-      setEmailMessage(data);
+      handleOpenSnackbar("error");
     }
   };
 
@@ -46,7 +66,8 @@ const Profile = () => {
 
     // Step 1 - check that both passwords match
     if (changePassword !== confirmPassword) {
-      setPasswordMessage("Passwords do not match");
+      setMessage("Passwords do not match");
+      handleOpenSnackbar("error");
       return;
     }
 
@@ -56,7 +77,8 @@ const Profile = () => {
         /^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[0-9])(?=.*?[#?!@$%^&*-])\S{8,10}$/
       )
     ) {
-      setPasswordMessage("Invalid password format");
+      setMessage("Invalid password format");
+      handleOpenSnackbar("error");
       return;
     }
 
@@ -67,9 +89,11 @@ const Profile = () => {
     });
 
     if (typeof data === "string") {
-      setPasswordMessage(data);
+      setMessage(data);
+      handleOpenSnackbar("error");
     } else {
-      setPasswordMessage("Password updated");
+      setMessage("Password updated");
+      handleOpenSnackbar("success");
     }
   };
 
@@ -118,7 +142,6 @@ const Profile = () => {
             />
             <Button type="submit">Update</Button>
           </form>
-          <Typography variant="body2">{emailMessage}</Typography>
 
           <form
             onSubmit={handlePasswordChange}
@@ -146,9 +169,14 @@ const Profile = () => {
             />
             <Button type="submit">Update password</Button>
           </form>
-          <Typography variant="body2">{passwordMessage}</Typography>
         </Box>
       </Box>
+      <CustomSnackbar
+        openSnackbar={openSnackbar}
+        handleCloseSnackbar={handleCloseSnackbar}
+        message={message}
+        severity={severity}
+      />
     </Box>
   );
 };

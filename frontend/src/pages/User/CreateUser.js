@@ -3,6 +3,7 @@ import handleGetRequest from "../../hooks/handleGetRequest";
 import handlePostRequest from "../../hooks/handlePostRequest";
 import Dropdown from "../../components/Dropdown";
 import { Typography, TextField, Button, Card, Box } from "@mui/material";
+import CustomSnackbar from "../../components/CustomSnackbar";
 
 const CreateUser = () => {
   // ------------- Fetch all groups -------------
@@ -35,7 +36,23 @@ const CreateUser = () => {
 
   // ------------- Submit form -------------
   const [selectedGroups, setSelectedGroups] = useState([]);
+  // ------------- Snackbar -------------
   const [message, setMessage] = useState("");
+  const [openSnackbar, setOpenSnackbar] = useState(false);
+  const [severity, setSeverity] = useState("");
+
+  const handleOpenSnackbar = (severity) => {
+    setOpenSnackbar(true);
+    setSeverity(severity);
+  };
+
+  const handleCloseSnackbar = (event, reason) => {
+    if (reason === "clickaway") {
+      return;
+    }
+
+    setOpenSnackbar(false);
+  };
 
   const options = [];
   for (const app of allApps) {
@@ -57,10 +74,14 @@ const CreateUser = () => {
     });
     setMessage(data);
 
-    e.target.username.value = "";
-    e.target.password.value = "";
-    e.target.email.value = "";
-    // setSelectedGroups([]);
+    if (data !== "User created") {
+      handleOpenSnackbar("error");
+    } else {
+      e.target.username.value = "";
+      e.target.password.value = "";
+      e.target.email.value = "";
+      handleOpenSnackbar("success");
+    }
   };
 
   return (
@@ -120,7 +141,12 @@ const CreateUser = () => {
             Submit
           </Button>
         </form>
-        <Typography variant="body2">{message}</Typography>
+        <CustomSnackbar
+          openSnackbar={openSnackbar}
+          handleCloseSnackbar={handleCloseSnackbar}
+          message={message}
+          severity={severity}
+        />
       </Card>
     </Box>
   );

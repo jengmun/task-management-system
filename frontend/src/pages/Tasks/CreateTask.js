@@ -13,6 +13,7 @@ import { useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
 import handleGetRequest from "../../hooks/handleGetRequest";
 import handlePostRequest from "../../hooks/handlePostRequest";
+import CustomSnackbar from "../../components/CustomSnackbar";
 
 const CreateTask = (props) => {
   const { app } = useParams();
@@ -34,7 +35,23 @@ const CreateTask = (props) => {
 
   const [selectedPlan, setSelectedPlan] = useState("");
 
+  // ------------- Snackbar -------------
   const [message, setMessage] = useState("");
+  const [openSnackbar, setOpenSnackbar] = useState(false);
+  const [severity, setSeverity] = useState("");
+
+  const handleOpenSnackbar = (severity) => {
+    setOpenSnackbar(true);
+    setSeverity(severity);
+  };
+
+  const handleCloseSnackbar = (event, reason) => {
+    if (reason === "clickaway") {
+      return;
+    }
+
+    setOpenSnackbar(false);
+  };
 
   const handleCreateTask = async (e) => {
     e.preventDefault();
@@ -43,7 +60,6 @@ const CreateTask = (props) => {
       acronym: app,
       taskName: e.target.taskName.value,
       description: e.target.description.value,
-      // details: e.target.notes.value,
       planName: selectedPlan,
     });
     setMessage(data);
@@ -51,9 +67,11 @@ const CreateTask = (props) => {
     if (data === "Added note") {
       e.target.taskName.value = "";
       e.target.description.value = "";
-      // e.target.notes.value = "";
       setSelectedPlan("");
       props.fetchTasks();
+      handleOpenSnackbar("success");
+    } else {
+      handleOpenSnackbar("error");
     }
   };
 
@@ -92,9 +110,6 @@ const CreateTask = (props) => {
           id="description"
           placeholder="Description"
         />
-        {/* <label htmlFor="notes">Notes</label>
-        <input id="notes" name="notes" required /> */}
-        {/* needed? */}
         <FormControl sx={{ mt: 2 }}>
           <InputLabel id="planName">Plan Name</InputLabel>
           <Select
@@ -118,7 +133,12 @@ const CreateTask = (props) => {
         </FormControl>
         <Button type="submit">Submit</Button>
       </form>
-      <Typography variant="body1">{message}</Typography>
+      <CustomSnackbar
+        openSnackbar={openSnackbar}
+        handleCloseSnackbar={handleCloseSnackbar}
+        message={message}
+        severity={severity}
+      />
     </Card>
   );
 };

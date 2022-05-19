@@ -10,6 +10,7 @@ import {
   TextField,
   Typography,
 } from "@mui/material";
+import CustomSnackbar from "../../components/CustomSnackbar";
 
 const AssignPM = () => {
   // ------------- Fetch all users -------------
@@ -28,13 +29,30 @@ const AssignPM = () => {
 
   const [selectedUser, setSelectedUser] = useState("");
 
+  // ------------- Snackbar -------------
   const [message, setMessage] = useState("");
+  const [openSnackbar, setOpenSnackbar] = useState(false);
+  const [severity, setSeverity] = useState("");
+
+  const handleOpenSnackbar = (severity) => {
+    setOpenSnackbar(true);
+    setSeverity(severity);
+  };
+
+  const handleCloseSnackbar = (event, reason) => {
+    if (reason === "clickaway") {
+      return;
+    }
+
+    setOpenSnackbar(false);
+  };
 
   const handleAssignPM = async (e) => {
     e.preventDefault();
 
     if (!e.target.acronym.value || !selectedUser) {
       setMessage("Please fill in all fields");
+      handleOpenSnackbar("error");
       return;
     }
 
@@ -43,6 +61,12 @@ const AssignPM = () => {
       username: selectedUser,
     });
     setMessage(data);
+
+    if (data !== "PM Assigned") {
+      handleOpenSnackbar("error");
+    } else {
+      handleOpenSnackbar("success");
+    }
   };
 
   return (
@@ -87,6 +111,12 @@ const AssignPM = () => {
         <Button type="submit">Submit</Button>
         <Typography variant="body2">{message}</Typography>
       </form>
+      <CustomSnackbar
+        openSnackbar={openSnackbar}
+        handleCloseSnackbar={handleCloseSnackbar}
+        message={message}
+        severity={severity}
+      />
     </Card>
   );
 };

@@ -6,7 +6,6 @@ import {
   TableBody,
   TableCell,
   Button,
-  Typography,
   TextField,
 } from "@mui/material";
 import { useState, useEffect } from "react";
@@ -14,6 +13,7 @@ import { useParams } from "react-router-dom";
 import handleGetRequest from "../../hooks/handleGetRequest";
 import handlePostRequest from "../../hooks/handlePostRequest";
 import moment from "moment";
+import CustomSnackbar from "../../components/CustomSnackbar";
 
 const EditPlan = (props) => {
   const { app } = useParams();
@@ -31,6 +31,24 @@ const EditPlan = (props) => {
   useEffect(() => {
     fetchAllPlans();
   }, []);
+
+  // ------------- Snackbar -------------
+  const [message, setMessage] = useState("");
+  const [openSnackbar, setOpenSnackbar] = useState(false);
+  const [severity, setSeverity] = useState("");
+
+  const handleOpenSnackbar = (severity) => {
+    setOpenSnackbar(true);
+    setSeverity(severity);
+  };
+
+  const handleCloseSnackbar = (event, reason) => {
+    if (reason === "clickaway") {
+      return;
+    }
+
+    setOpenSnackbar(false);
+  };
 
   return (
     <Card
@@ -52,10 +70,24 @@ const EditPlan = (props) => {
         </TableHead>
         <TableBody>
           {allPlans.map((plan) => {
-            return <Plan plan={plan} fetchAllPlans={props.fetchAllPlans} />;
+            return (
+              <Plan
+                plan={plan}
+                fetchAllPlans={props.fetchAllPlans}
+                setMessage={setMessage}
+                handleOpenSnackbar={handleOpenSnackbar}
+                key={plan.plan_name}
+              />
+            );
           })}
         </TableBody>
       </Table>
+      <CustomSnackbar
+        openSnackbar={openSnackbar}
+        handleCloseSnackbar={handleCloseSnackbar}
+        message={message}
+        severity={severity}
+      />
     </Card>
   );
 };
@@ -70,13 +102,12 @@ const Plan = (props) => {
     endDate: moment(props.plan.end_date).format("YYYY-MM-DD"),
   });
 
-  const [message, setMessage] = useState("");
-
   const handleUpdatePlan = async (e) => {
     e.preventDefault();
 
     if (new Date(input.endDate) - new Date(input.startDate) < 0) {
-      setMessage("End date must be later than start date!");
+      props.setMessage("End date must be later than start date!");
+      props.handleOpenSnackbar("error");
       return;
     }
 
@@ -85,37 +116,42 @@ const Plan = (props) => {
       endDate: input.endDate,
       currentPlan: props.plan.plan_name,
     });
-    setMessage(data);
+    props.setMessage(data);
 
     if (data === "Plan updated") {
       props.fetchAllPlans();
+      props.handleOpenSnackbar("success");
+    } else {
+      props.handleOpenSnackbar("error");
     }
   };
 
   const handleUpdatePlanStatus = async () => {
     if (props.plan.status === "Closed") {
-      setMessage("Status is already closed!");
+      props.setMessage("Status is already closed!");
+      props.handleOpenSnackbar("error");
       return;
     }
 
     const data = await handlePostRequest(`task/update-plan-status/${app}`, {
       planName: props.plan.plan_name,
     });
+    props.setMessage(data);
 
     if (data === "Plan status updated") {
       props.plan.status = "Closed";
       props.fetchAllPlans();
+      props.handleOpenSnackbar("success");
+    } else {
+      props.handleOpenSnackbar("error");
     }
-    setMessage(data);
   };
 
   const [startDate, setStartDate] = useState("");
 
   return (
     <TableRow>
-      <TableCell>
-        <Typography>{props.plan.plan_name}</Typography>
-      </TableCell>
+      <TableCell>{props.plan.plan_name}</TableCell>
       <TableCell>
         <TextField
           id="startDate"
@@ -164,7 +200,6 @@ const Plan = (props) => {
           <Button onClick={handleUpdatePlan}>Update</Button>
         )}
       </TableCell>
-      <Typography variant="body2">{message}</Typography>
     </TableRow>
   );
 };

@@ -3,11 +3,28 @@ import { useParams } from "react-router-dom";
 import handlePostRequest from "../../hooks/handlePostRequest";
 import { Button, Card, TextField, Typography } from "@mui/material";
 import moment from "moment";
+import CustomSnackbar from "../../components/CustomSnackbar";
 
 const CreatePlan = (props) => {
   const { app } = useParams();
 
+  // ------------- Snackbar -------------
   const [message, setMessage] = useState("");
+  const [openSnackbar, setOpenSnackbar] = useState(false);
+  const [severity, setSeverity] = useState("");
+
+  const handleOpenSnackbar = (severity) => {
+    setOpenSnackbar(true);
+    setSeverity(severity);
+  };
+
+  const handleCloseSnackbar = (event, reason) => {
+    if (reason === "clickaway") {
+      return;
+    }
+
+    setOpenSnackbar(false);
+  };
 
   const handleCreatePlan = async (e) => {
     e.preventDefault();
@@ -24,11 +41,14 @@ const CreatePlan = (props) => {
       e.target.endDate.value = "";
       e.target.planName.value = "";
       setMessage(data);
+      handleOpenSnackbar("success");
       props.fetchAllPlans();
     } else if (data.includes("Duplicate")) {
       setMessage("Plan name already exists");
+      handleOpenSnackbar("error");
     } else {
       setMessage(data);
+      handleOpenSnackbar("error");
     }
   };
 
@@ -81,7 +101,12 @@ const CreatePlan = (props) => {
         />
         <Button type="submit">Submit</Button>
       </form>
-      <Typography sx={{ textAlign: "center" }}>{message}</Typography>
+      <CustomSnackbar
+        openSnackbar={openSnackbar}
+        handleCloseSnackbar={handleCloseSnackbar}
+        message={message}
+        severity={severity}
+      />
     </Card>
   );
 };

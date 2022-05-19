@@ -14,6 +14,7 @@ import {
   Typography,
 } from "@mui/material";
 import moment from "moment";
+import CustomSnackbar from "../../components/CustomSnackbar";
 
 const CreateApp = (props) => {
   // ------------- Fetch all groups -------------
@@ -57,7 +58,23 @@ const CreateApp = (props) => {
     permitDone: "",
   });
 
+  // ------------- Snackbar -------------
   const [message, setMessage] = useState("");
+  const [openSnackbar, setOpenSnackbar] = useState(false);
+  const [severity, setSeverity] = useState("");
+
+  const handleOpenSnackbar = (severity) => {
+    setOpenSnackbar(true);
+    setSeverity(severity);
+  };
+
+  const handleCloseSnackbar = (event, reason) => {
+    if (reason === "clickaway") {
+      return;
+    }
+
+    setOpenSnackbar(false);
+  };
 
   const handleCreateApp = async (e) => {
     e.preventDefault();
@@ -65,8 +82,18 @@ const CreateApp = (props) => {
     for (const permission of permissions) {
       if (!selectedPermissions[permission] || !newApp) {
         setMessage("Please fill in all details");
+        handleOpenSnackbar("error");
         return;
       }
+    }
+
+    if (
+      new Date(e.target.endDate.value) - new Date(e.target.startDate.value) <
+      0
+    ) {
+      setMessage("End date must be later than start date!");
+      handleOpenSnackbar("error");
+      return;
     }
 
     const data = await handlePostRequest("task/create-app", {
@@ -80,8 +107,15 @@ const CreateApp = (props) => {
       permitDoing: selectedPermissions.permitDoing,
       permitDone: selectedPermissions.permitDone,
     });
+
     setMessage(data);
-    props.fetchAllApps();
+
+    if (data === "Application successfully created") {
+      handleOpenSnackbar("success");
+      props.fetchAllApps();
+    } else {
+      handleOpenSnackbar("error");
+    }
   };
 
   const [startDate, setStartDate] = useState("");
@@ -185,8 +219,13 @@ const CreateApp = (props) => {
           );
         })}
         <Button type="submit">Submit</Button>
-        <Typography variant="body1">{message}</Typography>
       </Box>
+      <CustomSnackbar
+        openSnackbar={openSnackbar}
+        handleCloseSnackbar={handleCloseSnackbar}
+        message={message}
+        severity={severity}
+      />
     </Card>
   );
 };

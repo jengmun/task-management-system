@@ -396,7 +396,8 @@ exports.updateTask = async (req, res, next) => {
 
   if (
     oldDetails.description === description &&
-    oldDetails.plan_name === planName
+    (oldDetails.plan_name === planName ||
+      (!oldDetails.planName && planName === "null"))
   ) {
     res.json("No change in details");
     return;

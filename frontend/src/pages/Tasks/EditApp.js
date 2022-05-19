@@ -14,6 +14,7 @@ import {
   MenuItem,
 } from "@mui/material";
 import moment from "moment";
+import CustomSnackbar from "../../components/CustomSnackbar";
 
 const EditApp = (props) => {
   const { app } = useParams();
@@ -68,10 +69,35 @@ const EditApp = (props) => {
     permitDone: "",
   });
 
+  // ------------- Snackbar -------------
   const [message, setMessage] = useState("");
+  const [openSnackbar, setOpenSnackbar] = useState(false);
+  const [severity, setSeverity] = useState("");
+
+  const handleOpenSnackbar = (severity) => {
+    setOpenSnackbar(true);
+    setSeverity(severity);
+  };
+
+  const handleCloseSnackbar = (event, reason) => {
+    if (reason === "clickaway") {
+      return;
+    }
+
+    setOpenSnackbar(false);
+  };
 
   const handleEditApp = async (e) => {
     e.preventDefault();
+
+    if (
+      new Date(e.target.endDate.value) - new Date(e.target.startDate.value) <
+      0
+    ) {
+      setMessage("End date must be later than start date!");
+      handleOpenSnackbar("error");
+      return;
+    }
 
     const data = await handlePostRequest(`task/update-app/${app}`, {
       description: e.target.description.value,
@@ -84,7 +110,13 @@ const EditApp = (props) => {
       permitDone: selectedPermissions.permitDone,
     });
     setMessage(data);
-    props.fetchAppDetails();
+
+    if (data === "Updated app") {
+      props.fetchAppDetails();
+      handleOpenSnackbar("success");
+    } else {
+      handleOpenSnackbar("error");
+    }
   };
   const [startDate, setStartDate] = useState("");
 
@@ -173,7 +205,12 @@ const EditApp = (props) => {
           <Button type="submit">Submit</Button>
         </form>
       )}
-      {message}
+      <CustomSnackbar
+        openSnackbar={openSnackbar}
+        handleCloseSnackbar={handleCloseSnackbar}
+        message={message}
+        severity={severity}
+      />
     </Card>
   );
 };

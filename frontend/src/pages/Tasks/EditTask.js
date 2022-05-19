@@ -21,6 +21,7 @@ import {
   MenuItem,
 } from "@mui/material";
 import moment from "moment";
+import CustomSnackbar from "../../components/CustomSnackbar";
 
 const EditTask = (props) => {
   const { app, task, createTaskPermission } = props;
@@ -76,8 +77,25 @@ const EditTask = (props) => {
   // ------------- Update task details -------------
 
   const [readOnly, setReadOnly] = useState(true);
-  const [message, setMessage] = useState("");
   const [selectedPlan, setSelectedPlan] = useState("");
+
+  // ------------- Snackbar -------------
+  const [message, setMessage] = useState("");
+  const [openSnackbar, setOpenSnackbar] = useState(false);
+  const [severity, setSeverity] = useState("");
+
+  const handleOpenSnackbar = (severity) => {
+    setOpenSnackbar(true);
+    setSeverity(severity);
+  };
+
+  const handleCloseSnackbar = (event, reason) => {
+    if (reason === "clickaway") {
+      return;
+    }
+
+    setOpenSnackbar(false);
+  };
 
   const handleTaskUpdate = async (e) => {
     e.preventDefault();
@@ -88,9 +106,16 @@ const EditTask = (props) => {
       acronym: app,
       taskID: task,
     });
+
     setMessage(data);
-    fetchAllNotes();
-    props.fetchTasks();
+
+    if (data === "Added note") {
+      fetchAllNotes();
+      props.fetchTasks();
+      handleOpenSnackbar("success");
+    } else {
+      handleOpenSnackbar("error");
+    }
   };
 
   const setPermissions = () => {
@@ -184,7 +209,7 @@ const EditTask = (props) => {
               Description: {taskDetails.description}
             </Typography>
             <Typography variant="body1" sx={{ mb: 2 }}>
-              Plan Name:{" "}
+              Plan Name:
               {taskDetails.plan_name
                 ? taskDetails.plan_name
                 : "No plan allocated"}
@@ -250,7 +275,6 @@ const EditTask = (props) => {
           </form>
         )}
       </Box>
-      {message}
 
       <Typography variant="body2" sx={{ mb: 2 }}>
         {notesMessage}
@@ -278,6 +302,12 @@ const EditTask = (props) => {
           </Accordion>
         );
       })}
+      <CustomSnackbar
+        openSnackbar={openSnackbar}
+        handleCloseSnackbar={handleCloseSnackbar}
+        message={message}
+        severity={severity}
+      />
     </Card>
   );
 };

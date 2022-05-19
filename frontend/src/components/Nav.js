@@ -24,7 +24,7 @@ const Nav = () => {
         width: "5%",
         height: "100%",
         p: 0,
-        backgroundColor: theme.palette.primary.light,
+        backgroundColor: theme.palette.background.paper,
       }}
     >
       <ListItem sx={{ display: "flex", justifyContent: "center" }}>

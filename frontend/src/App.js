@@ -41,11 +41,19 @@ function App() {
 
   const theme = createTheme({
     palette: {
-      primary: { main: "rgb(23 239 239)", light: "rgba(242, 241, 238, 0.6)" },
-      info: { main: "rgb(46 170 220)" },
-      error: { light: "rgb(255 226 221)", main: "rgb(158 33 30)" },
-      warning: { main: "rgb(253 236 200)" },
-      success: { main: "rgb(219 237 219)" },
+      primary: {
+        main: "rgb(167 167 167)",
+        light: "rgb(192 192 192)",
+      },
+      secondary: { main: "rgb(255, 255, 255)" },
+      info: { main: "rgb(191 226 230)" },
+      error: { main: "rgb(232 176 185)" },
+      warning: { main: "rgb(252 244 181)" },
+      success: { main: "rgb(213 231 184)" },
+      background: {
+        default: "rgba(255, 255, 255, 0.5)",
+        paper: "rgba(255, 255, 255, 0.2)",
+      },
     },
     typography: {
       fontFamily: "Helvetica",

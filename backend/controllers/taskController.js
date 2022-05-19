@@ -603,13 +603,13 @@ exports.taskStateProgression = async (req, res, next) => {
       );
     });
 
-    // for (const approver of allApprovers) {
-    //   sendEmail(
-    //     approver.email,
-    //     `${acronym}: Task promoted to Done`,
-    //     `Task ${taskID} of Application ${acronym} has been promoted to Done by ${req.session.username}.`
-    //   );
-    // }
+    for (const approver of allApprovers) {
+      sendEmail(
+        approver.email,
+        `${acronym}: Task promoted to Done`,
+        `Task ${taskID} of Application ${acronym} has been promoted to Done by ${req.session.username}.`
+      );
+    }
   }
 
   req.body.details = `Task updated from ${currentState} to ${newState}`;

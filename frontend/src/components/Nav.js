@@ -80,7 +80,6 @@ export default Nav;
 
 const NavButton = (props) => {
   const location = useLocation();
-  console.log(location.pathname);
 
   return (
     <NavLink to={props.link} style={{ textDecoration: "none", marginTop: 10 }}>

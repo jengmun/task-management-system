@@ -13,6 +13,7 @@ import { useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
 import handleGetRequest from "../../hooks/handleGetRequest";
 import handlePostRequest from "../../hooks/handlePostRequest";
+import moment from "moment";
 
 const EditPlan = (props) => {
   const { app } = useParams();
@@ -65,8 +66,8 @@ const Plan = (props) => {
   const { app } = useParams();
 
   const [input, setInput] = useState({
-    startDate: props.plan.start_date.slice(0, 10),
-    endDate: props.plan.end_date.slice(0, 10),
+    startDate: moment(props.plan.start_date).format("YYYY-MM-DD"),
+    endDate: moment(props.plan.end_date).format("YYYY-MM-DD"),
   });
 
   const [message, setMessage] = useState("");
@@ -125,7 +126,7 @@ const Plan = (props) => {
             setInput({ ...input, startDate: e.target.value });
             setStartDate(e.target.value);
           }}
-          defaultValue={`${props.plan.start_date.slice(0, 10)}`}
+          defaultValue={input.startDate}
           sx={{ mt: 2 }}
           InputProps={{
             inputProps: { readOnly: props.plan.status === "Closed" },
@@ -144,7 +145,7 @@ const Plan = (props) => {
               readOnly: props.plan.status === "Closed",
             },
           }}
-          defaultValue={`${props.plan.end_date.slice(0, 10)}`}
+          defaultValue={input.endDate}
           onChange={(e) => {
             setInput({ ...input, endDate: e.target.value });
           }}

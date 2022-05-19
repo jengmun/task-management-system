@@ -2,6 +2,7 @@ const checkState = require("../modules/checkState");
 const { db } = require("../modules/db");
 const sendEmail = require("../modules/email");
 const checkGroup = require("../modules/checkGroup");
+const moment = require("moment");
 
 exports.createApplication = (req, res, next) => {
   db.query(
@@ -703,7 +704,7 @@ exports.createNotes = async (req, res, next) => {
 
   const parsedNotes = JSON.parse(existingNotes);
   let newNotes = [];
-  const date = new Date().toISOString().slice(0, 10);
+  const date = moment(new Date()).format("YYYY-MM-DD");
   const time = new Date().toLocaleTimeString();
   const timestamp = date + " " + time;
 

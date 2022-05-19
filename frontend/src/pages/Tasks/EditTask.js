@@ -20,6 +20,7 @@ import {
   Select,
   MenuItem,
 } from "@mui/material";
+import moment from "moment";
 
 const EditTask = (props) => {
   const { app, task, createTaskPermission } = props;
@@ -162,7 +163,12 @@ const EditTask = (props) => {
               <Chip label={taskDetails.creator} />
             </TableCell>
             <TableCell sx={{ border: "none" }}>
-              <Chip label={taskDetails.create_date?.slice(0, 10)} />
+              <Chip
+                label={
+                  taskDetails.create_date &&
+                  moment(taskDetails.create_date).format("YYYY-MM-DD")
+                }
+              />
             </TableCell>
             <TableCell sx={{ border: "none" }}>
               <Chip label={taskDetails.owner ? taskDetails.owner : "N/A"} />

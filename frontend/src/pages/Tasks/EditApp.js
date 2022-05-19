@@ -13,6 +13,7 @@ import {
   Select,
   MenuItem,
 } from "@mui/material";
+import moment from "moment";
 
 const EditApp = (props) => {
   const { app } = useParams();
@@ -122,7 +123,7 @@ const EditApp = (props) => {
             variant="outlined"
             type="date"
             required
-            defaultValue={`${appDetails.start_date.slice(0, 10)}`}
+            defaultValue={moment(appDetails.start_date).format("YYYY-MM-DD")}
             onChange={(e) => {
               setStartDate(e.target.value);
             }}
@@ -135,7 +136,7 @@ const EditApp = (props) => {
             required
             type="date"
             InputProps={{ inputProps: { min: startDate } }}
-            defaultValue={`${appDetails.end_date.slice(0, 10)}`}
+            defaultValue={moment(appDetails.end_date).format("YYYY-MM-DD")}
             sx={{ mt: 2 }}
           />
           {permissions.map((permission) => {

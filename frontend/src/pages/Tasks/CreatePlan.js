@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useParams } from "react-router-dom";
 import handlePostRequest from "../../hooks/handlePostRequest";
 import { Button, Card, TextField, Typography } from "@mui/material";
+import moment from "moment";
 
 const CreatePlan = (props) => {
   const { app } = useParams();
@@ -32,7 +33,7 @@ const CreatePlan = (props) => {
   };
 
   const [startDate, setStartDate] = useState(
-    new Date().toISOString().slice(0, 10)
+    moment(new Date()).format("YYYY-MM-DD")
   );
 
   return (
@@ -65,7 +66,7 @@ const CreatePlan = (props) => {
           onChange={(e) => {
             setStartDate(e.target.value);
           }}
-          defaultValue={new Date().toISOString().slice(0, 10)}
+          defaultValue={moment(new Date()).format("YYYY-MM-DD")}
           sx={{ mt: 2 }}
         />
         <TextField
@@ -75,7 +76,7 @@ const CreatePlan = (props) => {
           required
           type="date"
           InputProps={{ inputProps: { min: startDate } }}
-          defaultValue={new Date().toISOString().slice(0, 10)}
+          defaultValue={moment(new Date()).format("YYYY-MM-DD")}
           sx={{ mt: 2 }}
         />
         <Button type="submit">Submit</Button>

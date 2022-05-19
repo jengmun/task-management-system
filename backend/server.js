@@ -6,7 +6,6 @@ const { db } = require("./modules/db");
 require("dotenv").config();
 
 const app = express();
-const port = 5000;
 
 app.use(session({ secret: process.env.SESSION_SECRET }));
 app.use(
@@ -45,6 +44,6 @@ db.connect((err) => {
   // );
 });
 
-app.listen(port, () => {
-  console.log(`Connected to http://localhost:${port}`);
+app.listen(process.env.PORT, () => {
+  console.log(`Connected to http://localhost:${process.env.PORT}`);
 });

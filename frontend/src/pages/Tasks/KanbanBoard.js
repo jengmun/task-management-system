@@ -26,6 +26,7 @@ import AddIcon from "@mui/icons-material/Add";
 import AppRegistrationIcon from "@mui/icons-material/AppRegistration";
 import NoteAddRoundedIcon from "@mui/icons-material/NoteAddRounded";
 import EditRoundedIcon from "@mui/icons-material/EditRounded";
+import moment from "moment";
 
 const KanbanBoard = () => {
   const { app } = useParams();
@@ -203,8 +204,12 @@ const KanbanBoard = () => {
                 title={
                   <>
                     <div>Status: {plan.status}</div>
-                    <div>Start Date: {plan.start_date.slice(0, 10)}</div>
-                    <div>End Date: {plan.end_date.slice(0, 10)}</div>
+                    <div>
+                      Start Date: {moment(plan.start_date).format("YYYY-MM-DD")}
+                    </div>
+                    <div>
+                      End Date: {moment(plan.end_date).format("YYYY-MM-DD")}
+                    </div>
                   </>
                 }
                 sx={{ mb: 0.5 }}
@@ -245,8 +250,8 @@ const KanbanBoard = () => {
               {app}
             </Typography>
             <Typography variant="body2" sx={{ textAlign: "center" }}>
-              {`${appDetails.start_date?.slice(0, 10)} -
-        ${appDetails.end_date?.slice(0, 10)}`}
+              {`${moment(appDetails.start_date).format("YYYY-MM-DD")} -
+        ${moment(appDetails.end_date).format("YYYY-MM-DD")}`}
             </Typography>
             <Typography variant="body1" sx={{ textAlign: "center" }}>
               {appDetails.description}
@@ -442,7 +447,9 @@ const KanbanBoard = () => {
 
         {/* ================== BOARD ================== */}
         <Board
-          renderCard={(content) => <TaskCard content={content} />}
+          renderCard={(content) => (
+            <TaskCard content={content} fetchTasks={fetchTasks} />
+          )}
           onCardDragEnd={handleCardMove}
           disableColumnDrag
         >
@@ -529,9 +536,7 @@ const TaskCard = (props) => {
           app={app}
           task={props.content.id}
           createTaskPermission={props.content.createTaskPermission}
-          setClose={() => {
-            setOpen(false);
-          }}
+          fetchTasks={props.fetchTasks}
         />
       </Modal>
     </Card>

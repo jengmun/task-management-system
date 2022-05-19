@@ -13,6 +13,7 @@ import {
   TextField,
   Typography,
 } from "@mui/material";
+import moment from "moment";
 
 const CreateApp = (props) => {
   // ------------- Fetch all groups -------------
@@ -140,7 +141,7 @@ const CreateApp = (props) => {
           onChange={(e) => {
             setStartDate(e.target.value);
           }}
-          defaultValue={new Date().toISOString().slice(0, 10)}
+          defaultValue={moment(new Date()).format("YYYY-MM-DD")}
           sx={{ mt: 2 }}
         />
         <TextField
@@ -150,7 +151,7 @@ const CreateApp = (props) => {
           required
           type="date"
           InputProps={{ inputProps: { min: startDate } }}
-          defaultValue={new Date().toISOString().slice(0, 10)}
+          defaultValue={moment(new Date()).format("YYYY-MM-DD")}
           sx={{ mt: 2 }}
         />
         <Typography>Permissions</Typography>

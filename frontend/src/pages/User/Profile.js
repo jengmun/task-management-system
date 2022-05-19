@@ -1,4 +1,4 @@
-import { Box, Button, TextField, Typography } from "@mui/material";
+import { Box, Button, TextField, Typography, useTheme } from "@mui/material";
 import { useContext, useState } from "react";
 import CustomSnackbar from "../../components/CustomSnackbar";
 import LoginContext from "../../context/login-context";
@@ -97,6 +97,8 @@ const Profile = () => {
     }
   };
 
+  const theme = useTheme();
+
   return (
     <Box
       sx={{
@@ -140,7 +142,9 @@ const Profile = () => {
               defaultValue={loginContext.isLoggedIn.email}
               sx={{ mt: 1, mb: 1 }}
             />
-            <Button type="submit">Update</Button>
+            <Button type="submit" variant="contained">
+              Update
+            </Button>
           </form>
 
           <form
@@ -167,7 +171,9 @@ const Profile = () => {
               type="password"
               sx={{ mt: 1, mb: 1 }}
             />
-            <Button type="submit">Update password</Button>
+            <Button type="submit" variant="contained">
+              Update password
+            </Button>
           </form>
         </Box>
       </Box>

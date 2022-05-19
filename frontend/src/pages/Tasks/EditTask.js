@@ -156,6 +156,7 @@ const EditTask = (props) => {
         maxHeight: "90vh",
         overflow: "scroll",
         p: 5,
+        backgroundColor: "white",
       }}
     >
       <Typography variant="h2" sx={{ textAlign: "center" }}>

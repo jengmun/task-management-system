@@ -76,6 +76,7 @@ const AssignPM = () => {
         display: "flex",
         flexDirection: "column",
         height: "fit-content",
+        backgroundColor: "white",
       }}
     >
       <Typography variant="h6" sx={{ mb: 2 }}>

@@ -127,6 +127,7 @@ const CreateApp = (props) => {
         maxWidth: "90vw",
         maxHeight: "90vh",
         overflow: "scroll",
+        backgroundColor: "white",
       }}
     >
       <Box

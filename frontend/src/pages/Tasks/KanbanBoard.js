@@ -21,6 +21,7 @@ import {
   SpeedDial,
   SpeedDialAction,
   SpeedDialIcon,
+  useTheme,
 } from "@mui/material";
 import AddIcon from "@mui/icons-material/Add";
 import AppRegistrationIcon from "@mui/icons-material/AppRegistration";
@@ -172,6 +173,8 @@ const KanbanBoard = () => {
   const [openEditPlan, setOpenEditPlan] = useState(false);
   const [openCreateTask, setOpenCreateTask] = useState(false);
 
+  const theme = useTheme();
+
   return (
     <Box sx={{ width: "100%" }}>
       {/* ================== PLANS ================== */}
@@ -181,9 +184,9 @@ const KanbanBoard = () => {
           flexDirection: "column",
           width: "10vw",
           position: "absolute",
-          left: "5vw",
+          left: "6vw",
           minHeight: "100%",
-          backgroundColor: "green",
+          backgroundColor: theme.palette.background.paper,
         }}
       >
         <Typography variant="h6" sx={{ mt: 2 }}>
@@ -226,7 +229,7 @@ const KanbanBoard = () => {
         </Box>
       </Box>
 
-      <Box sx={{ ml: "10vw" }}>
+      <Box sx={{ ml: "11vw" }}>
         <NavLink to={`/`} style={{ textDecoration: "none" }}>
           <Button>Back</Button>
         </NavLink>

@@ -61,6 +61,7 @@ const CreatePlan = (props) => {
       sx={{
         p: 3,
         width: "max-content",
+        backgroundColor: "white",
       }}
     >
       <Typography variant="h6" sx={{ textAlign: "center" }}>

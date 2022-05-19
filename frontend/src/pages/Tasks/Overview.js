@@ -79,7 +79,7 @@ const Overview = () => {
             <Button
               variant="contained"
               sx={{ ml: 2 }}
-              color="warning"
+              color="info"
               onClick={() => {
                 setOpenAssignPM(true);
               }}
@@ -110,7 +110,7 @@ const Overview = () => {
               }}
               sx={{ ml: 2 }}
               variant="contained"
-              color="warning"
+              color="error"
             >
               Create App
             </Button>
@@ -133,7 +133,7 @@ const Overview = () => {
                   mr: 2,
                   mt: 2,
                   borderRadius: "10px",
-                  backgroundColor: theme.palette.primary.main,
+                  backgroundColor: theme.palette.background.default,
                   display: "flex",
                   justifyContent: "center",
                 }}

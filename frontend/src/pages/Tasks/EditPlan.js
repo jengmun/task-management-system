@@ -57,6 +57,7 @@ const EditPlan = (props) => {
         width: "max-content",
         height: "90vh",
         overflow: "scroll",
+        backgroundColor: "white",
       }}
     >
       <Table>

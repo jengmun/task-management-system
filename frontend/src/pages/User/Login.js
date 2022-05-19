@@ -2,7 +2,7 @@ import { useContext, useState } from "react";
 import { NavLink, useHistory } from "react-router-dom";
 import LoginContext from "../../context/login-context";
 import handlePostRequest from "../../hooks/handlePostRequest";
-import { TextField, Button, Typography } from "@mui/material";
+import { TextField, Button, Typography, Box } from "@mui/material";
 
 const Login = () => {
   const loginContext = useContext(LoginContext);
@@ -26,49 +26,62 @@ const Login = () => {
   };
 
   return (
-    <form
-      style={{
+    <Box
+      sx={{
         display: "flex",
-        flexDirection: "column",
         alignItems: "center",
         justifyContent: "center",
         height: "100%",
       }}
-      onSubmit={handleLogin}
     >
-      <Typography variant="h3" sx={{ mb: 2 }}>
-        Login
-      </Typography>
-      <TextField
-        required
-        id="username"
-        label="Username"
-        sx={{ mt: 1, mb: 1 }}
-      />
-      <TextField
-        required
-        id="password"
-        label="Password"
-        type="password"
-        sx={{ mt: 1, mb: 1 }}
-      />
-      <Typography variant="body1" color="error">
-        {message}
-      </Typography>
-      <Button
-        type="submit"
-        variant="contained"
-        color="warning"
-        sx={{ mt: 1, mb: 1 }}
+      <form
+        style={{
+          padding: "2vw",
+          paddingRight: "4vw",
+          paddingLeft: "4vw",
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "center",
+          height: "fit-content",
+          backgroundColor: "rgba(255,255,255, 0.6)",
+          borderRadius: "20px",
+        }}
+        onSubmit={handleLogin}
       >
-        Submit
-      </Button>
-      <NavLink to="/forgot-password" style={{ textDecoration: "none" }}>
-        <Button variant="outlined" color="info" sx={{ mt: 1, mb: 1 }}>
-          Forgot password
+        <Typography variant="h3" sx={{ mb: 2 }}>
+          Login
+        </Typography>
+        <TextField
+          required
+          id="username"
+          label="Username"
+          sx={{ mt: 1, mb: 1 }}
+        />
+        <TextField
+          required
+          id="password"
+          label="Password"
+          type="password"
+          sx={{ mt: 1, mb: 1 }}
+        />
+        <Typography variant="body1" color="error">
+          {message}
+        </Typography>
+        <Button
+          type="submit"
+          variant="contained"
+          color="warning"
+          sx={{ mt: 1, mb: 1 }}
+        >
+          Submit
         </Button>
-      </NavLink>
-    </form>
+        <NavLink to="/forgot-password" style={{ textDecoration: "none" }}>
+          <Button variant="outlined" color="info" sx={{ mt: 1, mb: 1 }}>
+            Forgot password
+          </Button>
+        </NavLink>
+      </form>
+    </Box>
   );
 };
 

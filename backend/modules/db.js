@@ -1,11 +1,12 @@
 const mysql = require("mysql");
+require("dotenv").config();
 
 const database = "nodelogin";
 
 const db = mysql.createConnection({
   host: "localhost",
   user: "root",
-  password: "St3ng12!",
+  password: process.env.DB_PASSWORD,
   database,
 });
 

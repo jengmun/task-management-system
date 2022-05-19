@@ -404,7 +404,7 @@ exports.updateTask = async (req, res, next) => {
   if (planName !== "null") {
     const validPlan = await new Promise((resolve) => {
       db.query(
-        `SELECT plan_name FROM plans WHERE acronym = ? AND plan_name = ? AND status IS NULL`,
+        `SELECT plan_name FROM plans WHERE acronym = ? AND plan_name = ? AND status = 'Open'`,
         [taskID.slice(0, 3), planName],
         (err, result) => {
           if (err) {

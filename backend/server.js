@@ -3,11 +3,12 @@ const session = require("express-session");
 const cors = require("cors");
 const cookieParser = require("cookie-parser");
 const { db } = require("./modules/db");
+require("dotenv").config();
 
 const app = express();
 const port = 5000;
 
-app.use(session({ secret: "super-secret" }));
+app.use(session({ secret: process.env.SESSION_SECRET }));
 app.use(
   cors({
     origin: "http://localhost:3000",

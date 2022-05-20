@@ -81,7 +81,7 @@ const CreateTask = (props) => {
         p: 3,
         maxWidth: "90vw",
         maxHeight: "90vh",
-        overflow: "scroll",
+        overflowY: "scroll",
         backgroundColor: "white",
       }}
     >

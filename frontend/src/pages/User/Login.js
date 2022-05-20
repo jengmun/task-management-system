@@ -71,13 +71,19 @@ const Login = () => {
         <Button
           type="submit"
           variant="contained"
-          color="warning"
-          sx={{ mt: 1, mb: 1 }}
+          color="info"
+          disableElevation
+          sx={{ mt: 1, mb: 1, borderRadius: "20px" }}
         >
           Submit
         </Button>
         <NavLink to="/forgot-password" style={{ textDecoration: "none" }}>
-          <Button variant="contained" color="info" sx={{ mt: 1, mb: 1 }}>
+          <Button
+            variant="contained"
+            color="error"
+            disableElevation
+            sx={{ mt: 1, mb: 1, borderRadius: "20px" }}
+          >
             Forgot password
           </Button>
         </NavLink>

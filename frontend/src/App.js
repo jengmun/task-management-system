@@ -73,7 +73,13 @@ function App() {
     <ThemeProvider theme={theme}>
       <LoginContext.Provider value={{ isLoggedIn, setIsLoggedIn }}>
         <BrowserRouter>
-          <Box sx={{ display: "flex", height: "100vh", width: "100%" }}>
+          <Box
+            sx={{
+              display: "flex",
+              height: "100vh",
+              width: "100%",
+            }}
+          >
             <Nav />
             <Box
               sx={{

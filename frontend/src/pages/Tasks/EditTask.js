@@ -154,7 +154,7 @@ const EditTask = (props) => {
         minWidth: "120px",
         width: "50vw",
         maxHeight: "90vh",
-        overflow: "scroll",
+        overflowY: "scroll",
         p: 5,
         backgroundColor: "white",
       }}

@@ -1,6 +1,6 @@
 .react-kanban-board{
     display: flex;
-    justify-content: center;
+    justify-content: center;    
 }
 
 .react-kanban-column{
@@ -8,5 +8,7 @@
     display: flex;
     align-items: center;
     justify-content: center;
+    border-radius: 10px;
+    background-color: rgba(255, 255, 255, 0.6);
 }
 

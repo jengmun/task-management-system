@@ -195,13 +195,13 @@ const KanbanBoard = () => {
           flexDirection: "column",
           width: "10vw",
           position: "fixed",
-          top: "5vh",
-          left: "6vw",
+          top: "calc(2vh + 24.5px)",
+          left: "5vw",
           minHeight: "80%",
           maxHeight: "90%",
+          overflowY: "scroll",
           backgroundColor: theme.palette.background.paper,
           borderRadius: "15px",
-          overflow: "scroll",
         }}
       >
         <Typography variant="h6" sx={{ mt: 2 }}>
@@ -249,7 +249,16 @@ const KanbanBoard = () => {
         </Box>
       </Box>
 
-      <Box sx={{ ml: "11vw", mt: "5vh" }}>
+      <Box
+        sx={{
+          ml: "11vw",
+          mr: "1vw",
+          backgroundColor: theme.palette.background.paper,
+          borderRadius: "20px",
+          mt: "calc(2vh + 24.5px)",
+          pt: 3,
+        }}
+      >
         <Box sx={{ mb: 2, display: "flex", justifyContent: "center" }}>
           {/* ================== APP ================== */}
           <Box
@@ -260,7 +269,6 @@ const KanbanBoard = () => {
               alignItems: "center",
               width: "35%",
               borderRadius: "10px",
-              border: "1px solid black",
               p: 2,
               mr: 2,
             }}
@@ -537,7 +545,9 @@ const TaskCard = (props) => {
   const [open, setOpen] = useState(false);
 
   return (
-    <Card sx={{ p: 2, width: "calc(13vw - 30px)" }}>
+    <Card
+      sx={{ p: 2, width: "calc(13vw - 30px)", mb: 1, borderRadius: "10px" }}
+    >
       <Box
         onClick={() => {
           setOpen(true);

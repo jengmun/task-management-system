@@ -56,7 +56,7 @@ const EditPlan = (props) => {
         p: 3,
         width: "max-content",
         height: "90vh",
-        overflow: "scroll",
+        overflowY: "scroll",
         backgroundColor: "white",
       }}
     >

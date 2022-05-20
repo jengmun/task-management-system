@@ -230,11 +230,20 @@ const KanbanBoard = () => {
           position: "fixed",
           top: "calc(2vh + 36.5px)",
           left: "5vw",
-          minHeight: "80%",
           maxHeight: "90%",
           overflowY: "scroll",
           backgroundColor: theme.palette.background.paper,
           borderRadius: "15px",
+          boxShadow: "0 4px 30px rgba(0, 0, 0, 0.1)",
+          border: "1px solid rgba(255, 255, 255, 0.33)",
+          "::-webkit-scrollbar": {
+            width: "8px",
+            borderRadius: "15px",
+          },
+          "::-webkit-scrollbar-thumb": {
+            backgroundColor: "white",
+            borderRadius: "15px",
+          },
         }}
       >
         <Typography variant="h6" sx={{ mt: 2 }}>
@@ -312,6 +321,8 @@ const KanbanBoard = () => {
               backgroundImage: `url(https://static.vecteezy.com/system/resources/thumbnails/001/102/791/small/soft-blurred-pastel-holographic-design.jpg)`,
               backgroundRepeat: "no-repeat",
               backgroundSize: "cover",
+              boxShadow: "0 4px 30px rgba(0, 0, 0, 0.1)",
+              border: "1px solid rgba(255, 255, 255, 0.33)",
             }}
           >
             <Typography variant="h2" sx={{ textAlign: "center" }}>
@@ -637,11 +648,15 @@ const TaskCard = (props) => {
           p: 2,
           width: "calc(13vw - 30px)",
           mb: 1,
-          backgroundColor: "rgba(255, 255, 255, 0.6)",
+          backgroundColor: "rgba(255, 255, 255, 0.8)",
           borderRadius: "10px",
-          boxShadow: "none",
-          transition: "background-color 0.5s",
-          ":hover": { backgroundColor: "rgb(255, 255, 255)" },
+          boxShadow: "0 4px 30px rgba(0, 0, 0, 0.1)",
+          border: "1px solid rgba(255, 255, 255, 0.33)",
+          transition: "background-color 0.5s, transform 0.5s",
+          ":hover": {
+            backgroundColor: "rgb(255, 255, 255)",
+            transform: "scale(1.1)",
+          },
         }}
         onClick={() => {
           setOpen(true);

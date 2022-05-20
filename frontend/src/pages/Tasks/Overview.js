@@ -133,13 +133,18 @@ const Overview = () => {
                   mr: 2,
                   mt: 2,
                   borderRadius: "20px",
-                  backgroundColor: theme.palette.background.default,
+                  boxShadow: "0 4px 30px rgba(0, 0, 0, 0.1)",
+                  border: "1px solid rgba(255, 255, 255, 0.33)",
+                  backgroundColor: theme.palette.background.paper,
                   display: "flex",
                   justifyContent: "center",
                   color: theme.palette.primary.dark,
-                  transition: "background-color 0.5s",
+                  transition: "background-color 0.5s, transform 0.5s",
                   ":active": { color: theme.palette.primary.main },
-                  ":hover": { backgroundColor: "rgb(255, 255, 255)" },
+                  ":hover": {
+                    backgroundColor: "rgba(255, 255, 255, 0.9)",
+                    transform: "scale(1.1)",
+                  },
                 }}
               >
                 <Typography

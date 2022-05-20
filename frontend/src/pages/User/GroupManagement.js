@@ -178,7 +178,8 @@ const GroupManagement = () => {
               backgroundColor: theme.palette.background.paper,
               borderRadius: "20px",
               p: 5,
-              boxShadow: "1px 1px 5px white",
+              boxShadow: "0 4px 30px rgba(0, 0, 0, 0.1)",
+              border: "1px solid rgba(255, 255, 255, 0.33)",
               mb: 2,
             }}
           >
@@ -232,7 +233,8 @@ const GroupManagement = () => {
               backgroundColor: theme.palette.background.paper,
               borderRadius: "20px",
               p: 5,
-              boxShadow: "1px 1px 5px white",
+              boxShadow: "0 4px 30px rgba(0, 0, 0, 0.1)",
+              border: "1px solid rgba(255, 255, 255, 0.33)",
               mb: 2,
             }}
           >

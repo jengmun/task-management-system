@@ -126,6 +126,7 @@ const UserManagement = () => {
           backgroundColor: theme.palette.background.default,
           borderRadius: "25px",
           m: 4,
+          boxShadow: "0 4px 30px rgba(0, 0, 0, 0.1)",
         }}
       >
         <TableHead>
@@ -307,7 +308,7 @@ const User = (props) => {
           <>
             <Tooltip title="Save changes">
               <Button onClick={handleUpdateUser}>
-                <SaveRoundedIcon sx={{ mr: 1 }} color="success" />
+                <SaveRoundedIcon sx={{ mr: 1 }} color="warning" />
               </Button>
             </Tooltip>
             <Tooltip title="Cancel changes">

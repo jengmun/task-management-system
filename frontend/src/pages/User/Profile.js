@@ -115,8 +115,10 @@ const Profile = () => {
           justifyContent: "center",
           alignItems: "center",
           borderRadius: "15px",
-          backgroundColor: theme.palette.background.default,
+          backgroundColor: theme.palette.background.paper,
           p: 3,
+          boxShadow: "0 4px 30px rgba(0, 0, 0, 0.1)",
+          border: "1px solid rgba(255, 255, 255, 0.33)",
         }}
       >
         <Typography variant="h4">Account management</Typography>

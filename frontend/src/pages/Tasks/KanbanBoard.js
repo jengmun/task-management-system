@@ -28,6 +28,7 @@ import AppRegistrationIcon from "@mui/icons-material/AppRegistration";
 import NoteAddRoundedIcon from "@mui/icons-material/NoteAddRounded";
 import EditRoundedIcon from "@mui/icons-material/EditRounded";
 import moment from "moment";
+import CustomSnackbar from "../../components/CustomSnackbar";
 
 const KanbanBoard = () => {
   const { app } = useParams();
@@ -98,6 +99,24 @@ const KanbanBoard = () => {
     fetchUserPermissions();
   }, []);
 
+  // ------------- Snackbar -------------
+  const [message, setMessage] = useState("");
+  const [openSnackbar, setOpenSnackbar] = useState(false);
+  const [severity, setSeverity] = useState("");
+
+  const handleOpenSnackbar = (severity) => {
+    setOpenSnackbar(true);
+    setSeverity(severity);
+  };
+
+  const handleCloseSnackbar = (event, reason) => {
+    if (reason === "clickaway") {
+      return;
+    }
+
+    setOpenSnackbar(false);
+  };
+
   // ------------- Create Kanban Board -------------
   const [board, setBoard] = useState({ columns: [] });
   const states = ["Open", "Todo", "Doing", "Done", "Closed"];
@@ -159,9 +178,15 @@ const KanbanBoard = () => {
       });
     }
 
+    setMessage(data);
+
     if (data !== "Added note") {
+      handleOpenSnackbar("error");
       return;
+    } else {
+      handleOpenSnackbar("success");
     }
+
     // ------------- Update Board -------------
     const updatedBoard = moveCard(board, source, destination);
     setBoard(updatedBoard);
@@ -186,7 +211,15 @@ const KanbanBoard = () => {
           top: "0.5vh",
         }}
       >
-        <Button>Back</Button>
+        <Button
+          variant="contained"
+          sx={{
+            backgroundColor: theme.palette.background.default,
+            ":hover": { backgroundColor: theme.palette.primary.light },
+          }}
+        >
+          Back
+        </Button>
       </NavLink>
       {/* ================== PLANS ================== */}
       <Box
@@ -195,7 +228,7 @@ const KanbanBoard = () => {
           flexDirection: "column",
           width: "10vw",
           position: "fixed",
-          top: "calc(2vh + 24.5px)",
+          top: "calc(2vh + 36.5px)",
           left: "5vw",
           minHeight: "80%",
           maxHeight: "90%",
@@ -253,13 +286,19 @@ const KanbanBoard = () => {
         sx={{
           ml: "11vw",
           mr: "1vw",
-          backgroundColor: theme.palette.background.paper,
           borderRadius: "20px",
-          mt: "calc(2vh + 24.5px)",
+          mt: "2vh",
           pt: 3,
         }}
       >
-        <Box sx={{ mb: 2, display: "flex", justifyContent: "center" }}>
+        <Box
+          sx={{
+            mb: 2,
+            display: "flex",
+            flexDirection: "column",
+            justifyContent: "center",
+          }}
+        >
           {/* ================== APP ================== */}
           <Box
             sx={{
@@ -267,7 +306,6 @@ const KanbanBoard = () => {
               flexDirection: "column",
               justifyContent: "center",
               alignItems: "center",
-              width: "35%",
               borderRadius: "10px",
               p: 2,
               mr: 2,
@@ -288,16 +326,12 @@ const KanbanBoard = () => {
           {/* ================== PERMISSIONS ================== */}
           <Box
             sx={{
-              width: "35%",
               display: "flex",
               flexDirection: "column",
               borderRadius: "10px",
-              border: "1px solid black",
-              p: 2,
               mr: 2,
             }}
           >
-            <Typography variant="h6">Permissions</Typography>
             <Box
               sx={{
                 display: "flex",
@@ -310,15 +344,21 @@ const KanbanBoard = () => {
                   display: "flex",
                   justifyContent: "space-around",
                   alignItems: "center",
-                  backgroundColor: theme.palette.error.main,
+                  backgroundColor: userPermissions.find(
+                    ({ group_name }) => group_name === appDetails.permit_create
+                  )
+                    ? theme.palette.info.main
+                    : theme.palette.primary.dark,
                   p: 1,
                   mb: 1,
                   mr: 1,
                   borderRadius: "7px",
-                  width: "40%",
+                  width: "17%",
                 }}
               >
-                <Typography color="white">Create</Typography>
+                <Typography sx={{ fontWeight: "bold", color: "white" }}>
+                  CREATE
+                </Typography>
                 <Chip label={appDetails.permit_create} />
               </Box>
               <Box
@@ -326,15 +366,22 @@ const KanbanBoard = () => {
                   display: "flex",
                   justifyContent: "space-around",
                   alignItems: "center",
-                  backgroundColor: theme.palette.info.main,
+                  backgroundColor: theme.palette.warning.main,
+                  // userPermissions.find(
+                  //   ({ group_name }) => group_name === appDetails.permit_open
+                  // )
+                  //   ? theme.palette.warning.main
+                  //   : theme.palette.primary.dark,
                   p: 1,
                   mb: 1,
                   mr: 1,
                   borderRadius: "7px",
-                  width: "40%",
+                  width: "17%",
                 }}
               >
-                <Typography color="white">Open</Typography>
+                <Typography sx={{ fontWeight: "bold", color: "white" }}>
+                  OPEN
+                </Typography>
                 <Chip label={appDetails.permit_open} />
               </Box>
               <Box
@@ -342,15 +389,22 @@ const KanbanBoard = () => {
                   display: "flex",
                   justifyContent: "space-around",
                   alignItems: "center",
-                  backgroundColor: theme.palette.warning.main,
+                  backgroundColor: theme.palette.success.main,
+                  // userPermissions.find(
+                  //   ({ group_name }) => group_name === appDetails.permit_todo
+                  // )
+                  //   ? theme.palette.alert.main
+                  //   : theme.palette.primary.dark,
                   p: 1,
                   mb: 1,
                   mr: 1,
                   borderRadius: "7px",
-                  width: "40%",
+                  width: "17%",
                 }}
               >
-                <Typography color="white">Todo</Typography>
+                <Typography sx={{ fontWeight: "bold", color: "white" }}>
+                  TODO
+                </Typography>
                 <Chip label={appDetails.permit_todo} />
               </Box>
               <Box
@@ -358,15 +412,22 @@ const KanbanBoard = () => {
                   display: "flex",
                   justifyContent: "space-around",
                   alignItems: "center",
-                  backgroundColor: theme.palette.success.main,
+                  backgroundColor: "rgb(189 139 203)",
+                  // userPermissions.find(
+                  //   ({ group_name }) => group_name === appDetails.permit_doing
+                  // )
+                  //   ? theme.palette.background.paper
+                  //   : theme.palette.primary.dark,
                   p: 1,
                   mb: 1,
                   mr: 1,
                   borderRadius: "7px",
-                  width: "40%",
+                  width: "17%",
                 }}
               >
-                <Typography color="white">Doing</Typography>
+                <Typography sx={{ fontWeight: "bold", color: "white" }}>
+                  DOING
+                </Typography>
                 <Chip label={appDetails.permit_doing} />
               </Box>
               <Box
@@ -374,37 +435,25 @@ const KanbanBoard = () => {
                   display: "flex",
                   justifyContent: "space-around",
                   alignItems: "center",
-                  backgroundColor: "pink",
+                  backgroundColor: theme.palette.error.main,
+                  // userPermissions.find(
+                  //   ({ group_name }) => group_name === appDetails.permit_done
+                  // )
+                  //   ? theme.palette.error.main
+                  //   : theme.palette.primary.dark,
                   p: 1,
                   mb: 1,
                   mr: 1,
                   borderRadius: "7px",
-                  width: "40%",
+                  width: "17%",
                 }}
               >
-                <Typography color="white">Done</Typography>
+                <Typography sx={{ fontWeight: "bold", color: "white" }}>
+                  DONE
+                </Typography>
                 <Chip label={appDetails.permit_done} />
               </Box>
             </Box>
-          </Box>
-
-          {/* ================== USER PERMISSIONS ================== */}
-          <Box
-            sx={{
-              width: "10%",
-              p: 2,
-              borderRadius: "10px",
-              border: "1px solid black",
-            }}
-          >
-            <Typography variant="h6">User Permissions</Typography>
-            {userPermissions.map((permission) => {
-              return (
-                <Typography variant="body2" key={permission.group_name}>
-                  {permission.group_name}
-                </Typography>
-              );
-            })}
           </Box>
         </Box>
 
@@ -487,52 +536,68 @@ const KanbanBoard = () => {
       </Box>
 
       {/* ================== SPEED DIAL ================== */}
-      <SpeedDial
-        ariaLabel="SpeedDial"
-        icon={<SpeedDialIcon />}
-        sx={{ position: "fixed", bottom: "2%", right: "2%" }}
-      >
-        {createTaskPermission && (
-          <SpeedDialAction
-            key="Create Task"
-            tooltipTitle="Create Task"
-            icon={<AddIcon />}
-            onClick={() => {
-              setOpenCreateTask(true);
-            }}
-          />
-        )}
-        {isPM && (
-          <SpeedDialAction
-            key="Create Plan"
-            tooltipTitle="Create Plan"
-            icon={<NoteAddRoundedIcon />}
-            onClick={() => {
-              setOpenCreatePlan(true);
-            }}
-          />
-        )}
-        {isPM && (
-          <SpeedDialAction
-            key="Edit Plan"
-            tooltipTitle="Edit Plan"
-            icon={<EditRoundedIcon />}
-            onClick={() => {
-              setOpenEditPlan(true);
-            }}
-          />
-        )}
-        {isPM && (
-          <SpeedDialAction
-            key="Edit App"
-            tooltipTitle="Edit App"
-            icon={<AppRegistrationIcon />}
-            onClick={() => {
-              setOpenEditApp(true);
-            }}
-          />
-        )}
-      </SpeedDial>
+      {(isPM || createTaskPermission) && (
+        <SpeedDial
+          ariaLabel="SpeedDial"
+          icon={<SpeedDialIcon />}
+          sx={{ position: "fixed", bottom: "3%", right: "3%" }}
+          FabProps={{
+            sx: {
+              bgcolor: "error.main",
+              ":hover": {
+                bgcolor: "warning.main",
+              },
+            },
+          }}
+        >
+          {createTaskPermission && (
+            <SpeedDialAction
+              key="Create Task"
+              tooltipTitle="Create Task"
+              icon={<AddIcon />}
+              onClick={() => {
+                setOpenCreateTask(true);
+              }}
+            />
+          )}
+          {isPM && (
+            <SpeedDialAction
+              key="Create Plan"
+              tooltipTitle="Create Plan"
+              icon={<NoteAddRoundedIcon />}
+              onClick={() => {
+                setOpenCreatePlan(true);
+              }}
+            />
+          )}
+          {isPM && (
+            <SpeedDialAction
+              key="Edit Plan"
+              tooltipTitle="Edit Plan"
+              icon={<EditRoundedIcon />}
+              onClick={() => {
+                setOpenEditPlan(true);
+              }}
+            />
+          )}
+          {isPM && (
+            <SpeedDialAction
+              key="Edit App"
+              tooltipTitle="Edit App"
+              icon={<AppRegistrationIcon />}
+              onClick={() => {
+                setOpenEditApp(true);
+              }}
+            />
+          )}
+        </SpeedDial>
+      )}
+      <CustomSnackbar
+        openSnackbar={openSnackbar}
+        handleCloseSnackbar={handleCloseSnackbar}
+        message={message}
+        severity={severity}
+      />
     </Box>
   );
 };
@@ -545,23 +610,37 @@ const TaskCard = (props) => {
   const [open, setOpen] = useState(false);
 
   return (
-    <Card
-      sx={{ p: 2, width: "calc(13vw - 30px)", mb: 1, borderRadius: "10px" }}
-    >
-      <Box
+    <>
+      <Card
+        sx={{
+          p: 2,
+          width: "calc(13vw - 30px)",
+          mb: 1,
+          backgroundColor: "rgba(255, 255, 255, 0.4)",
+          borderRadius: "10px",
+          boxShadow: "none",
+          transition: "background-color 0.5s",
+          ":hover": { backgroundColor: "rgb(255, 255, 255)" },
+        }}
         onClick={() => {
           setOpen(true);
         }}
       >
-        <Typography variant="h6">{props.content.title}</Typography>
-        <Typography variant="body1">Plan: {props.content.planName}</Typography>
-      </Box>
+        <Box sx={{ width: "100%" }}>
+          <Typography variant="body1">{props.content.title}</Typography>
+          <Typography variant="body2">{props.content.planName}</Typography>
+        </Box>
+      </Card>
       <Modal
         open={open}
         onClose={() => {
           setOpen(false);
         }}
-        sx={{ display: "flex", justifyContent: "center", alignItems: "center" }}
+        sx={{
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center",
+        }}
       >
         <EditTask
           app={app}
@@ -570,6 +649,6 @@ const TaskCard = (props) => {
           fetchTasks={props.fetchTasks}
         />
       </Modal>
-    </Card>
+    </>
   );
 };

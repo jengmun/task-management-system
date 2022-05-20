@@ -476,21 +476,25 @@ exports.userPasswordReset = async (req, res, next) => {
   const oldPassword = req.body.oldPassword;
   const username = req.params.username;
 
-  if (
-    !db.query(
+  const validPassword = await new Promise((resolve) => {
+    db.query(
       "SELECT password FROM accounts WHERE username = ?",
       username,
       (err, result) => {
         if (err) return next(err);
         argon2.verify(result[0].password, oldPassword).then((argon2Match) => {
           if (!argon2Match) {
-            return false;
+            resolve(false);
+          } else {
+            resolve(true);
           }
         });
       }
-    )
-  ) {
-    res.json("Wrong password");
+    );
+  });
+
+  if (!validPassword) {
+    res.json("Current password is wrong!");
     return;
   }
 
@@ -510,7 +514,7 @@ exports.userPasswordReset = async (req, res, next) => {
     [password, username],
     (err, result) => {
       if (err) return next(err);
-      res.json(result);
+      res.json("Password resetted!");
     }
   );
 };

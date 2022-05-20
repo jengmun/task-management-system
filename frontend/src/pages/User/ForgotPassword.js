@@ -1,4 +1,4 @@
-import { Button, Card } from "@mui/material";
+import { Button, Card, TextField, Typography } from "@mui/material";
 import { Box } from "@mui/system";
 import { useState } from "react";
 import CustomSnackbar from "../../components/CustomSnackbar";
@@ -42,16 +42,25 @@ const ResetPassword = () => {
   return (
     <Box sx={{ height: "100%", display: "flex", alignItems: "center" }}>
       <Card sx={{ height: "fit-content", p: 3 }}>
-        <form onSubmit={handleResetPassword}>
-          <h1>Reset password</h1>
+        <form
+          onSubmit={handleResetPassword}
+          style={{ display: "flex", flexDirection: "column" }}
+        >
+          <Typography variant="h6" sx={{ mb: 1, textAlign: "center" }}>
+            Reset password
+          </Typography>
 
-          <label htmlFor="username">Username</label>
-          <input id="username" name="username" />
+          <TextField
+            required
+            id="username"
+            label="Username"
+            sx={{ mt: 1, mb: 1 }}
+          />
+          <TextField required id="email" label="Email" sx={{ mt: 1, mb: 1 }} />
 
-          <label htmlFor="email">Email</label>
-          <input id="email" name="email" />
-
-          <Button type="submit">Submit</Button>
+          <Button type="submit" variant="contained" color="error">
+            Submit
+          </Button>
         </form>
         <CustomSnackbar
           openSnackbar={openSnackbar}

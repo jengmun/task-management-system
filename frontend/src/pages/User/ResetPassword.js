@@ -1,15 +1,37 @@
+import { Box, Button, TextField, Typography } from "@mui/material";
+import { useState } from "react";
 import { useParams } from "react-router-dom";
+import CustomSnackbar from "../../components/CustomSnackbar";
 import handlePostRequest from "../../hooks/handlePostRequest";
 
 const ResetPassword = () => {
   const params = useParams();
+
+  // ------------- Snackbar -------------
+  const [message, setMessage] = useState("");
+  const [openSnackbar, setOpenSnackbar] = useState(false);
+  const [severity, setSeverity] = useState("");
+
+  const handleOpenSnackbar = (severity) => {
+    setOpenSnackbar(true);
+    setSeverity(severity);
+  };
+
+  const handleCloseSnackbar = (event, reason) => {
+    if (reason === "clickaway") {
+      return;
+    }
+
+    setOpenSnackbar(false);
+  };
 
   const handlePasswordChange = async (e) => {
     e.preventDefault();
 
     // Step 1 - check that both passwords match
     if (e.target.updatePassword.value !== e.target.confirmPassword.value) {
-      console.log("Passwords do not match");
+      setMessage("Passwords do not match");
+      handleOpenSnackbar("error");
       return;
     }
 
@@ -19,7 +41,8 @@ const ResetPassword = () => {
         /^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[0-9])(?=.*?[#?!@$%^&*-])\S{8,10}$/
       )
     ) {
-      console.log("Invalid password format");
+      setMessage("Invalid password format");
+      handleOpenSnackbar("error");
       return;
     }
 
@@ -31,21 +54,58 @@ const ResetPassword = () => {
         oldPassword: e.target.oldPassword.value,
       }
     );
-    console.log(result);
+    setMessage(result);
+
+    if (result !== "Password resetted!") {
+      handleOpenSnackbar("error");
+    } else {
+      handleOpenSnackbar("success");
+    }
   };
 
   return (
-    <form onSubmit={handlePasswordChange}>
-      <h1>Change password</h1>
+    <Box sx={{ height: "100%", display: "flex", alignItems: "center" }}>
+      <form
+        onSubmit={handlePasswordChange}
+        style={{ display: "flex", flexDirection: "column", padding: 2 }}
+      >
+        <Typography variant="h5" sx={{ textAlign: "center" }}>
+          Change password
+        </Typography>
 
-      <label htmlFor="oldPassword">Current Password</label>
-      <input id="oldPassword" name="oldPassword" type="password" />
-      <label htmlFor="updatePassword">New Password</label>
-      <input id="updatePassword" name="updatePassword" type="password" />
-      <label htmlFor="confirmPassword">Re-enter New Password</label>
-      <input id="confirmPassword" name="confirmPassword" type="password" />
-      <button>Update password</button>
-    </form>
+        <TextField
+          required
+          id="oldPassword"
+          label="Current Password"
+          type="password"
+          sx={{ mt: 1, mb: 1 }}
+        />
+        <TextField
+          required
+          id="updatePassword"
+          label="New Password"
+          type="password"
+          sx={{ mt: 1, mb: 1 }}
+        />
+        <TextField
+          required
+          id="confirmPassword"
+          label="Re-enter New Password"
+          type="password"
+          sx={{ mt: 1, mb: 2 }}
+        />
+
+        <Button type="submit" variant="contained">
+          Update password
+        </Button>
+      </form>
+      <CustomSnackbar
+        openSnackbar={openSnackbar}
+        handleCloseSnackbar={handleCloseSnackbar}
+        message={message}
+        severity={severity}
+      />
+    </Box>
   );
 };
 

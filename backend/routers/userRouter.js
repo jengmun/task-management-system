@@ -57,7 +57,7 @@ router.post("/assign-PM", checkAdmin, assignPM);
 
 // ================= PASSWORD RESETTING - USER AND ADMIN ================= //
 
-router.post("/admin-password-reset", checkAdmin, adminPasswordReset);
+router.post("/admin-password-reset", adminPasswordReset);
 
 router.post("/user-password-reset/:username", userPasswordReset);
 

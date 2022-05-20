@@ -293,7 +293,6 @@ const KanbanBoard = () => {
       >
         <Box
           sx={{
-            mb: 2,
             display: "flex",
             flexDirection: "column",
             justifyContent: "center",
@@ -309,6 +308,10 @@ const KanbanBoard = () => {
               borderRadius: "10px",
               p: 2,
               mr: 2,
+              mb: 2,
+              backgroundImage: `url(https://static.vecteezy.com/system/resources/thumbnails/001/102/791/small/soft-blurred-pastel-holographic-design.jpg)`,
+              backgroundRepeat: "no-repeat",
+              backgroundSize: "cover",
             }}
           >
             <Typography variant="h2" sx={{ textAlign: "center" }}>
@@ -321,137 +324,155 @@ const KanbanBoard = () => {
             <Typography variant="body1" sx={{ textAlign: "center" }}>
               {appDetails.description}
             </Typography>
-          </Box>
-
-          {/* ================== PERMISSIONS ================== */}
-          <Box
-            sx={{
-              display: "flex",
-              flexDirection: "column",
-              borderRadius: "10px",
-              mr: 2,
-            }}
-          >
+            {/* ================== PERMISSIONS ================== */}
             <Box
               sx={{
                 display: "flex",
-                flexWrap: "wrap",
-                justifyContent: "space-around",
+                flexDirection: "column",
+                borderRadius: "10px",
+                mr: 2,
+                mt: 2,
+                width: "100%",
               }}
             >
               <Box
                 sx={{
                   display: "flex",
+                  flexWrap: "wrap",
                   justifyContent: "space-around",
-                  alignItems: "center",
-                  backgroundColor: userPermissions.find(
-                    ({ group_name }) => group_name === appDetails.permit_create
-                  )
-                    ? theme.palette.info.main
-                    : theme.palette.primary.dark,
-                  p: 1,
-                  mb: 1,
-                  mr: 1,
-                  borderRadius: "7px",
-                  width: "17%",
                 }}
               >
-                <Typography sx={{ fontWeight: "bold", color: "white" }}>
-                  CREATE
-                </Typography>
-                <Chip label={appDetails.permit_create} />
-              </Box>
-              <Box
-                sx={{
-                  display: "flex",
-                  justifyContent: "space-around",
-                  alignItems: "center",
-                  backgroundColor: theme.palette.warning.main,
-                  // userPermissions.find(
-                  //   ({ group_name }) => group_name === appDetails.permit_open
-                  // )
-                  //   ? theme.palette.warning.main
-                  //   : theme.palette.primary.dark,
-                  p: 1,
-                  mb: 1,
-                  mr: 1,
-                  borderRadius: "7px",
-                  width: "17%",
-                }}
-              >
-                <Typography sx={{ fontWeight: "bold", color: "white" }}>
-                  OPEN
-                </Typography>
-                <Chip label={appDetails.permit_open} />
-              </Box>
-              <Box
-                sx={{
-                  display: "flex",
-                  justifyContent: "space-around",
-                  alignItems: "center",
-                  backgroundColor: theme.palette.success.main,
-                  // userPermissions.find(
-                  //   ({ group_name }) => group_name === appDetails.permit_todo
-                  // )
-                  //   ? theme.palette.alert.main
-                  //   : theme.palette.primary.dark,
-                  p: 1,
-                  mb: 1,
-                  mr: 1,
-                  borderRadius: "7px",
-                  width: "17%",
-                }}
-              >
-                <Typography sx={{ fontWeight: "bold", color: "white" }}>
-                  TODO
-                </Typography>
-                <Chip label={appDetails.permit_todo} />
-              </Box>
-              <Box
-                sx={{
-                  display: "flex",
-                  justifyContent: "space-around",
-                  alignItems: "center",
-                  backgroundColor: "rgb(189 139 203)",
-                  // userPermissions.find(
-                  //   ({ group_name }) => group_name === appDetails.permit_doing
-                  // )
-                  //   ? theme.palette.background.paper
-                  //   : theme.palette.primary.dark,
-                  p: 1,
-                  mb: 1,
-                  mr: 1,
-                  borderRadius: "7px",
-                  width: "17%",
-                }}
-              >
-                <Typography sx={{ fontWeight: "bold", color: "white" }}>
-                  DOING
-                </Typography>
-                <Chip label={appDetails.permit_doing} />
-              </Box>
-              <Box
-                sx={{
-                  display: "flex",
-                  justifyContent: "space-around",
-                  alignItems: "center",
-                  backgroundColor: theme.palette.error.main,
-                  // userPermissions.find(
-                  //   ({ group_name }) => group_name === appDetails.permit_done
-                  // )
-                  //   ? theme.palette.error.main
-                  //   : theme.palette.primary.dark,
-                  p: 1,
-                  mb: 1,
-                  mr: 1,
-                  borderRadius: "7px",
-                  width: "17%",
-                }}
-              >
-                <Typography sx={{ fontWeight: "bold", color: "white" }}>
-                  DONE
-                </Typography>
-                <Chip label={appDetails.permit_done} />
+                <Box
+                  sx={{
+                    display: "flex",
+                    justifyContent: "space-around",
+                    alignItems: "center",
+                    backgroundColor: theme.palette.info.main,
+                    border: userPermissions.find(
+                      ({ group_name }) =>
+                        group_name === appDetails.permit_create
+                    )
+                      ? "2px solid black"
+                      : null,
+                    p: 1,
+                    mb: 1,
+                    mr: 1,
+                    borderRadius: "7px",
+                    width: "17%",
+                  }}
+                >
+                  <Typography sx={{ fontWeight: "bold", color: "white" }}>
+                    CREATE
+                  </Typography>
+                  <Chip
+                    label={appDetails.permit_create}
+                    sx={{ backgroundColor: theme.palette.background.default }}
+                  />
+                </Box>
+                <Box
+                  sx={{
+                    display: "flex",
+                    justifyContent: "space-around",
+                    alignItems: "center",
+                    backgroundColor: "rgb(127 129 238)",
+                    border: userPermissions.find(
+                      ({ group_name }) => group_name === appDetails.permit_open
+                    )
+                      ? "2px solid black"
+                      : null,
+                    p: 1,
+                    mb: 1,
+                    mr: 1,
+                    borderRadius: "7px",
+                    width: "17%",
+                  }}
+                >
+                  <Typography sx={{ fontWeight: "bold", color: "white" }}>
+                    OPEN
+                  </Typography>
+                  <Chip
+                    label={appDetails.permit_open}
+                    sx={{ backgroundColor: theme.palette.background.default }}
+                  />
+                </Box>
+                <Box
+                  sx={{
+                    display: "flex",
+                    justifyContent: "space-around",
+                    alignItems: "center",
+                    backgroundColor: "rgb(181 133 227)",
+                    border: userPermissions.find(
+                      ({ group_name }) => group_name === appDetails.permit_todo
+                    )
+                      ? "2px solid black"
+                      : null,
+                    p: 1,
+                    mb: 1,
+                    mr: 1,
+                    borderRadius: "7px",
+                    width: "17%",
+                  }}
+                >
+                  <Typography sx={{ fontWeight: "bold", color: "white" }}>
+                    TODO
+                  </Typography>
+                  <Chip
+                    label={appDetails.permit_todo}
+                    sx={{ backgroundColor: theme.palette.background.default }}
+                  />
+                </Box>
+                <Box
+                  sx={{
+                    display: "flex",
+                    justifyContent: "space-around",
+                    alignItems: "center",
+                    backgroundColor: "rgb(214 154 218)",
+                    border: userPermissions.find(
+                      ({ group_name }) => group_name === appDetails.permit_doing
+                    )
+                      ? "2px solid black"
+                      : null,
+                    p: 1,
+                    mb: 1,
+                    mr: 1,
+                    borderRadius: "7px",
+                    width: "17%",
+                  }}
+                >
+                  <Typography sx={{ fontWeight: "bold", color: "white" }}>
+                    DOING
+                  </Typography>
+                  <Chip
+                    label={appDetails.permit_doing}
+                    sx={{ backgroundColor: theme.palette.background.default }}
+                  />
+                </Box>
+                <Box
+                  sx={{
+                    display: "flex",
+                    justifyContent: "space-around",
+                    alignItems: "center",
+                    backgroundColor: theme.palette.error.main,
+                    border: userPermissions.find(
+                      ({ group_name }) => group_name === appDetails.permit_done
+                    )
+                      ? "2px solid black"
+                      : null,
+                    p: 1,
+                    mb: 1,
+                    mr: 1,
+                    borderRadius: "7px",
+                    width: "17%",
+                  }}
+                >
+                  <Typography sx={{ fontWeight: "bold", color: "white" }}>
+                    DONE
+                  </Typography>
+                  <Chip
+                    label={appDetails.permit_done}
+                    sx={{ backgroundColor: theme.palette.background.default }}
+                  />
+                </Box>
               </Box>
             </Box>
           </Box>
@@ -616,7 +637,7 @@ const TaskCard = (props) => {
           p: 2,
           width: "calc(13vw - 30px)",
           mb: 1,
-          backgroundColor: "rgba(255, 255, 255, 0.4)",
+          backgroundColor: "rgba(255, 255, 255, 0.6)",
           borderRadius: "10px",
           boxShadow: "none",
           transition: "background-color 0.5s",

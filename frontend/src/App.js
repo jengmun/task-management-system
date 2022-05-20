@@ -47,13 +47,13 @@ function App() {
         light: "rgb(192 192 192)",
       },
       secondary: { main: "rgb(255, 255, 255)" },
-      info: { main: "rgb(171 216 229)" },
+      info: { main: "rgb(143, 203, 221)" },
       error: { main: "rgb(232 176 185)" },
       warning: { main: "rgb(233 223 149)" },
       success: { main: "rgb(189 217 144)" },
       background: {
-        default: "rgba(255, 255, 255, 0.5)",
-        paper: "rgba(255, 255, 255, 0.3)",
+        default: "rgba(255, 255, 255, 0.7)",
+        paper: "rgba(255, 255, 255, 0.5)",
       },
     },
     typography: {

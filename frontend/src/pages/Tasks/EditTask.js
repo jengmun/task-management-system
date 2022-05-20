@@ -19,6 +19,7 @@ import {
   TableCell,
   Select,
   MenuItem,
+  useTheme,
 } from "@mui/material";
 import moment from "moment";
 import CustomSnackbar from "../../components/CustomSnackbar";
@@ -128,8 +129,6 @@ const EditTask = (props) => {
     setPermissions();
   }, [taskDetails]);
 
-  const [notesMessage, setNotesMessage] = useState("");
-
   const handleAddNote = async (e) => {
     e.preventDefault();
 
@@ -138,15 +137,19 @@ const EditTask = (props) => {
       details: e.target.notes.value,
       acronym: app,
     });
+    setMessage(data);
+
     if (data !== "Added note") {
-      setNotesMessage(data);
+      handleOpenSnackbar("error");
     } else {
-      setNotesMessage(data);
       e.target.notes.value = "";
       fetchAllNotes();
       fetchTaskDetails();
+      handleOpenSnackbar("success");
     }
   };
+
+  const theme = useTheme();
 
   return (
     <Card
@@ -246,10 +249,29 @@ const EditTask = (props) => {
                       setSelectedPlan(e.target.value);
                     }}
                   >
-                    <MenuItem value="null">No plan</MenuItem>
+                    <MenuItem
+                      value="null"
+                      sx={{
+                        backgroundColor: "white",
+                        ":hover": {
+                          backgroundColor: theme.palette.info.main,
+                        },
+                      }}
+                    >
+                      No plan
+                    </MenuItem>
                     {allPlans.map((plan) => {
                       return (
-                        <MenuItem key={plan.plan_name} value={plan.plan_name}>
+                        <MenuItem
+                          key={plan.plan_name}
+                          value={plan.plan_name}
+                          sx={{
+                            backgroundColor: "white",
+                            ":hover": {
+                              backgroundColor: theme.palette.info.main,
+                            },
+                          }}
+                        >
                           {plan.plan_name}
                         </MenuItem>
                       );
@@ -277,9 +299,6 @@ const EditTask = (props) => {
         )}
       </Box>
 
-      <Typography variant="body2" sx={{ mb: 2 }}>
-        {notesMessage}
-      </Typography>
       {allNotes.map((note) => {
         return (
           <Accordion>

@@ -49,7 +49,7 @@ function App() {
       secondary: { main: "rgb(255, 255, 255)" },
       info: { main: "rgb(171 216 229)" },
       error: { main: "rgb(232 176 185)" },
-      warning: { main: "rgb(252 244 181)" },
+      warning: { main: "rgb(233 223 149)" },
       success: { main: "rgb(213 231 184)" },
       background: {
         default: "rgba(255, 255, 255, 0.5)",

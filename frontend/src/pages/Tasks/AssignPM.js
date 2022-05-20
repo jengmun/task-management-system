@@ -9,6 +9,7 @@ import {
   Select,
   TextField,
   Typography,
+  useTheme,
 } from "@mui/material";
 import CustomSnackbar from "../../components/CustomSnackbar";
 
@@ -69,6 +70,8 @@ const AssignPM = () => {
     }
   };
 
+  const theme = useTheme();
+
   return (
     <Card
       sx={{
@@ -106,7 +109,19 @@ const AssignPM = () => {
           onChange={(e) => setSelectedUser(e.target.value)}
         >
           {allUsers.map((user) => {
-            return <MenuItem value={user.username}>{user.username}</MenuItem>;
+            return (
+              <MenuItem
+                value={user.username}
+                sx={{
+                  backgroundColor: "white",
+                  ":hover": {
+                    backgroundColor: theme.palette.info.main,
+                  },
+                }}
+              >
+                {user.username}
+              </MenuItem>
+            );
           })}
         </Select>
         <Button type="submit">Submit</Button>

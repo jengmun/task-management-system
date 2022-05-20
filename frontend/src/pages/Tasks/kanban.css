@@ -1,6 +1,8 @@
 .react-kanban-board{
     display: flex;
     justify-content: center;    
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    text-align: center;
 }
 
 .react-kanban-column{
@@ -9,6 +11,6 @@
     align-items: center;
     justify-content: center;
     border-radius: 10px;
-    background-color: rgba(255, 255, 255, 0.6);
+    background-color: rgba(255, 255, 255, 0.2);
 }
 

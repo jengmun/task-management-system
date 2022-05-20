@@ -8,6 +8,7 @@ import {
   TextareaAutosize,
   TextField,
   Typography,
+  useTheme,
 } from "@mui/material";
 import { useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
@@ -75,6 +76,8 @@ const CreateTask = (props) => {
     }
   };
 
+  const theme = useTheme();
+
   return (
     <Card
       sx={{
@@ -122,10 +125,29 @@ const CreateTask = (props) => {
               setSelectedPlan(e.target.value);
             }}
           >
-            <MenuItem value="">No Plan Selected</MenuItem>
+            <MenuItem
+              value=""
+              sx={{
+                backgroundColor: "white",
+                ":hover": {
+                  backgroundColor: theme.palette.info.main,
+                },
+              }}
+            >
+              No Plan Selected
+            </MenuItem>
             {allPlans.map((plan) => {
               return (
-                <MenuItem value={plan.plan_name} key={plan.plan_name}>
+                <MenuItem
+                  value={plan.plan_name}
+                  key={plan.plan_name}
+                  sx={{
+                    backgroundColor: "white",
+                    ":hover": {
+                      backgroundColor: theme.palette.info.main,
+                    },
+                  }}
+                >
                   {plan.plan_name}
                 </MenuItem>
               );

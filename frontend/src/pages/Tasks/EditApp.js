@@ -12,6 +12,7 @@ import {
   InputLabel,
   Select,
   MenuItem,
+  useTheme,
 } from "@mui/material";
 import moment from "moment";
 import CustomSnackbar from "../../components/CustomSnackbar";
@@ -120,6 +121,8 @@ const EditApp = (props) => {
   };
   const [startDate, setStartDate] = useState("");
 
+  const theme = useTheme();
+
   return (
     <Card
       sx={{
@@ -194,7 +197,16 @@ const EditApp = (props) => {
                 >
                   {allGroups.map((group) => {
                     return (
-                      <MenuItem value={group.group_name} key={group.group_name}>
+                      <MenuItem
+                        value={group.group_name}
+                        key={group.group_name}
+                        sx={{
+                          backgroundColor: "white",
+                          ":hover": {
+                            backgroundColor: theme.palette.info.main,
+                          },
+                        }}
+                      >
                         {group.group_name}
                       </MenuItem>
                     );

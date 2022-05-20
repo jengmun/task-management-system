@@ -126,14 +126,14 @@ const EditApp = (props) => {
   return (
     <Card
       sx={{
-        p: 3,
+        p: 5,
         maxWidth: "90vw",
-        maxHeight: "90vh",
-        overflowY: "scroll",
+        maxHeight: "80vh",
         backgroundColor: "white",
+        overflowY: "scroll",
       }}
     >
-      <Typography variant="h4" sx={{ textAlign: "center" }}>
+      <Typography variant="h4" sx={{ textAlign: "center", mb: 2 }}>
         {app}
       </Typography>
       {appDetails.end_date && (
@@ -173,8 +173,9 @@ const EditApp = (props) => {
             type="date"
             InputProps={{ inputProps: { min: startDate } }}
             defaultValue={moment(appDetails.end_date).format("YYYY-MM-DD")}
-            sx={{ mt: 2 }}
+            sx={{ mt: 2, mb: 2 }}
           />
+          <Typography>Permissions</Typography>
           {permissions.map((permission) => {
             return (
               <FormControl key={permission} sx={{ mt: 2 }}>
@@ -215,7 +216,14 @@ const EditApp = (props) => {
               </FormControl>
             );
           })}
-          <Button type="submit">Submit</Button>
+          <Button
+            type="submit"
+            variant="contained"
+            color="success"
+            sx={{ mt: 2 }}
+          >
+            Submit
+          </Button>
         </form>
       )}
       <CustomSnackbar

@@ -80,13 +80,23 @@ export default Nav;
 const NavButton = (props) => {
   const location = useLocation();
 
+  let backgroundColor = {};
+
+  if (location.pathname === props.link) {
+    backgroundColor.backgroundColor = "white";
+  } else if (location.pathname.includes("/app") && props.link === "/") {
+    backgroundColor.backgroundColor = "white";
+  } else {
+    backgroundColor = null;
+  }
+
   return (
     <NavLink to={props.link} style={{ textDecoration: "none", marginTop: 10 }}>
       <Button
         sx={{
           minWidth: "24px",
           borderRadius: "10px",
-          backgroundColor: location.pathname.includes(props.link) && "white",
+          backgroundColor: backgroundColor,
         }}
       >
         <props.text />

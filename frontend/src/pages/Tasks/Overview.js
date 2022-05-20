@@ -117,7 +117,7 @@ const Overview = () => {
           </>
         )}
       </Box>
-      <Box sx={{ display: "flex", justifyContent: "center" }}>
+      <Box sx={{ display: "flex", justifyContent: "center", flexWrap: "wrap" }}>
         {allApps.map((app) => {
           return (
             <NavLink
@@ -137,7 +137,9 @@ const Overview = () => {
                   display: "flex",
                   justifyContent: "center",
                   color: theme.palette.primary.dark,
+                  transition: "background-color 0.5s",
                   ":active": { color: theme.palette.primary.main },
+                  ":hover": { backgroundColor: "rgb(255, 255, 255)" },
                 }}
               >
                 <Typography

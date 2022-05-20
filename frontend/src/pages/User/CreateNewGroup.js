@@ -43,7 +43,7 @@ const CreateNewGroup = (props) => {
     }
   };
   return (
-    <Card sx={{ width: "30%", p: 2 }}>
+    <Card sx={{ width: "30%", p: 2, backgroundColor: "white" }}>
       <form
         onSubmit={handleCreateGroup}
         style={{

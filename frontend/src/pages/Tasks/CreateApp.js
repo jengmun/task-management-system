@@ -126,13 +126,16 @@ const CreateApp = (props) => {
   return (
     <Card
       sx={{
-        p: 3,
+        p: 5,
         maxWidth: "90vw",
-        maxHeight: "90vh",
+        maxHeight: "80vh",
         overflowY: "scroll",
         backgroundColor: "white",
       }}
     >
+      <Typography variant="h5" sx={{ textAlign: "center" }}>
+        Create App
+      </Typography>
       <Box
         onSubmit={handleCreateApp}
         component="form"
@@ -199,7 +202,7 @@ const CreateApp = (props) => {
           type="date"
           InputProps={{ inputProps: { min: startDate } }}
           defaultValue={moment(new Date()).format("YYYY-MM-DD")}
-          sx={{ mt: 2 }}
+          sx={{ mt: 2, mb: 2 }}
         />
         <Typography>Permissions</Typography>
         {permissions.map((permission) => {
@@ -240,7 +243,9 @@ const CreateApp = (props) => {
             </FormControl>
           );
         })}
-        <Button type="submit">Submit</Button>
+        <Button type="submit" variant="contained" color="success">
+          Submit
+        </Button>
       </Box>
       <CustomSnackbar
         openSnackbar={openSnackbar}

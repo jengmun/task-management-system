@@ -18,6 +18,7 @@ import GroupAddRoundedIcon from "@mui/icons-material/GroupAddRounded";
 import GroupRemoveRoundedIcon from "@mui/icons-material/GroupRemoveRounded";
 import CircleRoundedIcon from "@mui/icons-material/CircleRounded";
 import AddBoxIcon from "@mui/icons-material/AddBox";
+import { useTheme } from "@mui/system";
 
 const GroupManagement = () => {
   // ------------- Fetch all groups -------------
@@ -115,6 +116,8 @@ const GroupManagement = () => {
 
   const [open, setOpen] = useState(false);
 
+  const theme = useTheme();
+
   return (
     <div style={{ width: "95%", marginTop: 10 }}>
       <Box
@@ -123,9 +126,10 @@ const GroupManagement = () => {
           mb: 2,
           flexDirection: "column",
           alignItems: "center",
+          mt: 2,
         }}
       >
-        <Typography variant="h4">Group Management</Typography>
+        <Typography variant="h3">Group Management</Typography>
         <Modal
           open={open}
           onClose={() => {
@@ -141,9 +145,12 @@ const GroupManagement = () => {
           <CreateNewGroup fetchAllGroups={fetchAllGroups} />
         </Modal>
         <Button
+          variant="contained"
+          color="info"
           onClick={() => {
             setOpen(true);
           }}
+          sx={{ mt: 1 }}
         >
           <AddBoxIcon sx={{ mr: 0.5 }} />
           New Group
@@ -166,15 +173,25 @@ const GroupManagement = () => {
             justifyContent: "space-around",
           }}
         >
-          <Box>
-            <Typography>Current Members:</Typography>
+          <Box
+            sx={{
+              backgroundColor: theme.palette.background.paper,
+              borderRadius: "20px",
+              p: 5,
+              boxShadow: "1px 1px 5px white",
+              mb: 2,
+            }}
+          >
+            <Typography variant="h6" sx={{ textAlign: "center" }}>
+              Current Members:
+            </Typography>
             <Table>
               <TableHead>
                 <TableRow>
-                  <TableCell>Username</TableCell>
-                  <TableCell>Email</TableCell>
-                  <TableCell>Status</TableCell>
-                  <TableCell>Action</TableCell>
+                  <TableCell sx={{ textAlign: "center" }}>Username</TableCell>
+                  <TableCell sx={{ textAlign: "center" }}>Email</TableCell>
+                  <TableCell sx={{ textAlign: "center" }}>Status</TableCell>
+                  <TableCell sx={{ textAlign: "center" }}>Action</TableCell>
                 </TableRow>
               </TableHead>
 
@@ -182,16 +199,20 @@ const GroupManagement = () => {
                 {groupMembers.map((member, index) => {
                   return (
                     <TableRow key={member.username}>
-                      <TableCell>{member.username}</TableCell>
-                      <TableCell>{member.email}</TableCell>
-                      <TableCell>
+                      <TableCell sx={{ textAlign: "center" }}>
+                        {member.username}
+                      </TableCell>
+                      <TableCell sx={{ textAlign: "center" }}>
+                        {member.email}
+                      </TableCell>
+                      <TableCell sx={{ textAlign: "center" }}>
                         <CircleRoundedIcon
                           color={
                             member.status === "Active" ? "success" : "error"
                           }
                         />
                       </TableCell>
-                      <TableCell>
+                      <TableCell sx={{ textAlign: "center" }}>
                         <Button
                           onClick={() => {
                             handleRemoveMember(member.username, index);
@@ -206,15 +227,25 @@ const GroupManagement = () => {
               </TableBody>
             </Table>
           </Box>
-          <Box>
-            <Typography> Other Members:</Typography>
+          <Box
+            sx={{
+              backgroundColor: theme.palette.background.paper,
+              borderRadius: "20px",
+              p: 5,
+              boxShadow: "1px 1px 5px white",
+              mb: 2,
+            }}
+          >
+            <Typography variant="h6" sx={{ textAlign: "center" }}>
+              Other Members:
+            </Typography>
             <Table>
               <TableHead>
                 <TableRow>
-                  <TableCell>Username</TableCell>
-                  <TableCell>Email</TableCell>
-                  <TableCell>Status</TableCell>
-                  <TableCell>Action</TableCell>
+                  <TableCell sx={{ textAlign: "center" }}>Username</TableCell>
+                  <TableCell sx={{ textAlign: "center" }}>Email</TableCell>
+                  <TableCell sx={{ textAlign: "center" }}>Status</TableCell>
+                  <TableCell sx={{ textAlign: "center" }}>Action</TableCell>
                 </TableRow>
               </TableHead>
 
@@ -222,22 +253,26 @@ const GroupManagement = () => {
                 {remainingUsers.map((member, index) => {
                   return (
                     <TableRow key={member.username}>
-                      <TableCell>{member.username}</TableCell>
-                      <TableCell>{member.email}</TableCell>
-                      <TableCell>
+                      <TableCell sx={{ textAlign: "center" }}>
+                        {member.username}
+                      </TableCell>
+                      <TableCell sx={{ textAlign: "center" }}>
+                        {member.email}
+                      </TableCell>
+                      <TableCell sx={{ textAlign: "center" }}>
                         <CircleRoundedIcon
                           color={
                             member.status === "Active" ? "success" : "error"
                           }
                         />
                       </TableCell>
-                      <TableCell>
+                      <TableCell sx={{ textAlign: "center" }}>
                         <Button
                           onClick={() => {
                             handleAddMember(member.username, index);
                           }}
                         >
-                          <GroupAddRoundedIcon />
+                          <GroupAddRoundedIcon color="error" />
                         </Button>
                       </TableCell>
                     </TableRow>

@@ -15,6 +15,7 @@ import {
   Switch,
   Tooltip,
   Typography,
+  useTheme,
 } from "@mui/material";
 import EditIcon from "@mui/icons-material/Edit";
 import SaveRoundedIcon from "@mui/icons-material/SaveRounded";
@@ -84,6 +85,8 @@ const UserManagement = () => {
     setFilterUsers(filteredArr);
   };
 
+  const theme = useTheme();
+
   return (
     <div
       style={{
@@ -100,23 +103,31 @@ const UserManagement = () => {
           display: "flex",
           justifyContent: "space-between",
           width: "100%",
+          mt: 2,
         }}
       >
         <NavLink to="/admin/create-user" style={{ textDecoration: "none" }}>
-          <Button>
+          <Button color="error" variant="contained">
             <PersonAddRoundedIcon />
             <Typography sx={{ ml: 1 }} variant="body1">
               Add new user
             </Typography>
           </Button>
         </NavLink>
+        <Typography variant="h3">User Management</Typography>
         <TextField
           label="Filter"
           variant="outlined"
           onChange={handleFilterUsers}
         />
       </Box>
-      <Table>
+      <Table
+        sx={{
+          backgroundColor: theme.palette.background.default,
+          borderRadius: "25px",
+          m: 4,
+        }}
+      >
         <TableHead>
           <TableRow>
             <TableCell sx={{ textAlign: "center" }}>Username</TableCell>
@@ -127,7 +138,7 @@ const UserManagement = () => {
           </TableRow>
         </TableHead>
         <TableBody>
-          {filterUsers.map((user, index) => {
+          {filterUsers.map((user) => {
             if (!user.formatted_groups) {
               user.formatted_groups = [];
               for (let i = 0; i < user.user_group.length; i++) {
@@ -181,8 +192,6 @@ const User = (props) => {
     setReadOnly(!readOnly);
     setReactData(userData);
   };
-
-  // to amend name to isActive instead
 
   const handleUpdateUser = () => {
     if (!reactData.email) {
@@ -292,25 +301,25 @@ const User = (props) => {
       <TableCell sx={{ textAlign: "center" }}>
         {readOnly ? (
           <Button onClick={handleEditUser}>
-            <EditIcon fontSize="small" />
+            <EditIcon />
           </Button>
         ) : (
           <>
             <Tooltip title="Save changes">
               <Button onClick={handleUpdateUser}>
-                <SaveRoundedIcon sx={{ mr: 1 }} />
+                <SaveRoundedIcon sx={{ mr: 1 }} color="success" />
               </Button>
             </Tooltip>
             <Tooltip title="Cancel changes">
               <Button onClick={handleCancelChanges}>
-                <CancelRoundedIcon sx={{ mr: 1 }} />
+                <CancelRoundedIcon sx={{ mr: 1 }} color="error" />
               </Button>
             </Tooltip>
             {passwordReset ? (
               "Password resetted"
             ) : (
               <Tooltip title="Reset password">
-                <Button onClick={handleResetPassword}>
+                <Button onClick={handleResetPassword} color="info">
                   <LockResetRoundedIcon />
                 </Button>
               </Tooltip>

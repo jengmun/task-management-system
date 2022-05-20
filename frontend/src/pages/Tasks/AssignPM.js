@@ -124,7 +124,14 @@ const AssignPM = () => {
             );
           })}
         </Select>
-        <Button type="submit">Submit</Button>
+        <Button
+          type="submit"
+          variant="contained"
+          color="warning"
+          sx={{ mt: 2 }}
+        >
+          Submit
+        </Button>
         <Typography variant="body2">{message}</Typography>
       </form>
       <CustomSnackbar

@@ -7,6 +7,7 @@ import {
   TableCell,
   Button,
   TextField,
+  Box,
 } from "@mui/material";
 import { useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
@@ -63,10 +64,11 @@ const EditPlan = (props) => {
       <Table>
         <TableHead>
           <TableRow>
-            <TableCell>Plan Name</TableCell>
-            <TableCell>Start Date</TableCell>
-            <TableCell>End Date</TableCell>
-            <TableCell>Status</TableCell>
+            <TableCell sx={{ textAlign: "center" }}>Plan Name</TableCell>
+            <TableCell sx={{ textAlign: "center" }}>Start Date</TableCell>
+            <TableCell sx={{ textAlign: "center" }}>End Date</TableCell>
+            <TableCell sx={{ textAlign: "center" }}>Status</TableCell>
+            <TableCell sx={{ textAlign: "center" }}>Actions</TableCell>
           </TableRow>
         </TableHead>
         <TableBody>
@@ -152,8 +154,8 @@ const Plan = (props) => {
 
   return (
     <TableRow>
-      <TableCell>{props.plan.plan_name}</TableCell>
-      <TableCell>
+      <TableCell sx={{ textAlign: "center" }}>{props.plan.plan_name}</TableCell>
+      <TableCell sx={{ textAlign: "center" }}>
         <TextField
           id="startDate"
           label="Start Date"
@@ -170,7 +172,7 @@ const Plan = (props) => {
           }}
         />
       </TableCell>
-      <TableCell>
+      <TableCell sx={{ textAlign: "center" }}>
         <TextField
           id="endDate"
           label="End Date"
@@ -189,16 +191,26 @@ const Plan = (props) => {
           sx={{ mt: 2 }}
         />
       </TableCell>
-      <TableCell>
-        {props.plan.status === "Closed" ? (
-          props.plan.status
-        ) : (
-          <Button onClick={handleUpdatePlanStatus}>Close Plan</Button>
-        )}
-      </TableCell>
+      <TableCell sx={{ textAlign: "center" }}>{props.plan.status}</TableCell>
       <TableCell>
         {props.plan.status !== "Closed" && (
-          <Button onClick={handleUpdatePlan}>Update</Button>
+          <Box sx={{ display: "flex", flexDirection: "column" }}>
+            <Button
+              sx={{ mb: 2 }}
+              onClick={handleUpdatePlan}
+              variant="contained"
+              color="success"
+            >
+              Update
+            </Button>
+            <Button
+              onClick={handleUpdatePlanStatus}
+              variant="contained"
+              color="error"
+            >
+              Close Plan
+            </Button>
+          </Box>
         )}
       </TableCell>
     </TableRow>

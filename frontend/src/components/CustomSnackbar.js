@@ -4,8 +4,6 @@ const CustomSnackbar = (props) => {
   const { openSnackbar, handleCloseSnackbar, message, severity } = props;
   const theme = useTheme();
 
-  console.log(severity);
-
   return (
     <Snackbar
       open={openSnackbar}
@@ -13,13 +11,15 @@ const CustomSnackbar = (props) => {
       onClose={handleCloseSnackbar}
       sx={{ backgroundColor: severity && theme.palette[severity].main }}
     >
-      <Alert
-        onClose={handleCloseSnackbar}
-        sx={{ width: "100%" }}
-        severity={severity}
-      >
-        {message}
-      </Alert>
+      {severity && (
+        <Alert
+          onClose={handleCloseSnackbar}
+          sx={{ width: "100%" }}
+          severity={severity}
+        >
+          {message}
+        </Alert>
+      )}
     </Snackbar>
   );
 };

@@ -114,8 +114,8 @@ const Profile = () => {
           flexDirection: "column",
           justifyContent: "center",
           alignItems: "center",
-          border: "1px solid black",
-          borderRadius: "10px",
+          borderRadius: "15px",
+          backgroundColor: theme.palette.background.default,
           p: 3,
         }}
       >
@@ -142,7 +142,7 @@ const Profile = () => {
               defaultValue={loginContext.isLoggedIn.email}
               sx={{ mt: 1, mb: 1 }}
             />
-            <Button type="submit" variant="contained">
+            <Button type="submit" variant="contained" color="error">
               Update
             </Button>
           </form>
@@ -171,7 +171,7 @@ const Profile = () => {
               type="password"
               sx={{ mt: 1, mb: 1 }}
             />
-            <Button type="submit" variant="contained">
+            <Button type="submit" variant="contained" color="info">
               Update password
             </Button>
           </form>

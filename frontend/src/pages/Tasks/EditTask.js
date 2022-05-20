@@ -206,16 +206,15 @@ const EditTask = (props) => {
         </TableBody>
       </Table>
 
-      <Box sx={{ display: "flex", justifyContent: "space-around" }}>
+      <Box sx={{ display: "flex", justifyContent: "space-around", mb: 2 }}>
         {readOnly ? (
           <>
-            <Typography variant="body1">
+            <Typography variant="body1" sx={{ mt: 2 }}>
               Description: {taskDetails.description}
             </Typography>
-            <Typography variant="body1" sx={{ mb: 2 }}>
-              Plan Name:
+            <Typography variant="body1" sx={{ mb: 2, mt: 2 }}>
               {taskDetails.plan_name
-                ? taskDetails.plan_name
+                ? `Plan Name: ${taskDetails.plan_name}`
                 : "No plan allocated"}
             </Typography>
           </>
@@ -236,7 +235,8 @@ const EditTask = (props) => {
                     id="description"
                     defaultValue={taskDetails.description}
                     maxLength="255"
-                    minRows={2}
+                    minRows={3}
+                    InputProps={{ inputProps: { height: "56px" } }}
                   />
                 </Box>{" "}
                 <Box>
@@ -279,7 +279,12 @@ const EditTask = (props) => {
                   </Select>
                 </Box>
               </Box>
-              <Button type="submit" variant="contained" sx={{ mt: 2 }}>
+              <Button
+                type="submit"
+                variant="contained"
+                color="info"
+                sx={{ mt: 2 }}
+              >
                 Update task
               </Button>
             </form>
@@ -291,17 +296,22 @@ const EditTask = (props) => {
             style={{ display: "flex", flexDirection: "column" }}
           >
             <InputLabel id="notes">Add notes</InputLabel>
-            <TextareaAutosize id="notes" maxLength="255" minRows={2} required />
-            <Button type="submit" variant="contained" sx={{ mt: 2 }}>
+            <TextareaAutosize id="notes" maxLength="255" minRows={3} required />
+            <Button
+              type="submit"
+              variant="contained"
+              color="error"
+              sx={{ mt: 2 }}
+            >
               Add
             </Button>
           </form>
         )}
       </Box>
 
-      {allNotes.map((note) => {
+      {allNotes.map((note, i) => {
         return (
-          <Accordion>
+          <Accordion key={i}>
             <AccordionSummary sx={{ display: "flex", alignItems: "center" }}>
               <Typography variant="body1" sx={{ maxWidth: "80%" }}>
                 {note.details}

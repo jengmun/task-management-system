@@ -100,7 +100,9 @@ const CreatePlan = (props) => {
           defaultValue={moment(new Date()).format("YYYY-MM-DD")}
           sx={{ mt: 2 }}
         />
-        <Button type="submit">Submit</Button>
+        <Button type="submit" variant="contained" color="error" sx={{ mt: 2 }}>
+          Submit
+        </Button>
       </form>
       <CustomSnackbar
         openSnackbar={openSnackbar}

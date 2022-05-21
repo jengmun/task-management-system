@@ -614,6 +614,10 @@ exports.taskStateProgression = async (req, res, next) => {
 
   req.body.details = `Task updated from ${currentState} to ${newState}`;
 
+  if (newState === "Closed") {
+    req.state = "Done";
+  }
+
   next();
 };
 
@@ -661,7 +665,11 @@ exports.createNotes = async (req, res, next) => {
   }
 
   let { details, taskID } = req.body;
-  const state = await checkState(taskID);
+  let state = req.state;
+
+  if (!req.state) {
+    state = await checkState(taskID);
+  }
 
   if (state === "Closed") {
     res.json("Task is closed!");

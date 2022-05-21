@@ -59,7 +59,7 @@ const CreateNewGroup = (props) => {
           variant="outlined"
           required
         />
-        <Button type="submit" sx={{ mt: 2 }}>
+        <Button type="submit" variant="contained" color="info" sx={{ mt: 2 }}>
           Submit
         </Button>
       </form>

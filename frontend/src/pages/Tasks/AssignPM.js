@@ -132,7 +132,6 @@ const AssignPM = () => {
         >
           Submit
         </Button>
-        <Typography variant="body2">{message}</Typography>
       </form>
       <CustomSnackbar
         openSnackbar={openSnackbar}

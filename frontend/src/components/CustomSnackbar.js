@@ -13,7 +13,10 @@ const CustomSnackbar = (props) => {
       {severity && (
         <Alert
           onClose={handleCloseSnackbar}
-          sx={{ width: "100%" }}
+          sx={{
+            width: "100%",
+            backgroundColor: severity && theme.palette[severity].main,
+          }}
           severity={severity}
         >
           {message}

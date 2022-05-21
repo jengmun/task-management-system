@@ -1,8 +1,16 @@
 import React, { useEffect, useState } from "react";
+import { NavLink } from "react-router-dom";
 import handleGetRequest from "../../hooks/handleGetRequest";
 import handlePostRequest from "../../hooks/handlePostRequest";
 import Dropdown from "../../components/Dropdown";
-import { Typography, TextField, Button, Card, Box } from "@mui/material";
+import {
+  Typography,
+  TextField,
+  Button,
+  Card,
+  Box,
+  useTheme,
+} from "@mui/material";
 import CustomSnackbar from "../../components/CustomSnackbar";
 
 const CreateUser = () => {
@@ -84,6 +92,8 @@ const CreateUser = () => {
     }
   };
 
+  const theme = useTheme();
+
   return (
     <Box
       sx={{
@@ -93,6 +103,25 @@ const CreateUser = () => {
         height: "100%",
       }}
     >
+      <NavLink
+        to={`/admin/user-management`}
+        style={{
+          textDecoration: "none",
+          position: "fixed",
+          left: "6vw",
+          top: "0.5vh",
+        }}
+      >
+        <Button
+          variant="contained"
+          sx={{
+            backgroundColor: theme.palette.background.default,
+            ":hover": { backgroundColor: theme.palette.primary.light },
+          }}
+        >
+          Back
+        </Button>
+      </NavLink>
       <Card
         sx={{
           display: "flex",

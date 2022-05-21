@@ -154,7 +154,9 @@ const CreateTask = (props) => {
             })}
           </Select>
         </FormControl>
-        <Button type="submit">Submit</Button>
+        <Button type="submit" variant="contained" color="info" sx={{ mt: 2 }}>
+          Submit
+        </Button>
       </form>
       <CustomSnackbar
         openSnackbar={openSnackbar}

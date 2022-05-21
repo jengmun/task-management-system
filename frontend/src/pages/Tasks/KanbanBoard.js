@@ -577,7 +577,7 @@ const KanbanBoard = () => {
             sx: {
               bgcolor: "error.main",
               ":hover": {
-                bgcolor: "warning.main",
+                bgcolor: "info.main",
               },
             },
           }}

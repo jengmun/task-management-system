@@ -318,9 +318,7 @@ const KanbanBoard = () => {
               p: 2,
               mr: 2,
               mb: 2,
-              backgroundImage: `url(https://static.vecteezy.com/system/resources/thumbnails/001/102/791/small/soft-blurred-pastel-holographic-design.jpg)`,
-              backgroundRepeat: "no-repeat",
-              backgroundSize: "cover",
+              backgroundImage: `linear-gradient(to bottom, rgb(249 248 244), #f7e2e2)`,
               boxShadow: "0 4px 30px rgba(0, 0, 0, 0.1)",
               border: "1px solid rgba(255, 255, 255, 0.33)",
             }}
@@ -358,7 +356,7 @@ const KanbanBoard = () => {
                     display: "flex",
                     justifyContent: "space-around",
                     alignItems: "center",
-                    backgroundColor: theme.palette.info.main,
+                    backgroundColor: "rgb(119 180 207)",
                     border: userPermissions.find(
                       ({ group_name }) =>
                         group_name === appDetails.permit_create
@@ -385,7 +383,7 @@ const KanbanBoard = () => {
                     display: "flex",
                     justifyContent: "space-around",
                     alignItems: "center",
-                    backgroundColor: "rgb(127 129 238)",
+                    backgroundColor: "rgb(134 169 219)",
                     border: userPermissions.find(
                       ({ group_name }) => group_name === appDetails.permit_open
                     )
@@ -411,7 +409,7 @@ const KanbanBoard = () => {
                     display: "flex",
                     justifyContent: "space-around",
                     alignItems: "center",
-                    backgroundColor: "rgb(181 133 227)",
+                    backgroundColor: "rgb(190 164 215)",
                     border: userPermissions.find(
                       ({ group_name }) => group_name === appDetails.permit_todo
                     )
@@ -437,7 +435,7 @@ const KanbanBoard = () => {
                     display: "flex",
                     justifyContent: "space-around",
                     alignItems: "center",
-                    backgroundColor: "rgb(214 154 218)",
+                    backgroundColor: "rgb(199 147 203)",
                     border: userPermissions.find(
                       ({ group_name }) => group_name === appDetails.permit_doing
                     )
@@ -463,7 +461,7 @@ const KanbanBoard = () => {
                     display: "flex",
                     justifyContent: "space-around",
                     alignItems: "center",
-                    backgroundColor: theme.palette.error.main,
+                    backgroundColor: "rgb(235 168 179)",
                     border: userPermissions.find(
                       ({ group_name }) => group_name === appDetails.permit_done
                     )

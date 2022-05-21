@@ -9,7 +9,6 @@ const CustomSnackbar = (props) => {
       open={openSnackbar}
       autoHideDuration={3000}
       onClose={handleCloseSnackbar}
-      sx={{ backgroundColor: severity && theme.palette[severity].main }}
     >
       {severity && (
         <Alert

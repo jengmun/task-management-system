@@ -124,7 +124,6 @@ const UserManagement = () => {
       <Table
         sx={{
           backgroundColor: theme.palette.background.default,
-          borderRadius: "25px",
           m: 4,
           boxShadow: "0 4px 30px rgba(0, 0, 0, 0.1)",
         }}

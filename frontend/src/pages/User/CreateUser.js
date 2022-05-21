@@ -99,6 +99,7 @@ const CreateUser = () => {
           flexDirection: "column",
           maxWidth: "70%",
           p: 5,
+          overflowY: "scroll",
         }}
       >
         <form
@@ -137,7 +138,12 @@ const CreateUser = () => {
             closeMenuOnSelect={false}
             callback={setSelectedGroups}
           />
-          <Button type="submit" sx={{ mt: 2 }}>
+          <Button
+            type="submit"
+            variant="contained"
+            color="error"
+            sx={{ mt: 2 }}
+          >
             Submit
           </Button>
         </form>

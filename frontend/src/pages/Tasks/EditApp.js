@@ -175,7 +175,7 @@ const EditApp = (props) => {
             defaultValue={moment(appDetails.end_date).format("YYYY-MM-DD")}
             sx={{ mt: 2, mb: 2 }}
           />
-          <Typography>Permissions</Typography>
+          <Typography>Assign Task Permissions</Typography>
           {permissions.map((permission) => {
             return (
               <FormControl key={permission} sx={{ mt: 2 }}>

@@ -207,7 +207,7 @@ const KanbanBoard = () => {
         style={{
           textDecoration: "none",
           position: "fixed",
-          left: "6vw",
+          left: "7vw",
           top: "0.5vh",
         }}
       >
@@ -229,7 +229,7 @@ const KanbanBoard = () => {
           width: "10vw",
           position: "fixed",
           top: "calc(2vh + 36.5px)",
-          left: "5vw",
+          left: "6vw",
           maxHeight: "90%",
           overflowY: "scroll",
           backgroundColor: theme.palette.background.paper,
@@ -294,7 +294,7 @@ const KanbanBoard = () => {
 
       <Box
         sx={{
-          ml: "11vw",
+          ml: "12vw",
           mr: "1vw",
           borderRadius: "20px",
           mt: "2vh",
@@ -369,6 +369,7 @@ const KanbanBoard = () => {
                     mr: 1,
                     borderRadius: "7px",
                     width: "17%",
+                    flexWrap: "wrap",
                   }}
                 >
                   <Typography sx={{ fontWeight: "bold", color: "white" }}>
@@ -395,6 +396,7 @@ const KanbanBoard = () => {
                     mr: 1,
                     borderRadius: "7px",
                     width: "17%",
+                    flexWrap: "wrap",
                   }}
                 >
                   <Typography sx={{ fontWeight: "bold", color: "white" }}>
@@ -421,6 +423,7 @@ const KanbanBoard = () => {
                     mr: 1,
                     borderRadius: "7px",
                     width: "17%",
+                    flexWrap: "wrap",
                   }}
                 >
                   <Typography sx={{ fontWeight: "bold", color: "white" }}>
@@ -447,6 +450,7 @@ const KanbanBoard = () => {
                     mr: 1,
                     borderRadius: "7px",
                     width: "17%",
+                    flexWrap: "wrap",
                   }}
                 >
                   <Typography sx={{ fontWeight: "bold", color: "white" }}>
@@ -473,6 +477,7 @@ const KanbanBoard = () => {
                     mr: 1,
                     borderRadius: "7px",
                     width: "17%",
+                    flexWrap: "wrap",
                   }}
                 >
                   <Typography sx={{ fontWeight: "bold", color: "white" }}>
@@ -662,9 +667,15 @@ const TaskCard = (props) => {
         }}
       >
         <Box sx={{ width: "100%" }}>
-          <Typography variant="body1">{props.content.title}</Typography>
-          <Typography variant="body2">{props.content.owner}</Typography>
-          <Typography variant="body2">{props.content.description}</Typography>
+          <Box sx={{ display: "flex", flexDirection: "column" }}>
+            <Typography variant="body1" sx={{ fontWeight: "bold" }}>
+              {props.content.title}
+            </Typography>
+            <Typography variant="body3">{props.content.owner}</Typography>
+          </Box>
+          <Typography variant="body1" sx={{ mt: 2 }}>
+            {props.content.description}
+          </Typography>
         </Box>
       </Card>
       <Modal

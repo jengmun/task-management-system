@@ -171,6 +171,7 @@ const GroupManagement = () => {
             display: "flex",
             alignItems: "flex-start",
             justifyContent: "space-around",
+            flexWrap: "wrap",
           }}
         >
           <Box

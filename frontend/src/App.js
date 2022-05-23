@@ -66,6 +66,7 @@ function App() {
       h6: { fontSize: "1.25rem", fontWeight: 600 },
       body1: { fontSize: "1rem" },
       body2: { fontSize: "0.875rem" },
+      body3: { fontSize: "0.7rem" },
     },
   });
 

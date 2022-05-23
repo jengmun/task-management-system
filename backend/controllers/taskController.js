@@ -320,21 +320,6 @@ exports.allAppTasks = (req, res, next) => {
   });
 };
 
-exports.allAppTasksByState = (req, res, next) => {
-  const { app, state } = req.params;
-
-  db.query(
-    "SELECT * FROM tasks WHERE acronym = ? AND state = ?",
-    [app, state],
-    (err, results) => {
-      if (err) {
-        return next(err);
-      }
-      res.json(results);
-    }
-  );
-};
-
 exports.taskDetails = (req, res, next) => {
   const taskID = req.params.task;
 
@@ -800,4 +785,276 @@ exports.isGroup = async (req, res, next) => {
 
 exports.isMember = async (req, res, next) => {
   res.json(req.isMember);
+};
+
+// ================= ASSIGNMENT 3 ================= //
+
+exports.a3AllAppTasksByState = (req, res, next) => {
+  const { app, state } = req.params;
+
+  db.query(
+    "SELECT * FROM tasks WHERE acronym = ? AND state = ?",
+    [app, state],
+    (err, results) => {
+      if (err) {
+        return next(err);
+      }
+      res.json(results);
+    }
+  );
+};
+
+exports.a3CreateTask = async (req, res, next) => {
+  if (req.body.planName) {
+    const validPlan = await new Promise((resolve) => {
+      db.query(
+        `SELECT plan_name FROM plans WHERE acronym = ? AND plan_name = ? AND status = 'Open'`,
+        [req.body.acronym, req.body.planName],
+        (err, result) => {
+          if (err) {
+            next(err);
+          } else {
+            if (result.length) {
+              resolve(true);
+            } else {
+              resolve(false);
+            }
+          }
+        }
+      );
+    });
+
+    if (!validPlan) {
+      res.json("No valid open plan found!");
+      return;
+    }
+  }
+
+  const runningNumber = await new Promise((resolve, reject) => {
+    db.query(
+      "SELECT running_number FROM applications WHERE acronym = ?",
+      [req.body.acronym],
+      (err, results) => {
+        if (err) {
+          next(err);
+        } else {
+          resolve(results[0].running_number);
+        }
+      }
+    );
+  });
+
+  db.query(
+    "INSERT INTO tasks (task_id, task_name, description, plan_name, acronym, state, creator) VALUES (?, ?, ?, ?, ?, ?, ?)",
+    [
+      `${req.body.acronym.toUpperCase()}_${runningNumber}`,
+      req.body.taskName,
+      req.body.description,
+      req.body.planName ? req.body.planName : null,
+      req.body.acronym.toUpperCase(),
+      "Open",
+      req.body.username,
+    ],
+    (err) => {
+      if (err) {
+        next(err);
+      } else {
+        db.query(
+          "UPDATE applications SET running_number = ?",
+          runningNumber + 1,
+          (err, results) => {
+            if (err) {
+              next(err);
+            } else {
+              req.body.taskID = `${req.body.acronym.toUpperCase()}_${runningNumber}`;
+              req.body.details = "Task created";
+              next();
+            }
+          }
+        );
+      }
+    }
+  );
+};
+
+exports.a3TaskStateProgression = async (req, res, next) => {
+  const { taskID, acronym } = req.body;
+
+  const results = await new Promise((resolve) => {
+    db.query(
+      "SELECT state, creator, owner FROM tasks WHERE task_id = ?",
+      taskID,
+      (err, results) => {
+        if (err) {
+          return next(err);
+        }
+        if (results.length) {
+          resolve(results[0]);
+        } else {
+          resolve({ state: "", creator: "", owner: "" });
+        }
+      }
+    );
+  });
+
+  const currentState = results.state;
+  const { creator, owner } = results;
+  console.log("currentState: ", currentState);
+
+  if (currentState === "Closed" || !currentState) {
+    res.json("State can't be updated!");
+    return;
+  }
+
+  if (creator === req.body.username && currentState === "Open") {
+    res.json("Approver cannot be the creator of the task!");
+    return;
+  }
+
+  if (owner === req.body.username && currentState === "Done") {
+    res.json("Checker cannot be the owner of the task!");
+    return;
+  }
+
+  const newState = listOfStates[listOfStates.indexOf(currentState) + 1];
+  console.log("New state:", newState);
+
+  // Update task state
+  db.query(
+    "UPDATE tasks SET state = ? WHERE task_id = ?",
+    [newState, taskID],
+    (err, results) => {
+      if (err) {
+        return next(err);
+      }
+    }
+  );
+
+  // Send email to approvers
+  if (newState === "Done") {
+    const approverGroup = await new Promise((resolve) => {
+      db.query(
+        "SELECT permit_done FROM applications WHERE acronym = ?",
+        [acronym],
+        (err, results) => {
+          if (err) {
+            return next(err);
+          }
+          resolve(results[0].permit_done);
+        }
+      );
+    });
+
+    const allApprovers = await new Promise((resolve) => {
+      db.query(
+        "SELECT accounts_groups.username, email FROM accounts_groups INNER JOIN accounts on accounts_groups.username = accounts.username WHERE acronym = ? AND group_name = ?",
+        [acronym, approverGroup],
+        (err, results) => {
+          if (err) {
+            return next(err);
+          }
+          console.log(results);
+          resolve(results);
+        }
+      );
+    });
+
+    for (const approver of allApprovers) {
+      sendEmail(
+        approver.email,
+        `${acronym}: Task promoted to Done`,
+        `Task ${taskID} of Application ${acronym} has been promoted to Done by ${req.session.username}.`
+      );
+    }
+  }
+
+  req.body.details = `Task updated from ${currentState} to ${newState}`;
+
+  if (newState === "Closed") {
+    req.state = "Done";
+  }
+
+  next();
+};
+
+exports.a3CreateNotes = async (req, res, next) => {
+  if (req.isMember === false) {
+    res.json("Not a member");
+    return;
+  }
+
+  let { details, taskID } = req.body;
+  let state = req.state;
+
+  if (!req.state) {
+    state = await checkState(taskID);
+  }
+
+  if (state === "Closed") {
+    res.json("Task is closed!");
+    return;
+  }
+
+  if (!details) {
+    res.json("Please enter some notes");
+    return;
+  }
+
+  if (!taskID) {
+    taskID = req.params.task;
+  }
+
+  if (state === "Doing") {
+    db.query("UPDATE tasks SET owner = ? WHERE task_id = ?", [
+      req.session.username,
+      taskID,
+    ]),
+      (err, results) => {
+        if (err) {
+          return next(err);
+        }
+      };
+  }
+
+  const existingNotes = await new Promise((resolve) => {
+    db.query(
+      "SELECT notes FROM tasks WHERE task_id = ?",
+      taskID,
+      (err, results) => {
+        if (err) {
+          return next();
+        } else {
+          resolve(results[0].notes);
+        }
+      }
+    );
+  });
+
+  const parsedNotes = JSON.parse(existingNotes);
+  let newNotes = [];
+  const date = moment(new Date()).format("YYYY-MM-DD");
+  const time = new Date().toLocaleTimeString();
+  const timestamp = date + " " + time;
+
+  if (existingNotes) {
+    newNotes = [
+      { details, timestamp, creator: req.session.username, state, taskID },
+      ...parsedNotes,
+    ];
+  } else {
+    newNotes = [
+      { details, timestamp, creator: req.session.username, state, taskID },
+    ];
+  }
+
+  db.query(
+    "UPDATE tasks SET notes = ? WHERE task_id = ?",
+    [JSON.stringify(newNotes), taskID],
+    (err, results) => {
+      if (err) {
+        return next(err);
+      }
+      res.json("Added note");
+    }
+  );
 };

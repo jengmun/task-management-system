@@ -14,6 +14,7 @@ const {
   taskStateRegression,
   createNotes,
   allAppTasks,
+  allAppTasksByState,
   allNotes,
   taskDetails,
   updateTask,
@@ -70,6 +71,12 @@ router.post("/update-plan-status/:app", checkPM, updatePlanStatus);
 router.post("/create-task", checkTaskPermissions, createTask, createNotes);
 
 router.get("/all-tasks/:app", checkApplicationAccess, allAppTasks);
+
+router.get(
+  "/all-tasks/:app/:state",
+  checkApplicationAccess,
+  allAppTasksByState
+);
 
 router.get("/task-details/:task", checkApplicationAccess, taskDetails);
 

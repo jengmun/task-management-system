@@ -124,6 +124,9 @@ const CreateTask = (props) => {
             onChange={(e) => {
               setSelectedPlan(e.target.value);
             }}
+            MenuProps={{
+              sx: { ".MuiList-root": { backgroundColor: "white" } },
+            }}
           >
             <MenuItem
               value=""

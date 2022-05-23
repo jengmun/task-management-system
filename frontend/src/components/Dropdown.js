@@ -13,6 +13,7 @@ const Dropdown = (props) => {
         onChange={(e) => {
           props.callback(e);
         }}
+        MenuProps={{ sx: { ".MuiList-root": { backgroundColor: "white" } } }}
       />
     </>
   );

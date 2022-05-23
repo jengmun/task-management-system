@@ -155,6 +155,9 @@ const CreateApp = (props) => {
             onChange={(e) => {
               setNewApp(e.target.value);
             }}
+            MenuProps={{
+              sx: { ".MuiList-root": { backgroundColor: "white" } },
+            }}
           >
             {uncreatedApps.map((app) => {
               return (
@@ -221,6 +224,9 @@ const CreateApp = (props) => {
                     ...selectedPermissions,
                     [permission]: e.target.value,
                   });
+                }}
+                MenuProps={{
+                  sx: { ".MuiList-root": { backgroundColor: "white" } },
                 }}
               >
                 {allGroups.map((group) => {

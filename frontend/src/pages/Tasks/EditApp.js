@@ -186,6 +186,9 @@ const EditApp = (props) => {
                   label={permission}
                   id={permission}
                   sx={{ width: "200px" }}
+                  MenuProps={{
+                    sx: { ".MuiList-root": { backgroundColor: "white" } },
+                  }}
                   value={
                     allGroups.length ? selectedPermissions[permission] : ""
                   }

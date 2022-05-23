@@ -107,6 +107,7 @@ const AssignPM = () => {
           sx={{ width: "200px" }}
           value={selectedUser}
           onChange={(e) => setSelectedUser(e.target.value)}
+          MenuProps={{ sx: { ".MuiList-root": { backgroundColor: "white" } } }}
         >
           {allUsers.map((user) => {
             return (

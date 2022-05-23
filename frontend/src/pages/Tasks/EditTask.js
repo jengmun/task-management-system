@@ -244,6 +244,9 @@ const EditTask = (props) => {
                   <Select
                     id="planName"
                     label="Plan Name"
+                    MenuProps={{
+                      sx: { ".MuiList-root": { backgroundColor: "white" } },
+                    }}
                     value={selectedPlan}
                     onChange={(e) => {
                       setSelectedPlan(e.target.value);

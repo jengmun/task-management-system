@@ -8,6 +8,7 @@ import {
   Button,
   TextField,
   Box,
+  TextareaAutosize,
 } from "@mui/material";
 import { useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
@@ -65,6 +66,7 @@ const EditPlan = (props) => {
         <TableHead>
           <TableRow>
             <TableCell sx={{ textAlign: "center" }}>Plan Name</TableCell>
+            <TableCell sx={{ textAlign: "center" }}>Description</TableCell>
             <TableCell sx={{ textAlign: "center" }}>Start Date</TableCell>
             <TableCell sx={{ textAlign: "center" }}>End Date</TableCell>
             <TableCell sx={{ textAlign: "center" }}>Status</TableCell>
@@ -101,6 +103,7 @@ const Plan = (props) => {
   const { app } = useParams();
 
   const [input, setInput] = useState({
+    description: props.plan.description,
     startDate: moment(props.plan.start_date).format("YYYY-MM-DD"),
     endDate: moment(props.plan.end_date).format("YYYY-MM-DD"),
   });
@@ -115,6 +118,7 @@ const Plan = (props) => {
     }
 
     const data = await handlePostRequest(`task/update-plan/${app}`, {
+      description: input.description,
       startDate: input.startDate,
       endDate: input.endDate,
       currentPlan: props.plan.plan_name,
@@ -155,6 +159,22 @@ const Plan = (props) => {
   return (
     <TableRow>
       <TableCell sx={{ textAlign: "center" }}>{props.plan.plan_name}</TableCell>
+      <TableCell sx={{ textAlign: "center" }}>
+        {props.plan.status === "Closed" ? (
+          props.plan.description
+        ) : (
+          <TextareaAutosize
+            required
+            maxLength="255"
+            minRows={3}
+            id="description"
+            defaultValue={input.description}
+            onChange={(e) => {
+              setInput({ ...input, description: e.target.value });
+            }}
+          />
+        )}
+      </TableCell>
       <TableCell sx={{ textAlign: "center" }}>
         <TextField
           id="startDate"

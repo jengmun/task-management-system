@@ -1,7 +1,13 @@
 import { useState } from "react";
 import { useParams } from "react-router-dom";
 import handlePostRequest from "../../hooks/handlePostRequest";
-import { Button, Card, TextField, Typography } from "@mui/material";
+import {
+  Button,
+  Card,
+  TextareaAutosize,
+  TextField,
+  Typography,
+} from "@mui/material";
 import moment from "moment";
 import CustomSnackbar from "../../components/CustomSnackbar";
 
@@ -31,6 +37,7 @@ const CreatePlan = (props) => {
 
     const data = await handlePostRequest("task/create-plan", {
       planName: e.target.planName.value,
+      description: e.target.description.value,
       startDate: e.target.startDate.value,
       endDate: e.target.endDate.value,
       acronym: app,
@@ -38,6 +45,7 @@ const CreatePlan = (props) => {
 
     if (data === "Plan created") {
       e.target.startDate.value = "";
+      e.target.description.value = "";
       e.target.endDate.value = "";
       e.target.planName.value = "";
       setMessage(data);
@@ -76,7 +84,14 @@ const CreatePlan = (props) => {
           label="Plan Name"
           variant="outlined"
           required
-          sx={{ mt: 2 }}
+          sx={{ mt: 2, mb: 2 }}
+        />
+        <TextareaAutosize
+          required
+          maxLength="255"
+          minRows={3}
+          id="description"
+          placeholder="Description"
         />
         <TextField
           id="startDate"

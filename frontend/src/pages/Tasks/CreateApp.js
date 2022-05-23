@@ -207,7 +207,7 @@ const CreateApp = (props) => {
           defaultValue={moment(new Date()).format("YYYY-MM-DD")}
           sx={{ mt: 2, mb: 2 }}
         />
-        <Typography>Assign Task Permissions</Typography>
+        <Typography variant="h6">Assign Task Permissions</Typography>
         {permissions.map((permission) => {
           return (
             <FormControl key={permission} sx={{ mt: 1, mb: 1 }}>

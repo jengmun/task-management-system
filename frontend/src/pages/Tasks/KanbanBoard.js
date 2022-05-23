@@ -263,6 +263,7 @@ const KanbanBoard = () => {
                 key={i}
                 title={
                   <>
+                    <div>Description: {plan.description}</div>
                     <div>Status: {plan.status}</div>
                     <div>
                       Start Date: {moment(plan.start_date).format("YYYY-MM-DD")}
@@ -662,7 +663,8 @@ const TaskCard = (props) => {
       >
         <Box sx={{ width: "100%" }}>
           <Typography variant="body1">{props.content.title}</Typography>
-          <Typography variant="body2">{props.content.planName}</Typography>
+          <Typography variant="body2">{props.content.owner}</Typography>
+          <Typography variant="body2">{props.content.description}</Typography>
         </Box>
       </Card>
       <Modal

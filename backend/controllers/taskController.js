@@ -131,8 +131,14 @@ exports.updateApp = (req, res, next) => {
 
 exports.createPlan = (req, res, next) => {
   db.query(
-    "INSERT INTO plans (plan_name, start_date, end_date, acronym) VALUES (?, ?, ?, ?)",
-    [req.body.planName, req.body.startDate, req.body.endDate, req.body.acronym],
+    "INSERT INTO plans (plan_name, description, start_date, end_date, acronym) VALUES (?, ?, ?, ?, ?)",
+    [
+      req.body.planName,
+      req.body.description,
+      req.body.startDate,
+      req.body.endDate,
+      req.body.acronym,
+    ],
     (err, results) => {
       if (err) {
         next(err);
@@ -145,8 +151,13 @@ exports.createPlan = (req, res, next) => {
 
 exports.updatePlan = (req, res, next) => {
   db.query(
-    "UPDATE plans SET start_date = ?, end_date = ? WHERE plan_name = ? AND status = 'Open'",
-    [req.body.startDate, req.body.endDate, req.body.currentPlan],
+    "UPDATE plans SET description = ?, start_date = ?, end_date = ? WHERE plan_name = ? AND status = 'Open'",
+    [
+      req.body.description,
+      req.body.startDate,
+      req.body.endDate,
+      req.body.currentPlan,
+    ],
     (err, result) => {
       if (err) {
         next(err);
@@ -307,6 +318,21 @@ exports.allAppTasks = (req, res, next) => {
     }
     res.json(results);
   });
+};
+
+exports.allAppTasksByState = (req, res, next) => {
+  const { app, state } = req.params;
+
+  db.query(
+    "SELECT * FROM tasks WHERE acronym = ? AND state = ?",
+    [app, state],
+    (err, results) => {
+      if (err) {
+        return next(err);
+      }
+      res.json(results);
+    }
+  );
 };
 
 exports.taskDetails = (req, res, next) => {

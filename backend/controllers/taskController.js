@@ -585,8 +585,21 @@ exports.taskStateProgression = async (req, res, next) => {
     }
   );
 
-  // Send email to approvers
   if (newState === "Done") {
+    // Update owner
+    if (req.session.username !== owner) {
+      db.query("UPDATE tasks SET owner = ? WHERE task_id = ?", [
+        req.session.username,
+        taskID,
+      ]),
+        (err, results) => {
+          if (err) {
+            return next(err);
+          }
+        };
+    }
+
+    // Send email to approvers
     const approverGroup = await new Promise((resolve) => {
       db.query(
         "SELECT permit_done FROM applications WHERE acronym = ?",
@@ -730,13 +743,11 @@ exports.createNotes = async (req, res, next) => {
 
   if (existingNotes) {
     newNotes = [
-      { details, timestamp, creator: req.session.username, state, taskID },
+      { details, timestamp, creator: req.session.username, state },
       ...parsedNotes,
     ];
   } else {
-    newNotes = [
-      { details, timestamp, creator: req.session.username, state, taskID },
-    ];
+    newNotes = [{ details, timestamp, creator: req.session.username, state }];
   }
 
   db.query(
@@ -882,7 +893,7 @@ exports.a3TaskStateProgression = async (req, res, next) => {
 
   const results = await new Promise((resolve) => {
     db.query(
-      "SELECT state, creator, owner FROM tasks WHERE task_id = ?",
+      "SELECT state, owner FROM tasks WHERE task_id = ?",
       taskID,
       (err, results) => {
         if (err) {
@@ -891,28 +902,18 @@ exports.a3TaskStateProgression = async (req, res, next) => {
         if (results.length) {
           resolve(results[0]);
         } else {
-          resolve({ state: "", creator: "", owner: "" });
+          resolve({ state: "", owner: "" });
         }
       }
     );
   });
 
   const currentState = results.state;
-  const { creator, owner } = results;
+  const { owner } = results;
   console.log("currentState: ", currentState);
 
-  if (currentState === "Closed" || !currentState) {
-    res.json("State can't be updated!");
-    return;
-  }
-
-  if (creator === req.body.username && currentState === "Open") {
-    res.json("Approver cannot be the creator of the task!");
-    return;
-  }
-
-  if (owner === req.body.username && currentState === "Done") {
-    res.json("Checker cannot be the owner of the task!");
+  if (currentState !== "Doing") {
+    res.json("Current state is not Doing!");
     return;
   }
 
@@ -930,8 +931,21 @@ exports.a3TaskStateProgression = async (req, res, next) => {
     }
   );
 
-  // Send email to approvers
   if (newState === "Done") {
+    // Update owner
+    if (req.body.username !== owner) {
+      db.query("UPDATE tasks SET owner = ? WHERE task_id = ?", [
+        req.body.username,
+        taskID,
+      ]),
+        (err, results) => {
+          if (err) {
+            return next(err);
+          }
+        };
+    }
+
+    // Send email to approvers
     const approverGroup = await new Promise((resolve) => {
       db.query(
         "SELECT permit_done FROM applications WHERE acronym = ?",
@@ -1006,7 +1020,7 @@ exports.a3CreateNotes = async (req, res, next) => {
 
   if (state === "Doing") {
     db.query("UPDATE tasks SET owner = ? WHERE task_id = ?", [
-      req.session.username,
+      req.body.username,
       taskID,
     ]),
       (err, results) => {
@@ -1038,13 +1052,11 @@ exports.a3CreateNotes = async (req, res, next) => {
 
   if (existingNotes) {
     newNotes = [
-      { details, timestamp, creator: req.session.username, state, taskID },
+      { details, timestamp, creator: req.body.username, state },
       ...parsedNotes,
     ];
   } else {
-    newNotes = [
-      { details, timestamp, creator: req.session.username, state, taskID },
-    ];
+    newNotes = [{ details, timestamp, creator: req.body.username, state }];
   }
 
   db.query(

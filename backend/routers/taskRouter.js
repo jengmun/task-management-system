@@ -129,6 +129,7 @@ router.post(
 
 router.post(
   "/a3/approve-done-task",
+  a3Login,
   a3CheckTaskPermissions,
   a3TaskStateProgression,
   a3CreateNotes

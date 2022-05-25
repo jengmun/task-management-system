@@ -3,6 +3,7 @@ const { db } = require("../modules/db");
 const sendEmail = require("../modules/email");
 const checkGroup = require("../modules/checkGroup");
 const moment = require("moment");
+const ErrorHandler = require("../utils/errorHandler");
 
 exports.createApplication = (req, res, next) => {
   db.query(
@@ -21,7 +22,7 @@ exports.createApplication = (req, res, next) => {
     ],
     (err, results) => {
       if (err) {
-        next(err);
+        return next(new ErrorHandler(err, 500));
       } else {
         res.json("Application successfully created");
       }
@@ -32,7 +33,7 @@ exports.createApplication = (req, res, next) => {
 exports.allApplications = (req, res, next) => {
   db.query(`SELECT acronym FROM applications`, (err, result) => {
     if (err) {
-      next(err);
+      return next(new ErrorHandler(err, 500));
     } else {
       res.json(result);
     }
@@ -45,7 +46,7 @@ exports.userApplications = (req, res, next) => {
     req.session.username,
     (err, result) => {
       if (err) {
-        next(err);
+        return next(new ErrorHandler(err, 500));
       } else {
         res.json(result);
       }
@@ -60,7 +61,7 @@ exports.uncreatedApplications = async (req, res, next) => {
       req.session.username,
       (err, result) => {
         if (err) {
-          next(err);
+          return next(new ErrorHandler(err, 500));
         } else {
           resolve(result);
         }
@@ -76,7 +77,7 @@ exports.uncreatedApplications = async (req, res, next) => {
       assignedApps[i].acronym,
       (err, result) => {
         if (err) {
-          next(err);
+          return next(new ErrorHandler(err, 500));
         } else if (!result.length) {
           uncreatedApps.push(assignedApps[i].acronym);
         }
@@ -95,7 +96,7 @@ exports.applicationDetails = (req, res, next) => {
     req.params.app,
     (err, result) => {
       if (err) {
-        next(err);
+        return next(new ErrorHandler(err, 500));
       } else {
         res.json(result[0]);
       }
@@ -121,7 +122,7 @@ exports.updateApp = (req, res, next) => {
     ],
     (err, result) => {
       if (err) {
-        next(err);
+        return next(new ErrorHandler(err, 500));
       } else {
         res.json("Updated app");
       }
@@ -141,7 +142,7 @@ exports.createPlan = (req, res, next) => {
     ],
     (err, results) => {
       if (err) {
-        next(err);
+        return next(new ErrorHandler(err, 500));
       } else {
         res.json("Plan created");
       }
@@ -160,7 +161,7 @@ exports.updatePlan = (req, res, next) => {
     ],
     (err, result) => {
       if (err) {
-        next(err);
+        return next(new ErrorHandler(err, 500));
       } else {
         if (result.affectedRows) {
           res.json("Plan updated");
@@ -179,7 +180,7 @@ exports.updatePlanStatus = async (req, res, next) => {
       [req.body.planName, req.params.app],
       (err, results) => {
         if (err) {
-          next(err);
+          return next(new ErrorHandler(err, 500));
         } else if (results.length) {
           resolve(false);
         } else {
@@ -197,7 +198,7 @@ exports.updatePlanStatus = async (req, res, next) => {
       [req.body.planName],
       (err, result) => {
         if (err) {
-          next(err);
+          return next(new ErrorHandler(err, 500));
         } else {
           res.json("Plan status updated");
         }
@@ -214,7 +215,7 @@ exports.allPlans = (req, res, next) => {
     req.params.app,
     (err, result) => {
       if (err) {
-        next(err);
+        return next(new ErrorHandler(err, 500));
       } else {
         res.json(result);
       }
@@ -228,7 +229,7 @@ exports.allOpenPlans = (req, res, next) => {
     req.params.app,
     (err, result) => {
       if (err) {
-        next(err);
+        return next(new ErrorHandler(err, 500));
       } else {
         res.json(result);
       }
@@ -244,7 +245,7 @@ exports.createTask = async (req, res, next) => {
         [req.body.acronym, req.body.planName],
         (err, result) => {
           if (err) {
-            next(err);
+            return next(new ErrorHandler(err, 500));
           } else {
             if (result.length) {
               resolve(true);
@@ -268,7 +269,7 @@ exports.createTask = async (req, res, next) => {
       [req.body.acronym],
       (err, results) => {
         if (err) {
-          next(err);
+          return next(new ErrorHandler(err, 500));
         } else {
           resolve(results[0].running_number);
         }
@@ -289,14 +290,14 @@ exports.createTask = async (req, res, next) => {
     ],
     (err) => {
       if (err) {
-        next(err);
+        return next(new ErrorHandler(err, 500));
       } else {
         db.query(
           "UPDATE applications SET running_number = ?",
           runningNumber + 1,
           (err, results) => {
             if (err) {
-              next(err);
+              return next(new ErrorHandler(err, 500));
             } else {
               req.body.taskID = `${req.body.acronym.toUpperCase()}_${runningNumber}`;
               req.body.details = "Task created";
@@ -314,7 +315,7 @@ exports.allAppTasks = (req, res, next) => {
 
   db.query("SELECT * FROM tasks WHERE acronym = ?", acronym, (err, results) => {
     if (err) {
-      return next(err);
+      return next(new ErrorHandler(err, 500));
     }
     res.json(results);
   });
@@ -325,7 +326,7 @@ exports.taskDetails = (req, res, next) => {
 
   db.query("SELECT * FROM tasks WHERE task_id = ?", taskID, (err, results) => {
     if (err) {
-      return next(err);
+      return next(new ErrorHandler(err, 500));
     }
     res.json(results[0]);
   });
@@ -340,7 +341,7 @@ exports.updateTask = async (req, res, next) => {
       [acronym],
       (err, results) => {
         if (err) {
-          return next(err);
+          return next(new ErrorHandler(err, 500));
         }
         resolve(results[0]["permit_create"]);
       }
@@ -369,7 +370,7 @@ exports.updateTask = async (req, res, next) => {
       taskID,
       (err, results) => {
         if (err) {
-          return next(err);
+          return next(new ErrorHandler(err, 500));
         }
         console.log(results[0].state);
         if (results.length) {
@@ -397,7 +398,7 @@ exports.updateTask = async (req, res, next) => {
       [taskID],
       (err, result) => {
         if (err) {
-          next(err);
+          return next(new ErrorHandler(err, 500));
         } else {
           resolve(result[0]);
         }
@@ -421,7 +422,7 @@ exports.updateTask = async (req, res, next) => {
         [taskID.slice(0, 3), planName],
         (err, result) => {
           if (err) {
-            next(err);
+            return next(new ErrorHandler(err, 500));
           } else {
             if (result.length) {
               resolve(true);
@@ -446,7 +447,7 @@ exports.updateTask = async (req, res, next) => {
     [description, planName, taskID],
     (err, results) => {
       if (err) {
-        return next(err);
+        return next(new ErrorHandler(err, 500));
       }
 
       if (
@@ -474,7 +475,7 @@ exports.hasPermissions = async (req, res, next) => {
       [app],
       (err, results) => {
         if (err) {
-          return next(err);
+          return next(new ErrorHandler(err, 500));
         }
         resolve(results[0]);
       }
@@ -491,7 +492,7 @@ exports.hasPermissions = async (req, res, next) => {
     [app, appDetails[permission], req.session.username],
     (err, results) => {
       if (err) {
-        return next(err);
+        return next(new ErrorHandler(err, 500));
       }
       if (results.length) {
         res.json(true);
@@ -508,7 +509,7 @@ exports.getPermissions = (req, res, next) => {
     [req.params.app, req.session.username],
     (err, results) => {
       if (err) {
-        return next(err);
+        return next(new ErrorHandler(err, 500));
       }
       res.json(results);
     }
@@ -523,7 +524,7 @@ exports.updatePermissions = (req, res, next) => {
     [create, open, todo, doing, done, acronym],
     (err, results) => {
       if (err) {
-        return next(err);
+        return next(new ErrorHandler(err, 500));
       }
       res.json("Permissions updated");
     }
@@ -541,7 +542,7 @@ exports.taskStateProgression = async (req, res, next) => {
       taskID,
       (err, results) => {
         if (err) {
-          return next(err);
+          return next(new ErrorHandler(err, 500));
         }
         if (results.length) {
           resolve(results[0]);
@@ -580,7 +581,7 @@ exports.taskStateProgression = async (req, res, next) => {
     [newState, taskID],
     (err, results) => {
       if (err) {
-        return next(err);
+        return next(new ErrorHandler(err, 500));
       }
     }
   );
@@ -594,7 +595,7 @@ exports.taskStateProgression = async (req, res, next) => {
       ]),
         (err, results) => {
           if (err) {
-            return next(err);
+            return next(new ErrorHandler(err, 500));
           }
         };
     }
@@ -606,7 +607,7 @@ exports.taskStateProgression = async (req, res, next) => {
         [acronym],
         (err, results) => {
           if (err) {
-            return next(err);
+            return next(new ErrorHandler(err, 500));
           }
           resolve(results[0].permit_done);
         }
@@ -619,7 +620,7 @@ exports.taskStateProgression = async (req, res, next) => {
         [acronym, approverGroup],
         (err, results) => {
           if (err) {
-            return next(err);
+            return next(new ErrorHandler(err, 500));
           }
           console.log(results);
           resolve(results);
@@ -663,7 +664,7 @@ exports.taskStateRegression = async (req, res, next) => {
     [newState, taskID],
     (err, results) => {
       if (err) {
-        return next(err);
+        return next(new ErrorHandler(err, 500));
       }
     }
   );
@@ -672,7 +673,7 @@ exports.taskStateRegression = async (req, res, next) => {
     db.query("UPDATE tasks SET owner = NULL WHERE task_id = ?", [taskID]),
       (err, results) => {
         if (err) {
-          return next(err);
+          return next(new ErrorHandler(err, 500));
         }
       };
   }
@@ -716,7 +717,7 @@ exports.createNotes = async (req, res, next) => {
     ]),
       (err, results) => {
         if (err) {
-          return next(err);
+          return next(new ErrorHandler(err, 500));
         }
       };
   }
@@ -727,7 +728,7 @@ exports.createNotes = async (req, res, next) => {
       taskID,
       (err, results) => {
         if (err) {
-          return next();
+          return next(new ErrorHandler(err, 500));
         } else {
           resolve(results[0].notes);
         }
@@ -755,7 +756,7 @@ exports.createNotes = async (req, res, next) => {
     [JSON.stringify(newNotes), taskID],
     (err, results) => {
       if (err) {
-        return next(err);
+        return next(new ErrorHandler(err, 500));
       }
       res.json("Added note");
     }
@@ -769,7 +770,7 @@ exports.allNotes = (req, res, next) => {
     taskID,
     (err, results) => {
       if (err) {
-        return next(err);
+        return next(new ErrorHandler(err, 500));
       }
       res.json(JSON.parse(results[0].notes));
     }
@@ -808,7 +809,7 @@ exports.a3AllAppTasksByState = (req, res, next) => {
     [app, state],
     (err, results) => {
       if (err) {
-        return next(err);
+        return next(new ErrorHandler(err, 500));
       }
       res.json(results);
     }
@@ -823,7 +824,7 @@ exports.a3CreateTask = async (req, res, next) => {
         [req.body.acronym, req.body.planName],
         (err, result) => {
           if (err) {
-            next(err);
+            return next(new ErrorHandler(err, 500));
           } else {
             if (result.length) {
               resolve(true);
@@ -847,7 +848,7 @@ exports.a3CreateTask = async (req, res, next) => {
       [req.body.acronym],
       (err, results) => {
         if (err) {
-          next(err);
+          return next(new ErrorHandler(err, 500));
         } else {
           resolve(results[0].running_number);
         }
@@ -868,14 +869,14 @@ exports.a3CreateTask = async (req, res, next) => {
     ],
     (err) => {
       if (err) {
-        next(err);
+        return next(new ErrorHandler(err, 500));
       } else {
         db.query(
           "UPDATE applications SET running_number = ?",
           runningNumber + 1,
           (err, results) => {
             if (err) {
-              next(err);
+              return next(new ErrorHandler(err, 500));
             } else {
               req.body.taskID = `${req.body.acronym.toUpperCase()}_${runningNumber}`;
               req.body.details = "Task created";
@@ -897,7 +898,7 @@ exports.a3TaskStateProgression = async (req, res, next) => {
       taskID,
       (err, results) => {
         if (err) {
-          return next(err);
+          return next(new ErrorHandler(err, 500));
         }
         if (results.length) {
           resolve(results[0]);
@@ -926,7 +927,7 @@ exports.a3TaskStateProgression = async (req, res, next) => {
     [newState, taskID],
     (err, results) => {
       if (err) {
-        return next(err);
+        return next(new ErrorHandler(err, 500));
       }
     }
   );
@@ -940,7 +941,7 @@ exports.a3TaskStateProgression = async (req, res, next) => {
       ]),
         (err, results) => {
           if (err) {
-            return next(err);
+            return next(new ErrorHandler(err, 500));
           }
         };
     }
@@ -952,7 +953,7 @@ exports.a3TaskStateProgression = async (req, res, next) => {
         [acronym],
         (err, results) => {
           if (err) {
-            return next(err);
+            return next(new ErrorHandler(err, 500));
           }
           resolve(results[0].permit_done);
         }
@@ -965,7 +966,7 @@ exports.a3TaskStateProgression = async (req, res, next) => {
         [acronym, approverGroup],
         (err, results) => {
           if (err) {
-            return next(err);
+            return next(new ErrorHandler(err, 500));
           }
           console.log(results);
           resolve(results);
@@ -1025,7 +1026,7 @@ exports.a3CreateNotes = async (req, res, next) => {
     ]),
       (err, results) => {
         if (err) {
-          return next(err);
+          return next(new ErrorHandler(err, 500));
         }
       };
   }
@@ -1064,7 +1065,7 @@ exports.a3CreateNotes = async (req, res, next) => {
     [JSON.stringify(newNotes), taskID],
     (err, results) => {
       if (err) {
-        return next(err);
+        return next(new ErrorHandler(err, 500));
       }
       res.json("Added note");
     }

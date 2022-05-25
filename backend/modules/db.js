@@ -1,5 +1,4 @@
 const mysql = require("mysql");
-require("dotenv").config({ path: "./config/config.env" });
 
 const database = "nodelogin";
 

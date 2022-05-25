@@ -2,6 +2,7 @@ const checkGroup = require("../modules/checkGroup");
 const checkState = require("../modules/checkState");
 const { db } = require("../modules/db");
 const argon2 = require("argon2");
+const ErrorHandler = require("../utils/errorHandler");
 
 // ================= ASSIGNMENT 3 ================= //
 
@@ -18,8 +19,7 @@ const a3Login = (req, res, next) => {
     username,
     (err, result) => {
       if (err) {
-        next(err);
-        return;
+        return next(new ErrorHandler(err, 500));
       }
 
       // Step 1 - check if user is valid
@@ -60,7 +60,7 @@ const a3CheckApplicationAccess = async (req, res, next) => {
       [req.body.username, app],
       (err, results) => {
         if (err) {
-          return next(err);
+          return next(new ErrorHandler(err, 500));
         }
         if (results.length) {
           resolve(true);
@@ -112,7 +112,7 @@ const a3CheckTaskPermissions = async (req, res, next) => {
       [`permit_${action}`, acronym],
       (err, results) => {
         if (err) {
-          return next(err);
+          return next(new ErrorHandler(err, 500));
         }
         resolve(results[0][`permit_${action}`]);
       }

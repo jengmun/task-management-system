@@ -1,6 +1,7 @@
 const checkGroup = require("../modules/checkGroup");
 const checkState = require("../modules/checkState");
 const { db } = require("../modules/db");
+const ErrorHandler = require("../utils/errorHandler");
 
 const checkAdmin = async (req, res, next) => {
   const isAdmin = await checkGroup(
@@ -57,7 +58,7 @@ const checkApplicationAccess = async (req, res, next) => {
       [req.session.username, app],
       (err, results) => {
         if (err) {
-          return next(err);
+          return next(new ErrorHandler(err, 500));
         }
         if (results.length) {
           resolve(true);
@@ -109,7 +110,7 @@ const checkTaskPermissions = async (req, res, next) => {
       [`permit_${action}`, acronym],
       (err, results) => {
         if (err) {
-          return next(err);
+          return next(new ErrorHandler(err, 500));
         }
         resolve(results[0][`permit_${action}`]);
       }

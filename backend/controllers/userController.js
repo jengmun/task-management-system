@@ -1,6 +1,8 @@
 const argon2 = require("argon2");
 const { db, database } = require("../modules/db");
 const sendEmail = require("../modules/email");
+const ErrorHandler = require("../utils/errorHandler");
+const catchAsyncErrors = require("../middleware/catchAsyncErrors");
 
 // ================= AUTHENTICATION ================= //
 
@@ -8,8 +10,7 @@ exports.login = (req, res, next) => {
   const { username, password } = req.body;
 
   if (!username || !password) {
-    res.json("Please enter all details");
-    return;
+    return next(new ErrorHandler("Please enter all details", 400));
   }
 
   db.query(
@@ -17,20 +18,17 @@ exports.login = (req, res, next) => {
     username,
     (err, result) => {
       if (err) {
-        next(err);
-        return;
+        return next(new ErrorHandler("Error logging in", 500));
       }
 
       // Step 1 - check if user is valid
       if (!result || !result.length) {
-        res.json("Invalid user");
-        return;
+        return next(new ErrorHandler("Invalid user", 401));
       }
 
       // Step 2 - check if user is active
       if (result[0].status !== "Active") {
-        res.json("Inactive user");
-        return;
+        return next(new ErrorHandler("Inactive user", 401));
       }
 
       argon2.verify(result[0].password, password).then((argon2Match) => {
@@ -46,7 +44,7 @@ exports.login = (req, res, next) => {
             account_type: result[0].account_type,
           });
         } else {
-          res.json("Invalid password");
+          return next(new ErrorHandler("Invalid password", 400));
         }
       });
     }
@@ -59,7 +57,7 @@ exports.getLoginDetails = (req, res, next) => {
     req.session.username,
     (err, results) => {
       if (err) {
-        next(err);
+        return next(new ErrorHandler(err, 500));
       }
       res.json(results[0]);
     }
@@ -74,7 +72,7 @@ exports.logout = (req, res) => {
 
 // ================= USER PRIVILEGES (EXCLUDING PW RESET) ================= //
 
-exports.updateEmail = async (req, res, next) => {
+exports.updateEmail = (req, res, next) => {
   const { username, email } = req.body;
 
   db.query(
@@ -82,7 +80,7 @@ exports.updateEmail = async (req, res, next) => {
     [email, username],
     (err, result) => {
       if (err) {
-        next(err);
+        return next(new ErrorHandler(err, 500));
       } else {
         res.json("Email updated successfully");
       }
@@ -92,11 +90,11 @@ exports.updateEmail = async (req, res, next) => {
 
 // ================= ADMIN PRIVILEGES ================= //
 
-exports.getAllUsers = async (req, res, next) => {
+exports.getAllUsers = (req, res, next) => {
   db.query(
     "SELECT accounts.username, email, account_type, status, GROUP_CONCAT(user_group) AS user_group FROM accounts LEFT JOIN accounts_groups ON accounts.username = accounts_groups.username GROUP BY username;",
     (err, result) => {
-      if (err) return next(err);
+      if (err) return next(new ErrorHandler(err, 500));
 
       for (const user of result) {
         user.apps = [];
@@ -129,29 +127,28 @@ exports.getAllUsers = async (req, res, next) => {
 exports.getAllGroups = (req, res, next) => {
   db.query(`SELECT * FROM ${database}.groups`, (err, result) => {
     if (err) {
-      next(err);
+      return next(new ErrorHandler(err, 500));
     } else {
       res.json(result);
     }
   });
 };
 
-exports.getUserGroups = async (req, res, next) => {
+exports.getUserGroups = (req, res, next) => {
   db.query(
     "SELECT accounts.username, email, account_type, status FROM accounts INNER JOIN accounts_groups ON accounts.username = accounts_groups.username WHERE accounts_groups.user_group LIKE ?;",
     req.body.group + "%",
     (err, result) => {
       if (err) {
-        next(err);
+        return next(new ErrorHandler(err, 500));
       } else {
-        console.log(result);
         res.json(result);
       }
     }
   );
 };
 
-exports.createAccount = async (req, res, next) => {
+exports.createAccount = catchAsyncErrors(async (req, res, next) => {
   const { username, password, email, groups } = req.body;
 
   // Password validation
@@ -160,8 +157,7 @@ exports.createAccount = async (req, res, next) => {
       /^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[0-9])(?=.*?[#?!@$%^&*-])\S{8,10}$/
     )
   ) {
-    res.json("Invalid password format");
-    return;
+    return next(new ErrorHandler("Invalid password format", 400));
   }
 
   const hashedPassword = await argon2.hash(password);
@@ -181,13 +177,13 @@ exports.createAccount = async (req, res, next) => {
 
   const defaultErrorHandler = (err) => {
     if (err) {
-      next(err);
+      return next(new ErrorHandler(err, 500));
     }
   };
 
   db.beginTransaction((err) => {
     if (err) {
-      return next(err);
+      return next(new ErrorHandler(err, 500));
     }
 
     db.query(
@@ -196,7 +192,7 @@ exports.createAccount = async (req, res, next) => {
       (err) => {
         if (err) {
           db.rollback(defaultErrorHandler);
-          return next(err);
+          return next(new ErrorHandler(err, 500));
         } else {
           if (groups.length) {
             db.query(
@@ -205,12 +201,12 @@ exports.createAccount = async (req, res, next) => {
               (err) => {
                 if (err) {
                   db.rollback(defaultErrorHandler);
-                  return next(err);
+                  return next(new ErrorHandler(err, 500));
                 } else {
                   db.commit((err) => {
                     if (err) {
                       db.rollback(defaultErrorHandler);
-                      return next(err);
+                      return next(new ErrorHandler(err, 500));
                     }
                   });
                   res.json("User created");
@@ -221,7 +217,7 @@ exports.createAccount = async (req, res, next) => {
             db.commit((err) => {
               if (err) {
                 db.rollback(defaultErrorHandler);
-                return next(err);
+                return next(new ErrorHandler(err, 500));
               }
             });
             res.json("User created");
@@ -230,16 +226,16 @@ exports.createAccount = async (req, res, next) => {
       }
     );
   });
-};
+});
 
-exports.updateDetails = async (req, res, next) => {
+exports.updateDetails = (req, res, next) => {
   const { username, email, status } = req.body;
   db.query(
     "UPDATE accounts SET email = ?, status = ? WHERE username = ?",
     [email, status, username],
     (err, result) => {
       if (err) {
-        next(err);
+        return next(new ErrorHandler(err, 500));
       } else {
         res.json(result);
       }
@@ -248,7 +244,7 @@ exports.updateDetails = async (req, res, next) => {
 };
 
 // User management
-exports.updateGroups = async (req, res, next) => {
+exports.updateGroups = (req, res, next) => {
   let { username, currentGroups, oldGroups } = req.body;
   let toDelete = [];
 
@@ -277,14 +273,13 @@ exports.updateGroups = async (req, res, next) => {
 
     console.log("insert ", acronym, groupName);
 
-    return await new Promise((resolve) => {
+    return await new Promise((resolve, reject) => {
       db.query(
         "INSERT INTO accounts_groups (user_group, username, group_name, acronym) VALUES (?, ?, ?, ?)",
         [`${acronym}_${groupName}_${username}`, username, groupName, acronym],
         (err, result) => {
           if (err) {
-            next(err);
-            resolve(false);
+            reject(err);
           } else {
             resolve(true);
           }
@@ -294,14 +289,13 @@ exports.updateGroups = async (req, res, next) => {
   };
 
   const deleteQuery = async (group) => {
-    return await new Promise((resolve) => {
+    return await new Promise((resolve, reject) => {
       db.query(
         "DELETE FROM accounts_groups WHERE user_group = ?",
         [`${group}_${username}`],
         (err, result) => {
           if (err) {
-            next(err);
-            resolve(false);
+            reject(err);
           } else {
             resolve(true);
           }
@@ -339,7 +333,7 @@ exports.createGroups = (req, res, next) => {
     req.body.group,
     (err) => {
       if (err) {
-        next(err);
+        return next(new ErrorHandler(err, 500));
       } else {
         res.json("Group created!");
       }
@@ -359,7 +353,7 @@ exports.addGroupMember = (req, res, next) => {
     "INSERT INTO accounts_groups (user_group, username, group_name, acronym) VALUES (?, ?, ?, ?)",
     [`${group}_${username}`, username, groupName, app],
     (err) => {
-      if (err) return next(err);
+      if (err) return next(new ErrorHandler(err, 500));
       res.json("Added");
     }
   );
@@ -372,40 +366,41 @@ exports.removeGroupMember = (req, res, next) => {
     "DELETE FROM accounts_groups WHERE user_group = ?",
     [`${group}_${username}`],
     (err) => {
-      if (err) return next(err);
+      if (err) return next(new ErrorHandler(err, 500));
       res.json("Removed");
     }
   );
 };
 
-exports.assignPM = async (req, res, next) => {
+exports.assignPM = catchAsyncErrors(async (req, res, next) => {
   const { acronym, username } = req.body;
 
-  const existingApp = await new Promise((resolve) => {
+  const existingApp = await new Promise((resolve, reject) => {
     db.query(
       "SELECT acronym FROM applications WHERE acronym = ?",
       acronym,
       (err, results) => {
-        if (err) return next(err);
+        if (err) {
+          reject(err);
+        }
         resolve(results);
       }
     );
   });
 
   if (existingApp.length) {
-    res.json("App already exists");
-    return;
+    return next(new ErrorHandler("App already exists"));
   }
 
   db.query(
     "INSERT INTO accounts_groups (user_group, username, group_name, acronym) VALUES (?, ?, 'Project Manager', ?)",
     [`${acronym}_Project Manager_${username}`, username, acronym],
     (err) => {
-      if (err) return next(err);
+      if (err) return next(new ErrorHandler(err, 500));
       res.json("PM Assigned");
     }
   );
-};
+});
 
 // ================= PASSWORD RESETTING - USER AND ADMIN ================= //
 
@@ -427,21 +422,20 @@ const generatePassword = () => {
   return password;
 };
 
-exports.adminPasswordReset = async (req, res, next) => {
+exports.adminPasswordReset = catchAsyncErrors(async (req, res, next) => {
   const validUser = await new Promise((resolve, reject) => {
     db.query(
       "SELECT * FROM accounts WHERE username = ? AND email = ?",
       [req.body.username, req.body.email],
       (err, results) => {
-        if (err) return next(err);
+        if (err) reject(err);
         resolve(results);
       }
     );
   });
 
   if (!validUser.length) {
-    res.json("No valid user found!");
-    return;
+    return next(new ErrorHandler("No valid user found!", 401));
   }
 
   const password = generatePassword();
@@ -465,23 +459,23 @@ exports.adminPasswordReset = async (req, res, next) => {
     "UPDATE accounts SET password = ? WHERE username = ? AND email = ? ",
     [hashedPassword, req.body.username, req.body.email],
     (err, result) => {
-      if (err) return next(err);
+      if (err) return next(new ErrorHandler(err, 500));
       res.json("Password successfully resetted");
     }
   );
-};
+});
 
 // For users who forgot their password / had their passwords reset by the administrator
-exports.userPasswordReset = async (req, res, next) => {
+exports.userPasswordReset = catchAsyncErrors(async (req, res, next) => {
   const oldPassword = req.body.oldPassword;
   const username = req.params.username;
 
-  const validPassword = await new Promise((resolve) => {
+  const validPassword = await new Promise((resolve, reject) => {
     db.query(
       "SELECT password FROM accounts WHERE username = ?",
       username,
       (err, result) => {
-        if (err) return next(err);
+        if (err) reject(err);
         argon2.verify(result[0].password, oldPassword).then((argon2Match) => {
           if (!argon2Match) {
             resolve(false);
@@ -494,8 +488,7 @@ exports.userPasswordReset = async (req, res, next) => {
   });
 
   if (!validPassword) {
-    res.json("Current password is wrong!");
-    return;
+    return next(new ErrorHandler("Current password is wrong!", 401));
   }
 
   if (
@@ -503,8 +496,7 @@ exports.userPasswordReset = async (req, res, next) => {
       /^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[0-9])(?=.*?[#?!@$%^&*-])\S{8,10}$/
     )
   ) {
-    res.json("Invalid password format");
-    return;
+    return next(new ErrorHandler("Invalid password format", 400));
   }
 
   const password = await argon2.hash(req.body.password);
@@ -513,21 +505,20 @@ exports.userPasswordReset = async (req, res, next) => {
     "UPDATE accounts SET password = ? WHERE username = ?",
     [password, username],
     (err, result) => {
-      if (err) return next(err);
+      if (err) return next(new ErrorHandler(err, 500));
       res.json("Password resetted!");
     }
   );
-};
+});
 
 // For users who are logged in
-exports.userUpdatePassword = async (req, res, next) => {
+exports.userUpdatePassword = catchAsyncErrors(async (req, res, next) => {
   if (
     !req.body.password.match(
       /^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[0-9])(?=.*?[#?!@$%^&*-])\S{8,10}$/
     )
   ) {
-    res.json("Invalid password format");
-    return;
+    return next(new ErrorHandler("Invalid password format", 400));
   }
 
   const { username } = req.body;
@@ -537,8 +528,8 @@ exports.userUpdatePassword = async (req, res, next) => {
     "UPDATE accounts SET password = ? WHERE username = ?",
     [password, username],
     (err, result) => {
-      if (err) return next(err);
+      if (err) return next(new ErrorHandler(err, 500));
       res.json(result);
     }
   );
-};
+});

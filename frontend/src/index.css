@@ -1,7 +1,7 @@
 body{
     margin: 0;
     padding: 0;
-    background-image: url("https://cutewallpaper.org/21/pastel-gradient-background/Smooth-gradient-background-with-pastel-pink-and-turquoise-.jpg");
+    background-image: url("./assets/background-image.jpg");
     background-attachment: fixed;
     background-size: cover;
     color:rgb(55, 53, 47);

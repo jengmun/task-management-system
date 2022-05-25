@@ -61,9 +61,9 @@ const AssignPM = () => {
       acronym: e.target.acronym.value,
       username: selectedUser,
     });
-    setMessage(data);
+    setMessage(data.message);
 
-    if (data !== "PM Assigned") {
+    if (data.message !== "PM Assigned") {
       handleOpenSnackbar("error");
     } else {
       handleOpenSnackbar("success");

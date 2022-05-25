@@ -123,9 +123,9 @@ const Plan = (props) => {
       endDate: input.endDate,
       currentPlan: props.plan.plan_name,
     });
-    props.setMessage(data);
+    props.setMessage(data.message);
 
-    if (data === "Plan updated") {
+    if (data.message === "Plan updated") {
       props.fetchAllPlans();
       props.handleOpenSnackbar("success");
     } else {
@@ -143,9 +143,9 @@ const Plan = (props) => {
     const data = await handlePostRequest(`task/update-plan-status/${app}`, {
       planName: props.plan.plan_name,
     });
-    props.setMessage(data);
+    props.setMessage(data.message);
 
-    if (data === "Plan status updated") {
+    if (data.message === "Plan status updated") {
       props.plan.status = "Closed";
       props.fetchAllPlans();
       props.handleOpenSnackbar("success");

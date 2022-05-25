@@ -178,9 +178,9 @@ const KanbanBoard = () => {
       });
     }
 
-    setMessage(data);
+    setMessage(data.message);
 
-    if (data !== "Added note") {
+    if (data.message !== "Added note") {
       handleOpenSnackbar("error");
       return;
     } else {

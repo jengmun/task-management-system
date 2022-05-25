@@ -110,9 +110,9 @@ const EditApp = (props) => {
       permitDoing: selectedPermissions.permitDoing,
       permitDone: selectedPermissions.permitDone,
     });
-    setMessage(data);
+    setMessage(data.message);
 
-    if (data === "Updated app") {
+    if (data.message === "Updated app") {
       props.fetchAppDetails();
       handleOpenSnackbar("success");
     } else {

@@ -63,9 +63,9 @@ const CreateTask = (props) => {
       description: e.target.description.value,
       planName: selectedPlan,
     });
-    setMessage(data);
+    setMessage(data.message);
 
-    if (data === "Added note") {
+    if (data.message === "Added note") {
       e.target.taskName.value = "";
       e.target.description.value = "";
       setSelectedPlan("");

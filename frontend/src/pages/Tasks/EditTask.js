@@ -108,9 +108,9 @@ const EditTask = (props) => {
       taskID: task,
     });
 
-    setMessage(data);
+    setMessage(data.message);
 
-    if (data === "Added note") {
+    if (data.message === "Added note") {
       fetchAllNotes();
       props.fetchTasks();
       handleOpenSnackbar("success");
@@ -137,9 +137,9 @@ const EditTask = (props) => {
       details: e.target.notes.value,
       acronym: app,
     });
-    setMessage(data);
+    setMessage(data.message);
 
-    if (data !== "Added note") {
+    if (data.message !== "Added note") {
       handleOpenSnackbar("error");
     } else {
       e.target.notes.value = "";

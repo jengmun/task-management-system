@@ -30,8 +30,8 @@ const CreateNewGroup = (props) => {
         group: e.target.groupName.value,
       });
 
-      setMessage(result);
-      if (result === "Group created!") {
+      setMessage(result.message);
+      if (result.message === "Group created!") {
         handleOpenSnackbar("success");
         props.fetchAllGroups();
       } else {

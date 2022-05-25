@@ -54,9 +54,9 @@ const ResetPassword = () => {
         oldPassword: e.target.oldPassword.value,
       }
     );
-    setMessage(result);
+    setMessage(result.message);
 
-    if (result !== "Password resetted!") {
+    if (result.message !== "Password resetted!") {
       handleOpenSnackbar("error");
     } else {
       handleOpenSnackbar("success");

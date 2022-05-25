@@ -80,9 +80,9 @@ const CreateUser = () => {
       email: e.target.email.value,
       groups: selectedGroups,
     });
-    setMessage(data);
+    setMessage(data.message);
 
-    if (data !== "User created") {
+    if (data.message !== "User created") {
       handleOpenSnackbar("error");
     } else {
       e.target.username.value = "";

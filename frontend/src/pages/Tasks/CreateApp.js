@@ -109,9 +109,9 @@ const CreateApp = (props) => {
       permitDone: selectedPermissions.permitDone,
     });
 
-    setMessage(data);
+    setMessage(data.message);
 
-    if (data === "Application successfully created") {
+    if (data.message === "Application successfully created") {
       handleOpenSnackbar("success");
       props.fetchAllApps();
     } else {

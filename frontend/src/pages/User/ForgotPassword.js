@@ -30,9 +30,9 @@ const ResetPassword = () => {
       username: e.target.username.value,
       email: e.target.email.value,
     });
-    setMessage(data);
+    setMessage(data.message);
 
-    if (data !== "Password successfully resetted") {
+    if (data.message !== "Password successfully resetted") {
       handleOpenSnackbar("error");
     } else {
       handleOpenSnackbar("success");

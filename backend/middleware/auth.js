@@ -2,8 +2,9 @@ const checkGroup = require("../modules/checkGroup");
 const checkState = require("../modules/checkState");
 const { db } = require("../modules/db");
 const ErrorHandler = require("../utils/errorHandler");
+const catchAsyncErrors = require("../middleware/catchAsyncErrors");
 
-const checkAdmin = async (req, res, next) => {
+const checkAdmin = catchAsyncErrors(async (req, res, next) => {
   const isAdmin = await checkGroup(
     "accounts",
     req.session.username,
@@ -12,22 +13,20 @@ const checkAdmin = async (req, res, next) => {
   );
 
   if (!isAdmin) {
-    res.json("Unauthorised administrator!");
-    return;
+    return next(new ErrorHandler("Unauthorised administrator!", 401));
   }
 
   next();
-};
+});
 
 const checkLoggedIn = (req, res, next) => {
   if (!req.session.username) {
-    res.json("User is not logged in!");
-    return;
+    return next(new ErrorHandler("User is not logged in!", 401));
   }
   next();
 };
 
-const checkPM = async (req, res, next) => {
+const checkPM = catchAsyncErrors(async (req, res, next) => {
   const { acronym } = req.body;
 
   const isPermitted = await checkGroup(
@@ -41,24 +40,24 @@ const checkPM = async (req, res, next) => {
   if (isPermitted) {
     next();
   } else {
-    res.json("Insufficient permissions");
+    return next(new ErrorHandler("Insufficient permissions", 401));
   }
-};
+});
 
-const checkApplicationAccess = async (req, res, next) => {
+const checkApplicationAccess = catchAsyncErrors(async (req, res, next) => {
   let { app, task } = req.params;
 
   if (!app) {
     app = task.slice(0, 3);
   }
 
-  const isMember = await new Promise((resolve) => {
+  const isMember = await new Promise((resolve, reject) => {
     db.query(
       "SELECT * FROM accounts_groups WHERE username = ? AND acronym = ?",
       [req.session.username, app],
       (err, results) => {
         if (err) {
-          return next(new ErrorHandler(err, 500));
+          reject(err);
         }
         if (results.length) {
           resolve(true);
@@ -85,9 +84,9 @@ const checkApplicationAccess = async (req, res, next) => {
   } else {
     res.json(false);
   }
-};
+});
 
-const checkTaskPermissions = async (req, res, next) => {
+const checkTaskPermissions = catchAsyncErrors(async (req, res, next) => {
   // const listOfActions = ["create", "open", "todo", "doing", "done"];
   const { taskID, acronym } = req.body;
   let action;
@@ -97,20 +96,19 @@ const checkTaskPermissions = async (req, res, next) => {
   } else {
     const state = await checkState(taskID);
     if (state === "Closed") {
-      res.json("Task is closed");
-      return;
+      return next(new ErrorHandler("Task is closed", 500));
     } else {
       action = state.toLowerCase();
     }
   }
 
-  const permittedGroup = await new Promise((resolve) => {
+  const permittedGroup = await new Promise((resolve, reject) => {
     db.query(
       "SELECT ?? FROM applications WHERE acronym = ?",
       [`permit_${action}`, acronym],
       (err, results) => {
         if (err) {
-          return next(new ErrorHandler(err, 500));
+          reject(err);
         }
         resolve(results[0][`permit_${action}`]);
       }
@@ -130,9 +128,9 @@ const checkTaskPermissions = async (req, res, next) => {
   if (isPermitted) {
     next();
   } else {
-    res.json("Insufficient permissions");
+    return next(new ErrorHandler("Insufficient permissions", 401));
   }
-};
+});
 
 module.exports = {
   checkAdmin,

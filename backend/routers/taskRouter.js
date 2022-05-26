@@ -3,7 +3,6 @@ const router = express.Router();
 const {
   createApplication,
   allApplications,
-  userApplications,
   uncreatedApplications,
   createPlan,
   allPlans,
@@ -17,12 +16,10 @@ const {
   a3AllAppTasksByState,
   allNotes,
   taskDetails,
-  updateTask,
   updatePlan,
   applicationDetails,
   updateApp,
   isGroup,
-  isMember,
   updatePlanStatus,
   hasPermissions,
   getPermissions,
@@ -46,13 +43,11 @@ const {
 
 router.post("/create-app", checkPM, createApplication);
 
-router.get("/all-apps", checkAdmin, allApplications);
-
-router.get("/all-apps/user", userApplications);
+router.get("/all-apps", allApplications);
 
 router.get("/uncreated-apps/user", uncreatedApplications);
 
-router.get("/apps/:app", checkApplicationAccess, applicationDetails);
+router.get("/apps/:app", applicationDetails);
 
 router.post("/update-app/:app", checkPM, updateApp);
 
@@ -66,9 +61,9 @@ router.post("/update-permissions", checkPM, updatePermissions);
 
 router.post("/create-plan", checkPM, createPlan);
 
-router.get("/all-plans/:app", checkApplicationAccess, allPlans);
+router.get("/all-plans/:app", allPlans);
 
-router.get("/all-open-plans/:app", checkApplicationAccess, allOpenPlans);
+router.get("/all-open-plans/:app", allOpenPlans);
 
 router.post("/update-plan/:app", checkPM, updatePlan);
 
@@ -78,11 +73,9 @@ router.post("/update-plan-status/:app", checkPM, updatePlanStatus);
 
 router.post("/create-task", checkTaskPermissions, createTask, createNotes);
 
-router.get("/all-tasks/:app", checkApplicationAccess, allAppTasks);
+router.get("/all-tasks/:app", allAppTasks);
 
-router.get("/task-details/:task", checkApplicationAccess, taskDetails);
-
-router.post("/update-task", updateTask, createNotes);
+router.get("/task-details/:task", taskDetails);
 
 router.post(
   "/task-state-progression",
@@ -100,13 +93,11 @@ router.post(
 
 // ================= NOTES ================= //
 
-router.post("/create-notes/:task", checkApplicationAccess, createNotes);
+router.post("/create-notes/:task", checkTaskPermissions, createNotes);
 
-router.get("/all-notes/:task", checkApplicationAccess, allNotes);
+router.get("/all-notes/:task", allNotes);
 
 // ================= AUTH ================= //
-
-router.get("/is-member/:app", checkApplicationAccess, isMember);
 
 router.post("/is-group", isGroup);
 

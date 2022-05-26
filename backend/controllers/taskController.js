@@ -41,20 +41,6 @@ exports.allApplications = (req, res, next) => {
   });
 };
 
-exports.userApplications = (req, res, next) => {
-  db.query(
-    `SELECT DISTINCT accounts_groups.acronym FROM accounts_groups INNER JOIN applications ON applications.acronym = accounts_groups.acronym WHERE accounts_groups.username = ?`,
-    req.session.username,
-    (err, result) => {
-      if (err) {
-        return next(new ErrorHandler(err, 500));
-      } else {
-        res.json(result);
-      }
-    }
-  );
-};
-
 exports.uncreatedApplications = catchAsyncErrors(async (req, res, next) => {
   const assignedApps = await new Promise((resolve, reject) => {
     db.query(
@@ -331,138 +317,6 @@ exports.taskDetails = (req, res, next) => {
     res.json(results[0]);
   });
 };
-
-exports.updateTask = catchAsyncErrors(async (req, res, next) => {
-  const { taskID, acronym } = req.body;
-
-  const permittedGroup = await new Promise((resolve, reject) => {
-    db.query(
-      "SELECT permit_create FROM applications WHERE acronym = ?",
-      [acronym],
-      (err, results) => {
-        if (err) {
-          reject(err);
-        }
-        resolve(results[0]["permit_create"]);
-      }
-    );
-  });
-
-  console.log(permittedGroup);
-
-  const isPermitted = await checkGroup(
-    "accounts_groups",
-    req.session.username,
-    "group_name",
-    permittedGroup,
-    acronym
-  );
-
-  if (!isPermitted) {
-    return next(new ErrorHandler("Insufficient permissions", 401));
-  }
-  console.log(isPermitted);
-
-  const results = await new Promise((resolve, reject) => {
-    db.query(
-      "SELECT state FROM tasks WHERE task_id = ?",
-      taskID,
-      (err, results) => {
-        if (err) {
-          reject(err);
-        }
-        console.log(results[0].state);
-        if (results.length) {
-          resolve(results[0]);
-        } else {
-          resolve({ state: "" });
-        }
-      }
-    );
-  });
-
-  const currentState = results.state;
-  console.log(currentState);
-
-  if (currentState !== "Open" || !currentState) {
-    return next(new ErrorHandler("Task can't be updated!", 500));
-  }
-
-  let { description, planName } = req.body;
-
-  const oldDetails = await new Promise((resolve, reject) => {
-    db.query(
-      `SELECT description, plan_name FROM tasks WHERE task_id = ?`,
-      [taskID],
-      (err, result) => {
-        if (err) {
-          reject(err);
-        } else {
-          resolve(result[0]);
-        }
-      }
-    );
-  });
-
-  if (
-    oldDetails.description === description &&
-    (oldDetails.plan_name === planName ||
-      (!oldDetails.plan_name && planName === "null"))
-  ) {
-    return next(new ErrorHandler("No change in details", 400));
-  }
-
-  if (planName !== "null") {
-    const validPlan = await new Promise((resolve, reject) => {
-      db.query(
-        `SELECT plan_name FROM plans WHERE acronym = ? AND plan_name = ? AND status = 'Open'`,
-        [taskID.slice(0, 3), planName],
-        (err, result) => {
-          if (err) {
-            reject(err);
-          } else {
-            if (result.length) {
-              resolve(true);
-            } else {
-              resolve(false);
-            }
-          }
-        }
-      );
-    });
-
-    if (!validPlan) {
-      return next(
-        new ErrorHandler("Invalid plan selected or plan is closed!", 500)
-      );
-    }
-  } else {
-    planName = null;
-  }
-
-  db.query(
-    "UPDATE tasks SET description = ?, plan_name = ? WHERE task_id = ?",
-    [description, planName, taskID],
-    (err, results) => {
-      if (err) {
-        return next(new ErrorHandler(err, 500));
-      }
-
-      if (
-        oldDetails.description !== description &&
-        oldDetails.plan_name !== planName
-      ) {
-        req.body.details = `Task description updated from ${oldDetails.description} to ${description}. Plan name updated from from ${oldDetails.plan_name} to ${planName}.`;
-      } else if (oldDetails.description !== description) {
-        req.body.details = `Task description updated from ${oldDetails.description} to ${description}.`;
-      } else {
-        req.body.details = `Plan name updated from from ${oldDetails.plan_name} to ${planName}.`;
-      }
-
-      next();
-    }
-  );
-});
 
 exports.hasPermissions = catchAsyncErrors(async (req, res, next) => {
   const { app, permission } = req.body;
@@ -759,10 +613,6 @@ exports.isGroup = catchAsyncErrors(async (req, res, next) => {
   } else {
     res.json(false);
   }
-});
-
-exports.isMember = catchAsyncErrors(async (req, res, next) => {
-  res.json(req.isMember);
 });
 
 // ================= ASSIGNMENT 3 ================= //

@@ -11,7 +11,9 @@ const a3Login = (req, res, next) => {
   const { username, password } = req.body;
 
   if (!username || !password) {
-    return next(new ErrorHandler("Please enter all details", 400));
+    return next(
+      new ErrorHandler("Please enter all authentication details", 400)
+    );
   }
 
   db.query(
@@ -59,6 +61,16 @@ const a3CheckTaskPermissions = catchAsyncErrors(async (req, res, next) => {
     } else {
       action = state.toLowerCase();
     }
+  }
+
+  if (!acronym) {
+    return next(new ErrorHandler("Please input an app acronym", 400));
+  }
+
+  if (acronym.length !== 3) {
+    return next(
+      new ErrorHandler("Length of acronym must be 3 characters!", 400)
+    );
   }
 
   const permittedGroup = await new Promise((resolve, reject) => {

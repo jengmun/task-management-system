@@ -657,6 +657,12 @@ exports.a3CreateTask = catchAsyncErrors(async (req, res, next) => {
     }
   }
 
+  if (!req.body.taskName || !req.body.description) {
+    return next(
+      new ErrorHandler("Please input both task name and description!", 400)
+    );
+  }
+
   const runningNumber = await new Promise((resolve, reject) => {
     db.query(
       "SELECT running_number FROM applications WHERE acronym = ?",
@@ -707,9 +713,13 @@ exports.a3CreateTask = catchAsyncErrors(async (req, res, next) => {
 exports.a3TaskStateProgression = catchAsyncErrors(async (req, res, next) => {
   const { taskID, acronym } = req.body;
 
+  if (!req.body.taskID) {
+    return next(new ErrorHandler("Please input task ID!", 400));
+  }
+
   const results = await new Promise((resolve, reject) => {
     db.query(
-      "SELECT state, owner FROM tasks WHERE task_id = ?",
+      "SELECT state FROM tasks WHERE task_id = ?",
       taskID,
       (err, results) => {
         if (err) {
@@ -718,14 +728,13 @@ exports.a3TaskStateProgression = catchAsyncErrors(async (req, res, next) => {
         if (results.length) {
           resolve(results[0]);
         } else {
-          resolve({ state: "", owner: "" });
+          resolve({ state: "" });
         }
       }
     );
   });
 
   const currentState = results.state;
-  const { owner } = results;
   console.log("currentState: ", currentState);
 
   if (currentState !== "Doing") {
@@ -859,7 +868,7 @@ exports.a3CreateNotes = catchAsyncErrors(async (req, res, next) => {
       if (err) {
         return next(new ErrorHandler(err, 500));
       }
-      res.json({ message: "Added note" });
+      res.json({ message: req.body.details || "Added note" });
     }
   );
 });

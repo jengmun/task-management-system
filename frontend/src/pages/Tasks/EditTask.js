@@ -293,7 +293,8 @@ const EditTask = (props) => {
             </form>
           </>
         )}
-        {taskPermission && (
+        {(taskPermission ||
+          (createTaskPermission && taskDetails.state === "Open")) && (
           <form
             onSubmit={handleAddNote}
             style={{ display: "flex", flexDirection: "column" }}

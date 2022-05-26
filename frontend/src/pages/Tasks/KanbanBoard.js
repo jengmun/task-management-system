@@ -83,7 +83,7 @@ const KanbanBoard = () => {
     const data = await handleGetRequest(`task/get-permissions/${app}`);
 
     setUserPermissions(data);
-
+    console.log("Permissions:", data);
     if (
       data.some((permission) => permission.group_name === "Project Manager")
     ) {
@@ -136,11 +136,13 @@ const KanbanBoard = () => {
           id: numOfCards[i].task_id,
           title: numOfCards[i].task_name,
           description: numOfCards[i].description,
-          planName: numOfCards[i].plan_name,
-          state: numOfCards[i].state,
-          creator: numOfCards[i].creator,
           owner: numOfCards[i].owner,
           createTaskPermission: createTaskPermission,
+          taskPermission: userPermissions.find(
+            ({ group_name }) =>
+              group_name ===
+              appDetails[`permit_${numOfCards[i].state.toLowerCase()}`]
+          )?.group_name,
         });
       }
       columns.push({ id, title, cards });
@@ -156,7 +158,7 @@ const KanbanBoard = () => {
 
   useEffect(() => {
     createBoard();
-  }, [allTasks, createTaskPermission]);
+  }, [allTasks, createTaskPermission, appDetails, userPermissions]);
 
   const handleCardMove = async (card, source, destination) => {
     let data;
@@ -185,6 +187,7 @@ const KanbanBoard = () => {
       return;
     } else {
       handleOpenSnackbar("success");
+      fetchTasks();
     }
 
     // ------------- Update Board -------------
@@ -694,6 +697,7 @@ const TaskCard = (props) => {
           task={props.content.id}
           createTaskPermission={props.content.createTaskPermission}
           fetchTasks={props.fetchTasks}
+          taskPermission={props.content.taskPermission}
         />
       </Modal>
     </>

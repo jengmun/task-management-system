@@ -15,16 +15,9 @@ const Overview = () => {
   const [allApps, setAllApps] = useState([]);
 
   const fetchAllApps = async () => {
-    if (loginContext.isLoggedIn.account_type === "Admin") {
-      const data = await handleGetRequest("task/all-apps");
-      if (data) {
-        setAllApps(data);
-      }
-    } else {
-      const data = await handleGetRequest("task/all-apps/user");
-      if (data) {
-        setAllApps(data);
-      }
+    const data = await handleGetRequest("task/all-apps");
+    if (data) {
+      setAllApps(data);
     }
   };
 

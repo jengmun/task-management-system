@@ -25,7 +25,7 @@ import moment from "moment";
 import CustomSnackbar from "../../components/CustomSnackbar";
 
 const EditTask = (props) => {
-  const { app, task, createTaskPermission } = props;
+  const { app, task, createTaskPermission, taskPermission } = props;
 
   // ------------- Fetch task details -------------
   const [taskDetails, setTaskDetails] = useState([]);
@@ -293,7 +293,7 @@ const EditTask = (props) => {
             </form>
           </>
         )}
-        {isMember && taskDetails.state !== "Closed" && (
+        {taskPermission && (
           <form
             onSubmit={handleAddNote}
             style={{ display: "flex", flexDirection: "column" }}

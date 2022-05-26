@@ -3,7 +3,6 @@ import { BrowserRouter, Redirect, Route, Switch } from "react-router-dom";
 import Cookies from "js-cookie";
 import "./App.css";
 import AdminRoute from "./ProtectedRoutes/AdminRoute";
-import PermissionsRoute from "./ProtectedRoutes/PermissionsRoute";
 import LoginContext from "./context/login-context";
 import handleGetRequest from "./hooks/handleGetRequest";
 import Nav from "./components/Nav";
@@ -117,11 +116,7 @@ function App() {
                     </Route>
                     {/* TASK MANAGEMENT ROUTES */}
                     <AdminRoute path="/app/assign-PM" component={AssignPM} />
-
-                    <PermissionsRoute
-                      path="/app/:app"
-                      component={KanbanBoard}
-                    />
+                    <Route path="/app/:app" component={KanbanBoard} />
 
                     {/* ADMIN ROUTES */}
                     <AdminRoute

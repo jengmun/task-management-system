@@ -293,8 +293,8 @@ exports.createTask = catchAsyncErrors(async (req, res, next) => {
         return next(new ErrorHandler(err, 500));
       } else {
         db.query(
-          "UPDATE applications SET running_number = ?",
-          runningNumber + 1,
+          "UPDATE applications SET running_number = ? WHERE acronym = ?",
+          [runningNumber + 1, req.body.acronym],
           (err, results) => {
             if (err) {
               return next(new ErrorHandler(err, 500));
@@ -584,21 +584,8 @@ exports.taskStateProgression = catchAsyncErrors(async (req, res, next) => {
     }
   );
 
+  // Send email to approvers
   if (newState === "Done") {
-    // Update owner
-    if (req.session.username !== owner) {
-      db.query("UPDATE tasks SET owner = ? WHERE task_id = ?", [
-        req.session.username,
-        taskID,
-      ]),
-        (err, results) => {
-          if (err) {
-            return next(new ErrorHandler(err, 500));
-          }
-        };
-    }
-
-    // Send email to approvers
     const approverGroup = await new Promise((resolve, reject) => {
       db.query(
         "SELECT permit_done FROM applications WHERE acronym = ?",
@@ -666,25 +653,12 @@ exports.taskStateRegression = catchAsyncErrors(async (req, res, next) => {
     }
   );
 
-  if (newState === "Todo") {
-    db.query("UPDATE tasks SET owner = NULL WHERE task_id = ?", [taskID]),
-      (err, results) => {
-        if (err) {
-          return next(new ErrorHandler(err, 500));
-        }
-      };
-  }
-
   req.body.details = `Task updated from ${currentState} to ${newState}`;
 
   next();
 });
 
 exports.createNotes = catchAsyncErrors(async (req, res, next) => {
-  if (req.isMember === false) {
-    return next(new ErrorHandler("Not a member", 500));
-  }
-
   let { details, taskID } = req.body;
   let state = req.state;
 
@@ -703,30 +677,6 @@ exports.createNotes = catchAsyncErrors(async (req, res, next) => {
   if (!taskID) {
     taskID = req.params.task;
   }
-
-  // const permittedGroup = await new Promise((resolve, reject) => {
-  //   db.query(
-  //     "SELECT permit_doing FROM applications WHERE acronym = ?",
-  //     [req.body.acronym],
-  //     (err, results) => {
-  //       if (err) {
-  //         reject(err);
-  //       }
-  //       resolve(results[0]["permit_doing"]);
-  //     }
-  //   );
-  // });
-
-  // const isPermitted = await checkGroup(
-  //   "accounts_groups",
-  //   req.session.username,
-  //   "group_name",
-  //   permittedGroup,
-  //   req.body.acronym
-  // );
-
-  // if (isPermitted) {
-  // }
 
   db.query("UPDATE tasks SET owner = ? WHERE task_id = ?", [
     req.session.username,
@@ -887,8 +837,8 @@ exports.a3CreateTask = catchAsyncErrors(async (req, res, next) => {
         return next(new ErrorHandler(err, 500));
       } else {
         db.query(
-          "UPDATE applications SET running_number = ?",
-          runningNumber + 1,
+          "UPDATE applications SET running_number = ? WHERE acronym = ?",
+          [runningNumber + 1, req.body.acronym],
           (err, results) => {
             if (err) {
               return next(new ErrorHandler(err, 500));

@@ -17,15 +17,12 @@ import {
   TableRow,
   TableBody,
   TableCell,
-  Select,
-  MenuItem,
-  useTheme,
 } from "@mui/material";
 import moment from "moment";
 import CustomSnackbar from "../../components/CustomSnackbar";
 
 const EditTask = (props) => {
-  const { app, task, createTaskPermission, taskPermission } = props;
+  const { app, task, taskPermission } = props;
 
   // ------------- Fetch task details -------------
   const [taskDetails, setTaskDetails] = useState([]);
@@ -34,7 +31,6 @@ const EditTask = (props) => {
     const data = await handleGetRequest(`task/task-details/${task}`);
     if (data) {
       setTaskDetails(data);
-      setSelectedPlan(data.plan_name ? data.plan_name : "null");
     }
   };
 
@@ -48,37 +44,10 @@ const EditTask = (props) => {
     }
   };
 
-  // ------------- Fetch all plans -------------
-  const [allPlans, setAllPlans] = useState([]);
-
-  const fetchAllPlans = async () => {
-    const data = await handleGetRequest(`task/all-open-plans/${app}`);
-    if (data) {
-      setAllPlans(data);
-    }
-  };
-
-  // ------------- Check if Member -------------/
-  const [isMember, setIsMember] = useState(false);
-
-  const checkMember = async () => {
-    const data = await handleGetRequest(`task/is-member/${app}`);
-    if (data) {
-      setIsMember(data);
-    }
-  };
-
   useEffect(() => {
     fetchTaskDetails();
     fetchAllNotes();
-    fetchAllPlans();
-    checkMember();
   }, []);
-
-  // ------------- Update task details -------------
-
-  const [readOnly, setReadOnly] = useState(true);
-  const [selectedPlan, setSelectedPlan] = useState("");
 
   // ------------- Snackbar -------------
   const [message, setMessage] = useState("");
@@ -97,37 +66,6 @@ const EditTask = (props) => {
 
     setOpenSnackbar(false);
   };
-
-  const handleTaskUpdate = async (e) => {
-    e.preventDefault();
-
-    const data = await handlePostRequest(`task/update-task`, {
-      description: e.target.description.value,
-      planName: selectedPlan,
-      acronym: app,
-      taskID: task,
-    });
-
-    setMessage(data.message);
-
-    if (data.message === "Added note") {
-      fetchAllNotes();
-      props.fetchTasks();
-      handleOpenSnackbar("success");
-    } else {
-      handleOpenSnackbar("error");
-    }
-  };
-
-  const setPermissions = () => {
-    if (createTaskPermission && taskDetails.state === "Open") {
-      setReadOnly(false);
-    }
-  };
-
-  useEffect(() => {
-    setPermissions();
-  }, [taskDetails]);
 
   const handleAddNote = async (e) => {
     e.preventDefault();
@@ -148,8 +86,6 @@ const EditTask = (props) => {
       handleOpenSnackbar("success");
     }
   };
-
-  const theme = useTheme();
 
   return (
     <Card
@@ -207,94 +143,18 @@ const EditTask = (props) => {
       </Table>
 
       <Box sx={{ display: "flex", justifyContent: "space-around", mb: 2 }}>
-        {readOnly ? (
-          <>
-            <Typography variant="body1" sx={{ mt: 2 }}>
-              Description: {taskDetails.description}
-            </Typography>
-            <Typography variant="body1" sx={{ mb: 2, mt: 2 }}>
-              {taskDetails.plan_name
-                ? `Plan Name: ${taskDetails.plan_name}`
-                : "No plan allocated"}
-            </Typography>
-          </>
-        ) : (
-          <>
-            <form
-              onSubmit={handleTaskUpdate}
-              style={{
-                display: "flex",
-                flexDirection: "column",
-                width: "70%",
-              }}
-            >
-              <Box sx={{ display: "flex", justifyContent: "space-around" }}>
-                <Box>
-                  <InputLabel id="description">Description</InputLabel>
-                  <TextareaAutosize
-                    id="description"
-                    defaultValue={taskDetails.description}
-                    maxLength="255"
-                    minRows={3}
-                    InputProps={{ inputProps: { height: "56px" } }}
-                  />
-                </Box>{" "}
-                <Box>
-                  <InputLabel id="planName">Plan Name</InputLabel>
-                  <Select
-                    id="planName"
-                    label="Plan Name"
-                    MenuProps={{
-                      sx: { ".MuiList-root": { backgroundColor: "white" } },
-                    }}
-                    value={selectedPlan}
-                    onChange={(e) => {
-                      setSelectedPlan(e.target.value);
-                    }}
-                  >
-                    <MenuItem
-                      value="null"
-                      sx={{
-                        backgroundColor: "white",
-                        ":hover": {
-                          backgroundColor: theme.palette.info.main,
-                        },
-                      }}
-                    >
-                      No plan
-                    </MenuItem>
-                    {allPlans.map((plan) => {
-                      return (
-                        <MenuItem
-                          key={plan.plan_name}
-                          value={plan.plan_name}
-                          sx={{
-                            backgroundColor: "white",
-                            ":hover": {
-                              backgroundColor: theme.palette.info.main,
-                            },
-                          }}
-                        >
-                          {plan.plan_name}
-                        </MenuItem>
-                      );
-                    })}
-                  </Select>
-                </Box>
-              </Box>
-              <Button
-                type="submit"
-                variant="contained"
-                color="info"
-                sx={{ mt: 2 }}
-              >
-                Update task
-              </Button>
-            </form>
-          </>
-        )}
-        {(taskPermission ||
-          (createTaskPermission && taskDetails.state === "Open")) && (
+        <>
+          <Typography variant="body1" sx={{ mt: 2 }}>
+            Description: {taskDetails.description}
+          </Typography>
+          <Typography variant="body1" sx={{ mb: 2, mt: 2 }}>
+            {taskDetails.plan_name
+              ? `Plan Name: ${taskDetails.plan_name}`
+              : "No plan allocated"}
+          </Typography>
+        </>
+
+        {taskPermission && (
           <form
             onSubmit={handleAddNote}
             style={{ display: "flex", flexDirection: "column" }}

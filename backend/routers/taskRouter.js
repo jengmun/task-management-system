@@ -27,17 +27,8 @@ const {
   a3TaskStateProgression,
   a3CreateNotes,
 } = require("../controllers/taskController");
-const {
-  checkAdmin,
-  checkPM,
-  checkApplicationAccess,
-  checkTaskPermissions,
-} = require("../middleware/auth");
-const {
-  a3Login,
-  a3CheckApplicationAccess,
-  a3CheckTaskPermissions,
-} = require("../middleware/a3Auth");
+const { checkPM, checkTaskPermissions } = require("../middleware/auth");
+const { a3Login, a3CheckTaskPermissions } = require("../middleware/a3Auth");
 
 // ================= APPLICATIONS ================= //
 
@@ -103,12 +94,7 @@ router.post("/is-group", isGroup);
 
 // ================= ASSIGNMENT 3 ================= //
 
-router.post(
-  "/a3/all-tasks/:app/:state",
-  a3Login,
-  a3CheckApplicationAccess,
-  a3AllAppTasksByState
-);
+router.post("/a3/all-tasks/:app/:state", a3Login, a3AllAppTasksByState);
 
 router.post(
   "/a3/create-task",

@@ -525,7 +525,7 @@ exports.createNotes = catchAsyncErrors(async (req, res, next) => {
   }
 
   if (!details) {
-    return next(new ErrorHandler("Please enter some notes", 500));
+    return next(new ErrorHandler("Please enter some notes", 400));
   }
 
   if (!taskID) {
@@ -653,7 +653,7 @@ exports.a3CreateTask = catchAsyncErrors(async (req, res, next) => {
     });
 
     if (!validPlan) {
-      return next(new ErrorHandler("No valid open plan found!", 404));
+      return next(new ErrorHandler("No valid open plan found!", 500));
     }
   }
 
@@ -746,21 +746,8 @@ exports.a3TaskStateProgression = catchAsyncErrors(async (req, res, next) => {
     }
   );
 
+  // Send email to approvers
   if (newState === "Done") {
-    // Update owner
-    if (req.body.username !== owner) {
-      db.query("UPDATE tasks SET owner = ? WHERE task_id = ?", [
-        req.body.username,
-        taskID,
-      ]),
-        (err, results) => {
-          if (err) {
-            return next(new ErrorHandler(err, 500));
-          }
-        };
-    }
-
-    // Send email to approvers
     const approverGroup = await new Promise((resolve, reject) => {
       db.query(
         "SELECT permit_done FROM applications WHERE acronym = ?",
@@ -807,10 +794,6 @@ exports.a3TaskStateProgression = catchAsyncErrors(async (req, res, next) => {
 });
 
 exports.a3CreateNotes = catchAsyncErrors(async (req, res, next) => {
-  if (req.isMember === false) {
-    return next(new ErrorHandler("Not a member", 401));
-  }
-
   let { details, taskID } = req.body;
   let state = req.state;
 
@@ -819,7 +802,7 @@ exports.a3CreateNotes = catchAsyncErrors(async (req, res, next) => {
   }
 
   if (state === "Closed") {
-    return next(new ErrorHandler("Task is closed!", 400));
+    return next(new ErrorHandler("Task is closed!", 500));
   }
 
   if (!details) {
@@ -830,17 +813,15 @@ exports.a3CreateNotes = catchAsyncErrors(async (req, res, next) => {
     taskID = req.params.task;
   }
 
-  if (state === "Doing") {
-    db.query("UPDATE tasks SET owner = ? WHERE task_id = ?", [
-      req.body.username,
-      taskID,
-    ]),
-      (err, results) => {
-        if (err) {
-          return next(new ErrorHandler(err, 500));
-        }
-      };
-  }
+  db.query("UPDATE tasks SET owner = ? WHERE task_id = ?", [
+    req.body.username,
+    taskID,
+  ]),
+    (err, results) => {
+      if (err) {
+        return next(new ErrorHandler(err, 500));
+      }
+    };
 
   const existingNotes = await new Promise((resolve, reject) => {
     db.query(

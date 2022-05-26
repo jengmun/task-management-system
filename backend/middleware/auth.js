@@ -44,48 +44,6 @@ const checkPM = catchAsyncErrors(async (req, res, next) => {
   }
 });
 
-const checkApplicationAccess = catchAsyncErrors(async (req, res, next) => {
-  let { app, task } = req.params;
-
-  if (!app) {
-    app = task.slice(0, 3);
-  }
-
-  const isMember = await new Promise((resolve, reject) => {
-    db.query(
-      "SELECT * FROM accounts_groups WHERE username = ? AND acronym = ?",
-      [req.session.username, app],
-      (err, results) => {
-        if (err) {
-          reject(err);
-        }
-        if (results.length) {
-          resolve(true);
-        } else {
-          resolve(false);
-        }
-      }
-    );
-  });
-
-  req.isMember = isMember;
-
-  console.log(isMember);
-
-  const isAdmin = await checkGroup(
-    "accounts",
-    req.session.username,
-    "account_type",
-    "Admin"
-  );
-
-  if (isMember || isAdmin) {
-    next();
-  } else {
-    res.json(false);
-  }
-});
-
 const checkTaskPermissions = catchAsyncErrors(async (req, res, next) => {
   // const listOfActions = ["create", "open", "todo", "doing", "done"];
   const { taskID, acronym } = req.body;
@@ -136,6 +94,5 @@ module.exports = {
   checkAdmin,
   checkLoggedIn,
   checkPM,
-  checkApplicationAccess,
   checkTaskPermissions,
 };

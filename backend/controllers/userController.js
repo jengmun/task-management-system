@@ -67,7 +67,7 @@ exports.getLoginDetails = (req, res, next) => {
 exports.logout = (req, res) => {
   req.session.destroy();
   res.clearCookie("Username");
-  res.json("Logged out");
+  res.json({ message: "Logged out" });
 };
 
 // ================= USER PRIVILEGES (EXCLUDING PW RESET) ================= //
@@ -82,7 +82,7 @@ exports.updateEmail = (req, res, next) => {
       if (err) {
         return next(new ErrorHandler(err, 500));
       } else {
-        res.json("Email updated successfully");
+        res.json({ message: "Email updated successfully" });
       }
     }
   );
@@ -209,7 +209,7 @@ exports.createAccount = catchAsyncErrors(async (req, res, next) => {
                       return next(new ErrorHandler(err, 500));
                     }
                   });
-                  res.json("User created");
+                  res.json({ message: "User created" });
                 }
               }
             );
@@ -220,7 +220,7 @@ exports.createAccount = catchAsyncErrors(async (req, res, next) => {
                 return next(new ErrorHandler(err, 500));
               }
             });
-            res.json("User created");
+            res.json({ message: "User created" });
           }
         }
       }
@@ -321,7 +321,7 @@ exports.updateGroups = (req, res, next) => {
       }
     }
 
-    res.json("Updated groups");
+    res.json({ message: "Updated groups" });
   }
 
   runQueries();
@@ -335,7 +335,7 @@ exports.createGroups = (req, res, next) => {
       if (err) {
         return next(new ErrorHandler(err, 500));
       } else {
-        res.json("Group created!");
+        res.json({ message: "Group created!" });
       }
     }
   );
@@ -354,7 +354,7 @@ exports.addGroupMember = (req, res, next) => {
     [`${group}_${username}`, username, groupName, app],
     (err) => {
       if (err) return next(new ErrorHandler(err, 500));
-      res.json("Added");
+      res.json({ message: "Added" });
     }
   );
 };
@@ -367,7 +367,7 @@ exports.removeGroupMember = (req, res, next) => {
     [`${group}_${username}`],
     (err) => {
       if (err) return next(new ErrorHandler(err, 500));
-      res.json("Removed");
+      res.json({ message: "Removed" });
     }
   );
 };
@@ -397,7 +397,7 @@ exports.assignPM = catchAsyncErrors(async (req, res, next) => {
     [`${acronym}_Project Manager_${username}`, username, acronym],
     (err) => {
       if (err) return next(new ErrorHandler(err, 500));
-      res.json("PM Assigned");
+      res.json({ message: "PM Assigned" });
     }
   );
 });
@@ -460,7 +460,7 @@ exports.adminPasswordReset = catchAsyncErrors(async (req, res, next) => {
     [hashedPassword, req.body.username, req.body.email],
     (err, result) => {
       if (err) return next(new ErrorHandler(err, 500));
-      res.json("Password successfully resetted");
+      res.json({ message: "Password successfully resetted" });
     }
   );
 });
@@ -506,7 +506,7 @@ exports.userPasswordReset = catchAsyncErrors(async (req, res, next) => {
     [password, username],
     (err, result) => {
       if (err) return next(new ErrorHandler(err, 500));
-      res.json("Password resetted!");
+      res.json({ message: "Password resetted!" });
     }
   );
 });
@@ -527,9 +527,9 @@ exports.userUpdatePassword = catchAsyncErrors(async (req, res, next) => {
   db.query(
     "UPDATE accounts SET password = ? WHERE username = ?",
     [password, username],
-    (err, result) => {
+    (err) => {
       if (err) return next(new ErrorHandler(err, 500));
-      res.json(result);
+      res.json({ message: "Password updated" });
     }
   );
 });

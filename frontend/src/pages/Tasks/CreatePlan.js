@@ -43,19 +43,19 @@ const CreatePlan = (props) => {
       acronym: app,
     });
 
-    if (data === "Plan created") {
+    if (data.message === "Plan created") {
       e.target.startDate.value = "";
       e.target.description.value = "";
       e.target.endDate.value = "";
       e.target.planName.value = "";
-      setMessage(data);
+      setMessage(data.message);
       handleOpenSnackbar("success");
       props.fetchAllPlans();
-    } else if (data.includes("Duplicate")) {
+    } else if (data.message.includes("Duplicate")) {
       setMessage("Plan name already exists");
       handleOpenSnackbar("error");
     } else {
-      setMessage(data);
+      setMessage(data.message);
       handleOpenSnackbar("error");
     }
   };

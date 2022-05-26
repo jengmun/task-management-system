@@ -48,8 +48,8 @@ const Profile = () => {
       email: updateEmail,
     });
 
-    setMessage(data);
-    if (data === "Email updated successfully") {
+    setMessage(data.message);
+    if (data.message === "Email updated successfully") {
       loginContext.isLoggedIn.email = updateEmail;
       handleOpenSnackbar("success");
     } else {
@@ -88,12 +88,11 @@ const Profile = () => {
       password: confirmPassword,
     });
 
-    if (typeof data === "string") {
-      setMessage(data);
-      handleOpenSnackbar("error");
-    } else {
-      setMessage("Password updated");
+    setMessage(data.message);
+    if (data.message === "Password updated") {
       handleOpenSnackbar("success");
+    } else {
+      handleOpenSnackbar("error");
     }
   };
 

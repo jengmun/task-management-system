@@ -4,6 +4,7 @@ const sendEmail = require("../modules/email");
 const checkGroup = require("../modules/checkGroup");
 const moment = require("moment");
 const ErrorHandler = require("../utils/errorHandler");
+const catchAsyncErrors = require("../middleware/catchAsyncErrors");
 
 exports.createApplication = (req, res, next) => {
   db.query(
@@ -24,7 +25,7 @@ exports.createApplication = (req, res, next) => {
       if (err) {
         return next(new ErrorHandler(err, 500));
       } else {
-        res.json("Application successfully created");
+        res.json({ message: "Application successfully created" });
       }
     }
   );
@@ -54,14 +55,14 @@ exports.userApplications = (req, res, next) => {
   );
 };
 
-exports.uncreatedApplications = async (req, res, next) => {
-  const assignedApps = await new Promise((resolve) => {
+exports.uncreatedApplications = catchAsyncErrors(async (req, res, next) => {
+  const assignedApps = await new Promise((resolve, reject) => {
     db.query(
       "SELECT DISTINCT acronym FROM accounts_groups WHERE username = ?",
       req.session.username,
       (err, result) => {
         if (err) {
-          return next(new ErrorHandler(err, 500));
+          reject(err);
         } else {
           resolve(result);
         }
@@ -88,7 +89,7 @@ exports.uncreatedApplications = async (req, res, next) => {
       }
     );
   }
-};
+});
 
 exports.applicationDetails = (req, res, next) => {
   db.query(
@@ -124,7 +125,7 @@ exports.updateApp = (req, res, next) => {
       if (err) {
         return next(new ErrorHandler(err, 500));
       } else {
-        res.json("Updated app");
+        res.json({ message: "Updated app" });
       }
     }
   );
@@ -144,7 +145,7 @@ exports.createPlan = (req, res, next) => {
       if (err) {
         return next(new ErrorHandler(err, 500));
       } else {
-        res.json("Plan created");
+        res.json({ message: "Plan created" });
       }
     }
   );
@@ -164,23 +165,23 @@ exports.updatePlan = (req, res, next) => {
         return next(new ErrorHandler(err, 500));
       } else {
         if (result.affectedRows) {
-          res.json("Plan updated");
+          res.json({ message: "Plan updated" });
         } else {
-          res.json("No open plan found!");
+          return next(new ErrorHandler("No open plan found!", 404));
         }
       }
     }
   );
 };
 
-exports.updatePlanStatus = async (req, res, next) => {
-  const allTasksClosed = await new Promise((resolve) => {
+exports.updatePlanStatus = catchAsyncErrors(async (req, res, next) => {
+  const allTasksClosed = await new Promise((resolve, reject) => {
     db.query(
       "SELECT task_id FROM tasks WHERE plan_name = ? AND acronym = ? AND state != 'Closed'",
       [req.body.planName, req.params.app],
       (err, results) => {
         if (err) {
-          return next(new ErrorHandler(err, 500));
+          reject(err);
         } else if (results.length) {
           resolve(false);
         } else {
@@ -200,14 +201,14 @@ exports.updatePlanStatus = async (req, res, next) => {
         if (err) {
           return next(new ErrorHandler(err, 500));
         } else {
-          res.json("Plan status updated");
+          res.json({ message: "Plan status updated" });
         }
       }
     );
   } else {
-    res.json("There are pending open tasks");
+    return next(new ErrorHandler("There are pending open tasks", 500));
   }
-};
+});
 
 exports.allPlans = (req, res, next) => {
   db.query(
@@ -237,15 +238,15 @@ exports.allOpenPlans = (req, res, next) => {
   );
 };
 
-exports.createTask = async (req, res, next) => {
+exports.createTask = catchAsyncErrors(async (req, res, next) => {
   if (req.body.planName) {
-    const validPlan = await new Promise((resolve) => {
+    const validPlan = await new Promise((resolve, reject) => {
       db.query(
         `SELECT plan_name FROM plans WHERE acronym = ? AND plan_name = ? AND status = 'Open'`,
         [req.body.acronym, req.body.planName],
         (err, result) => {
           if (err) {
-            return next(new ErrorHandler(err, 500));
+            reject(err);
           } else {
             if (result.length) {
               resolve(true);
@@ -258,8 +259,7 @@ exports.createTask = async (req, res, next) => {
     });
 
     if (!validPlan) {
-      res.json("No valid open plan found!");
-      return;
+      return next(new ErrorHandler("No valid open plan found!", 500));
     }
   }
 
@@ -269,7 +269,7 @@ exports.createTask = async (req, res, next) => {
       [req.body.acronym],
       (err, results) => {
         if (err) {
-          return next(new ErrorHandler(err, 500));
+          reject(err);
         } else {
           resolve(results[0].running_number);
         }
@@ -308,7 +308,7 @@ exports.createTask = async (req, res, next) => {
       }
     }
   );
-};
+});
 
 exports.allAppTasks = (req, res, next) => {
   const acronym = req.params.app;
@@ -332,16 +332,16 @@ exports.taskDetails = (req, res, next) => {
   });
 };
 
-exports.updateTask = async (req, res, next) => {
+exports.updateTask = catchAsyncErrors(async (req, res, next) => {
   const { taskID, acronym } = req.body;
 
-  const permittedGroup = await new Promise((resolve) => {
+  const permittedGroup = await new Promise((resolve, reject) => {
     db.query(
       "SELECT permit_create FROM applications WHERE acronym = ?",
       [acronym],
       (err, results) => {
         if (err) {
-          return next(new ErrorHandler(err, 500));
+          reject(err);
         }
         resolve(results[0]["permit_create"]);
       }
@@ -359,18 +359,17 @@ exports.updateTask = async (req, res, next) => {
   );
 
   if (!isPermitted) {
-    res.json("Insufficient permissions");
-    return;
+    return next(new ErrorHandler("Insufficient permissions", 401));
   }
   console.log(isPermitted);
 
-  const results = await new Promise((resolve) => {
+  const results = await new Promise((resolve, reject) => {
     db.query(
       "SELECT state FROM tasks WHERE task_id = ?",
       taskID,
       (err, results) => {
         if (err) {
-          return next(new ErrorHandler(err, 500));
+          reject(err);
         }
         console.log(results[0].state);
         if (results.length) {
@@ -386,19 +385,18 @@ exports.updateTask = async (req, res, next) => {
   console.log(currentState);
 
   if (currentState !== "Open" || !currentState) {
-    res.json("Task can't be updated!");
-    return;
+    return next(new ErrorHandler("Task can't be updated!", 500));
   }
 
   let { description, planName } = req.body;
 
-  const oldDetails = await new Promise((resolve) => {
+  const oldDetails = await new Promise((resolve, reject) => {
     db.query(
       `SELECT description, plan_name FROM tasks WHERE task_id = ?`,
       [taskID],
       (err, result) => {
         if (err) {
-          return next(new ErrorHandler(err, 500));
+          reject(err);
         } else {
           resolve(result[0]);
         }
@@ -411,18 +409,17 @@ exports.updateTask = async (req, res, next) => {
     (oldDetails.plan_name === planName ||
       (!oldDetails.plan_name && planName === "null"))
   ) {
-    res.json("No change in details");
-    return;
+    return next(new ErrorHandler("No change in details", 400));
   }
 
   if (planName !== "null") {
-    const validPlan = await new Promise((resolve) => {
+    const validPlan = await new Promise((resolve, reject) => {
       db.query(
         `SELECT plan_name FROM plans WHERE acronym = ? AND plan_name = ? AND status = 'Open'`,
         [taskID.slice(0, 3), planName],
         (err, result) => {
           if (err) {
-            return next(new ErrorHandler(err, 500));
+            reject(err);
           } else {
             if (result.length) {
               resolve(true);
@@ -435,8 +432,9 @@ exports.updateTask = async (req, res, next) => {
     });
 
     if (!validPlan) {
-      res.json("Invalid plan selected or plan is closed!");
-      return;
+      return next(
+        new ErrorHandler("Invalid plan selected or plan is closed!", 500)
+      );
     }
   } else {
     planName = null;
@@ -464,18 +462,18 @@ exports.updateTask = async (req, res, next) => {
       next();
     }
   );
-};
+});
 
-exports.hasPermissions = async (req, res, next) => {
+exports.hasPermissions = catchAsyncErrors(async (req, res, next) => {
   const { app, permission } = req.body;
 
-  const appDetails = await new Promise((resolve) => {
+  const appDetails = await new Promise((resolve, reject) => {
     db.query(
       "SELECT * FROM applications WHERE acronym = ?",
       [app],
       (err, results) => {
         if (err) {
-          return next(new ErrorHandler(err, 500));
+          reject(err);
         }
         resolve(results[0]);
       }
@@ -483,8 +481,7 @@ exports.hasPermissions = async (req, res, next) => {
   });
 
   if (!appDetails) {
-    res.json("App does not exist");
-    return;
+    return next(new ErrorHandler("App does not exist", 404));
   }
 
   db.query(
@@ -501,7 +498,7 @@ exports.hasPermissions = async (req, res, next) => {
       }
     }
   );
-};
+});
 
 exports.getPermissions = (req, res, next) => {
   db.query(
@@ -526,23 +523,23 @@ exports.updatePermissions = (req, res, next) => {
       if (err) {
         return next(new ErrorHandler(err, 500));
       }
-      res.json("Permissions updated");
+      res.json({ message: "Permissions updated" });
     }
   );
 };
 
 const listOfStates = ["Open", "Todo", "Doing", "Done", "Closed"];
 
-exports.taskStateProgression = async (req, res, next) => {
+exports.taskStateProgression = catchAsyncErrors(async (req, res, next) => {
   const { taskID, acronym } = req.body;
 
-  const results = await new Promise((resolve) => {
+  const results = await new Promise((resolve, reject) => {
     db.query(
       "SELECT state, creator, owner FROM tasks WHERE task_id = ?",
       taskID,
       (err, results) => {
         if (err) {
-          return next(new ErrorHandler(err, 500));
+          reject(err);
         }
         if (results.length) {
           resolve(results[0]);
@@ -558,18 +555,19 @@ exports.taskStateProgression = async (req, res, next) => {
   console.log("currentState: ", currentState);
 
   if (currentState === "Closed" || !currentState) {
-    res.json("State can't be updated!");
-    return;
+    return next(new ErrorHandler("State can't be updated!", 500));
   }
 
   if (creator === req.session.username && currentState === "Open") {
-    res.json("Approver cannot be the creator of the task!");
-    return;
+    return next(
+      new ErrorHandler("Approver cannot be the creator of the task!", 401)
+    );
   }
 
   if (owner === req.session.username && currentState === "Done") {
-    res.json("Checker cannot be the owner of the task!");
-    return;
+    return next(
+      new ErrorHandler("Checker cannot be the owner of the task!", 401)
+    );
   }
 
   const newState = listOfStates[listOfStates.indexOf(currentState) + 1];
@@ -601,26 +599,26 @@ exports.taskStateProgression = async (req, res, next) => {
     }
 
     // Send email to approvers
-    const approverGroup = await new Promise((resolve) => {
+    const approverGroup = await new Promise((resolve, reject) => {
       db.query(
         "SELECT permit_done FROM applications WHERE acronym = ?",
         [acronym],
         (err, results) => {
           if (err) {
-            return next(new ErrorHandler(err, 500));
+            reject(err);
           }
           resolve(results[0].permit_done);
         }
       );
     });
 
-    const allApprovers = await new Promise((resolve) => {
+    const allApprovers = await new Promise((resolve, reject) => {
       db.query(
         "SELECT accounts_groups.username, email FROM accounts_groups INNER JOIN accounts on accounts_groups.username = accounts.username WHERE acronym = ? AND group_name = ?",
         [acronym, approverGroup],
         (err, results) => {
           if (err) {
-            return next(new ErrorHandler(err, 500));
+            reject(err);
           }
           console.log(results);
           resolve(results);
@@ -644,17 +642,16 @@ exports.taskStateProgression = async (req, res, next) => {
   }
 
   next();
-};
+});
 
-exports.taskStateRegression = async (req, res, next) => {
+exports.taskStateRegression = catchAsyncErrors(async (req, res, next) => {
   const { taskID } = req.body;
 
   const currentState = await checkState(taskID);
 
   // Only can demote from Done to Doing and Doing to Todo
   if (currentState !== "Doing" && currentState !== "Done") {
-    res.json("State can't be demoted!");
-    return;
+    return next(new ErrorHandler("State can't be demoted!", 500));
   }
 
   const newState = listOfStates[listOfStates.indexOf(currentState) - 1];
@@ -681,12 +678,11 @@ exports.taskStateRegression = async (req, res, next) => {
   req.body.details = `Task updated from ${currentState} to ${newState}`;
 
   next();
-};
+});
 
-exports.createNotes = async (req, res, next) => {
+exports.createNotes = catchAsyncErrors(async (req, res, next) => {
   if (req.isMember === false) {
-    res.json("Not a member");
-    return;
+    return next(new ErrorHandler("Not a member", 500));
   }
 
   let { details, taskID } = req.body;
@@ -697,38 +693,58 @@ exports.createNotes = async (req, res, next) => {
   }
 
   if (state === "Closed") {
-    res.json("Task is closed!");
-    return;
+    return next(new ErrorHandler("Task is closed!", 500));
   }
 
   if (!details) {
-    res.json("Please enter some notes");
-    return;
+    return next(new ErrorHandler("Please enter some notes", 500));
   }
 
   if (!taskID) {
     taskID = req.params.task;
   }
 
-  if (state === "Doing") {
-    db.query("UPDATE tasks SET owner = ? WHERE task_id = ?", [
-      req.session.username,
-      taskID,
-    ]),
-      (err, results) => {
-        if (err) {
-          return next(new ErrorHandler(err, 500));
-        }
-      };
-  }
+  // const permittedGroup = await new Promise((resolve, reject) => {
+  //   db.query(
+  //     "SELECT permit_doing FROM applications WHERE acronym = ?",
+  //     [req.body.acronym],
+  //     (err, results) => {
+  //       if (err) {
+  //         reject(err);
+  //       }
+  //       resolve(results[0]["permit_doing"]);
+  //     }
+  //   );
+  // });
 
-  const existingNotes = await new Promise((resolve) => {
+  // const isPermitted = await checkGroup(
+  //   "accounts_groups",
+  //   req.session.username,
+  //   "group_name",
+  //   permittedGroup,
+  //   req.body.acronym
+  // );
+
+  // if (isPermitted) {
+  // }
+
+  db.query("UPDATE tasks SET owner = ? WHERE task_id = ?", [
+    req.session.username,
+    taskID,
+  ]),
+    (err, results) => {
+      if (err) {
+        return next(new ErrorHandler(err, 500));
+      }
+    };
+
+  const existingNotes = await new Promise((resolve, reject) => {
     db.query(
       "SELECT notes FROM tasks WHERE task_id = ?",
       taskID,
       (err, results) => {
         if (err) {
-          return next(new ErrorHandler(err, 500));
+          reject(err);
         } else {
           resolve(results[0].notes);
         }
@@ -758,10 +774,10 @@ exports.createNotes = async (req, res, next) => {
       if (err) {
         return next(new ErrorHandler(err, 500));
       }
-      res.json("Added note");
+      res.json({ message: "Added note" });
     }
   );
-};
+});
 
 exports.allNotes = (req, res, next) => {
   const taskID = req.params.task;
@@ -777,7 +793,7 @@ exports.allNotes = (req, res, next) => {
   );
 };
 
-exports.isGroup = async (req, res, next) => {
+exports.isGroup = catchAsyncErrors(async (req, res, next) => {
   const { acronym } = req.body;
 
   const isPermitted = await checkGroup(
@@ -793,11 +809,11 @@ exports.isGroup = async (req, res, next) => {
   } else {
     res.json(false);
   }
-};
+});
 
-exports.isMember = async (req, res, next) => {
+exports.isMember = catchAsyncErrors(async (req, res, next) => {
   res.json(req.isMember);
-};
+});
 
 // ================= ASSIGNMENT 3 ================= //
 
@@ -816,15 +832,15 @@ exports.a3AllAppTasksByState = (req, res, next) => {
   );
 };
 
-exports.a3CreateTask = async (req, res, next) => {
+exports.a3CreateTask = catchAsyncErrors(async (req, res, next) => {
   if (req.body.planName) {
-    const validPlan = await new Promise((resolve) => {
+    const validPlan = await new Promise((resolve, reject) => {
       db.query(
         `SELECT plan_name FROM plans WHERE acronym = ? AND plan_name = ? AND status = 'Open'`,
         [req.body.acronym, req.body.planName],
         (err, result) => {
           if (err) {
-            return next(new ErrorHandler(err, 500));
+            reject(err);
           } else {
             if (result.length) {
               resolve(true);
@@ -837,8 +853,7 @@ exports.a3CreateTask = async (req, res, next) => {
     });
 
     if (!validPlan) {
-      res.json("No valid open plan found!");
-      return;
+      return next(new ErrorHandler("No valid open plan found!", 404));
     }
   }
 
@@ -848,7 +863,7 @@ exports.a3CreateTask = async (req, res, next) => {
       [req.body.acronym],
       (err, results) => {
         if (err) {
-          return next(new ErrorHandler(err, 500));
+          reject(err);
         } else {
           resolve(results[0].running_number);
         }
@@ -887,18 +902,18 @@ exports.a3CreateTask = async (req, res, next) => {
       }
     }
   );
-};
+});
 
-exports.a3TaskStateProgression = async (req, res, next) => {
+exports.a3TaskStateProgression = catchAsyncErrors(async (req, res, next) => {
   const { taskID, acronym } = req.body;
 
-  const results = await new Promise((resolve) => {
+  const results = await new Promise((resolve, reject) => {
     db.query(
       "SELECT state, owner FROM tasks WHERE task_id = ?",
       taskID,
       (err, results) => {
         if (err) {
-          return next(new ErrorHandler(err, 500));
+          reject(err);
         }
         if (results.length) {
           resolve(results[0]);
@@ -914,8 +929,7 @@ exports.a3TaskStateProgression = async (req, res, next) => {
   console.log("currentState: ", currentState);
 
   if (currentState !== "Doing") {
-    res.json("Current state is not Doing!");
-    return;
+    return next(new ErrorHandler("Current state is not Doing!", 500));
   }
 
   const newState = listOfStates[listOfStates.indexOf(currentState) + 1];
@@ -947,26 +961,26 @@ exports.a3TaskStateProgression = async (req, res, next) => {
     }
 
     // Send email to approvers
-    const approverGroup = await new Promise((resolve) => {
+    const approverGroup = await new Promise((resolve, reject) => {
       db.query(
         "SELECT permit_done FROM applications WHERE acronym = ?",
         [acronym],
         (err, results) => {
           if (err) {
-            return next(new ErrorHandler(err, 500));
+            reject(err);
           }
           resolve(results[0].permit_done);
         }
       );
     });
 
-    const allApprovers = await new Promise((resolve) => {
+    const allApprovers = await new Promise((resolve, reject) => {
       db.query(
         "SELECT accounts_groups.username, email FROM accounts_groups INNER JOIN accounts on accounts_groups.username = accounts.username WHERE acronym = ? AND group_name = ?",
         [acronym, approverGroup],
         (err, results) => {
           if (err) {
-            return next(new ErrorHandler(err, 500));
+            reject(err);
           }
           console.log(results);
           resolve(results);
@@ -990,12 +1004,11 @@ exports.a3TaskStateProgression = async (req, res, next) => {
   }
 
   next();
-};
+});
 
-exports.a3CreateNotes = async (req, res, next) => {
+exports.a3CreateNotes = catchAsyncErrors(async (req, res, next) => {
   if (req.isMember === false) {
-    res.json("Not a member");
-    return;
+    return next(new ErrorHandler("Not a member", 401));
   }
 
   let { details, taskID } = req.body;
@@ -1006,13 +1019,11 @@ exports.a3CreateNotes = async (req, res, next) => {
   }
 
   if (state === "Closed") {
-    res.json("Task is closed!");
-    return;
+    return next(new ErrorHandler("Task is closed!", 400));
   }
 
   if (!details) {
-    res.json("Please enter some notes");
-    return;
+    return next(new ErrorHandler("Please enter some notes", 400));
   }
 
   if (!taskID) {
@@ -1031,13 +1042,13 @@ exports.a3CreateNotes = async (req, res, next) => {
       };
   }
 
-  const existingNotes = await new Promise((resolve) => {
+  const existingNotes = await new Promise((resolve, reject) => {
     db.query(
       "SELECT notes FROM tasks WHERE task_id = ?",
       taskID,
       (err, results) => {
         if (err) {
-          return next();
+          reject(err);
         } else {
           resolve(results[0].notes);
         }
@@ -1067,7 +1078,7 @@ exports.a3CreateNotes = async (req, res, next) => {
       if (err) {
         return next(new ErrorHandler(err, 500));
       }
-      res.json("Added note");
+      res.json({ message: "Added note" });
     }
   );
-};
+});

@@ -21,7 +21,7 @@ const Login = () => {
       loginContext.setIsLoggedIn(data);
       history.push("/");
     } else {
-      setMessage(data);
+      setMessage(data.message);
     }
   };
 

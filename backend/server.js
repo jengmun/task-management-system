@@ -6,6 +6,9 @@ require("dotenv").config({ path: "./config/config.env" });
 const { db } = require("./modules/db");
 const errorMiddleware = require("./middleware/errors");
 const ErrorHandler = require("./utils/errorHandler");
+const rateLimit = require("express-rate-limit");
+const helmet = require("helmet");
+const hpp = require("hpp");
 
 const app = express();
 
@@ -53,6 +56,19 @@ process.on("uncaughtException", (err) => {
   console.log("Shutting down the server due to uncaught exception");
   process.exit(1);
 });
+
+// Rate Limiting
+const limiter = rateLimit({
+  windowMs: 10 * 60 * 1000,
+  max: 100,
+});
+app.use(limiter);
+
+// Setup security headers
+app.use(helmet());
+
+// Prevent Parameter Pollution
+app.use(hpp());
 
 // Connect to port and DB
 

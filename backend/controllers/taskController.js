@@ -625,7 +625,7 @@ exports.a3AllAppTasksByState = (req, res, next) => {
     [app, state],
     (err, results) => {
       if (err) {
-        return next(new ErrorHandler(err, 500));
+        return next(new ErrorHandler());
       }
       res.json(results);
     }
@@ -653,7 +653,7 @@ exports.a3CreateTask = catchAsyncErrors(async (req, res, next) => {
     });
 
     if (!validPlan) {
-      return next(new ErrorHandler("No valid open plan found!", 500));
+      return next(new ErrorHandler("No valid open plan found!", 400));
     }
   }
 
@@ -690,14 +690,14 @@ exports.a3CreateTask = catchAsyncErrors(async (req, res, next) => {
     ],
     (err) => {
       if (err) {
-        return next(new ErrorHandler(err, 500));
+        return next(new ErrorHandler());
       } else {
         db.query(
           "UPDATE applications SET running_number = ? WHERE acronym = ?",
           [runningNumber + 1, req.body.acronym],
           (err, results) => {
             if (err) {
-              return next(new ErrorHandler(err, 500));
+              return next(new ErrorHandler());
             } else {
               req.body.taskID = `${req.body.acronym.toUpperCase()}_${runningNumber}`;
               req.body.details = "Task created";
@@ -712,10 +712,6 @@ exports.a3CreateTask = catchAsyncErrors(async (req, res, next) => {
 
 exports.a3TaskStateProgression = catchAsyncErrors(async (req, res, next) => {
   const { taskID, acronym } = req.body;
-
-  if (!req.body.taskID) {
-    return next(new ErrorHandler("Please input task ID!", 400));
-  }
 
   const results = await new Promise((resolve, reject) => {
     db.query(
@@ -738,7 +734,7 @@ exports.a3TaskStateProgression = catchAsyncErrors(async (req, res, next) => {
   console.log("currentState: ", currentState);
 
   if (currentState !== "Doing") {
-    return next(new ErrorHandler("Current state is not Doing!", 500));
+    return next(new ErrorHandler("Current state is not Doing!", 400));
   }
 
   const newState = listOfStates[listOfStates.indexOf(currentState) + 1];
@@ -750,7 +746,7 @@ exports.a3TaskStateProgression = catchAsyncErrors(async (req, res, next) => {
     [newState, taskID],
     (err, results) => {
       if (err) {
-        return next(new ErrorHandler(err, 500));
+        return next(new ErrorHandler());
       }
     }
   );
@@ -828,7 +824,7 @@ exports.a3CreateNotes = catchAsyncErrors(async (req, res, next) => {
   ]),
     (err, results) => {
       if (err) {
-        return next(new ErrorHandler(err, 500));
+        return next(new ErrorHandler());
       }
     };
 
@@ -866,9 +862,9 @@ exports.a3CreateNotes = catchAsyncErrors(async (req, res, next) => {
     [JSON.stringify(newNotes), taskID],
     (err, results) => {
       if (err) {
-        return next(new ErrorHandler(err, 500));
+        return next(new ErrorHandler());
       }
-      res.json({ message: req.body.details || "Added note" });
+      res.status(201).json({ message: req.body.details || "Added note" });
     }
   );
 });

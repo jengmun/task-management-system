@@ -1,4 +1,79 @@
-# 1. Create a new task
+# 1. Authentication - applied to ALL routes
+
+**Data example** All fields must be sent together with the request body of the respective routes
+
+```json
+{
+  "username": "username",
+  "password": "password",
+  "acronym": "APP",
+  "taskID": "APP_4"
+}
+```
+
+## Error Responses
+
+<!-- Authentication -->
+
+**Condition** : If username or password are not entered.
+
+**Code** : `400 BAD REQUEST`
+
+**Content**
+
+```json
+{
+  "success": false,
+  "message": "Please enter all authentication details"
+}
+```
+
+### Or
+
+**Condition** : If user does not exist.
+
+**Code** : `401 UNAUTHORISED`
+
+**Content** :
+
+```json
+{
+  "success": false,
+  "message": "Invalid user"
+}
+```
+
+### Or
+
+**Condition** : If user is inactive.
+
+**Code** : `401 UNAUTHORISED`
+
+**Content** :
+
+```json
+{
+  "success": false,
+  "message": "Inactive user"
+}
+```
+
+### Or
+
+**Condition** : If password is invalid.
+
+**Code** : `400 BAD REQUEST`
+
+**Content** :
+
+```json
+{
+  "success": false,
+  "message": "Invalid password"
+}
+```
+
+# 2. Create a new task
 
 **URL** : `/task/a3/create-task`
 
@@ -6,7 +81,7 @@
 
 **Auth required** : YES
 
-**Permissions required** : Team Lead
+**Permissions required** : Team Lead (Default)
 
 **Data constraints**
 
@@ -20,6 +95,8 @@
 ```
 
 **Data example** All fields must be sent except for planName. Remove field if not used.
+
+http://localhost:5000/task/a3/create-task
 
 ```json
 {
@@ -42,25 +119,62 @@
 
 ```json
 {
-  "id": 123,
-  "name": "Build something project dot com",
-  "url": "http://testserver/api/accounts/123/"
+  "message": "Task created"
 }
 ```
 
 ## Error Responses
 
-**Condition** : If Account already exists for User.
+<!-- Task Permissions -->
 
-**Code** : `303 SEE OTHER`
+**Condition** : If Acronym not sent.
 
-**Headers** : `Location: http://testserver/api/accounts/123/`
+**Code** : `400 BAD REQUEST`
 
-**Content** : `{}`
+**Content** :
+
+```json
+{
+  "success": false,
+  "message": "Please input an app acronym"
+}
+```
 
 ### Or
 
-**Condition** : If fields are missed.
+**Condition** : If length of acronym is not 3 characters.
+
+**Code** : `400 BAD REQUEST`
+
+**Content** :
+
+```json
+{
+  "success": false,
+  "message": "Length of acronym must be 3 characters!"
+}
+```
+
+### Or
+
+**Condition** : If user does not have permissions to create task.
+
+**Code** : `401 UNAUTHORISED`
+
+**Content** :
+
+```json
+{
+  "success": false,
+  "message": "Insufficient permissions"
+}
+```
+
+### Or
+
+<!-- Create task -->
+
+**Condition** : If taskName or description are missed.
 
 **Code** : `400 BAD REQUEST`
 
@@ -68,11 +182,42 @@
 
 ```json
 {
-  "name": ["This field is required."]
+  "success": false,
+  "message": "Please input both task name and description!"
 }
 ```
 
-# 2. Retrieve tasks in a particular state
+### Or
+
+**Condition** : If plan name is invalid or closed.
+
+**Code** : `400 BAD REQUEST`
+
+**Content example**
+
+```json
+{
+  "success": false,
+  "message": "No valid open plan found!"
+}
+```
+
+### Or
+
+**Condition** : If server error.
+
+**Code** : `500 INTERNAL SERVER ERROR`
+
+**Content example**
+
+```json
+{
+  "success": false,
+  "message": "Internal Server Error"
+}
+```
+
+# 3. Retrieve tasks in a particular state
 
 **URL** : `/task/a3/all-tasks/:app/:state`
 
@@ -80,9 +225,11 @@
 
 **Auth required** : YES
 
-**Permissions required** : Member of the application
+**Permissions required** : NO
 
 **Data constraints**
+
+App is 3 characters long.
 
 Available states:
 
@@ -98,6 +245,17 @@ All fields must be sent.
 
 http://localhost:5000/task/a3/all-tasks/APP/Open
 
+1. Request Parameters
+
+```json
+{
+  "app": "APP",
+  "state": "Open"
+}
+```
+
+2. Request Body
+
 ```json
 {
   "username": "username",
@@ -107,9 +265,9 @@ http://localhost:5000/task/a3/all-tasks/APP/Open
 
 ## Success Response
 
-**Condition** : If everything is OK.
+**Condition** : If there are tasks in that state for that app
 
-**Code** : `201 CREATED`
+**Code** : `200 OK`
 
 **Content example**
 
@@ -130,31 +288,45 @@ http://localhost:5000/task/a3/all-tasks/APP/Open
 ]
 ```
 
+### Or
+
+**Condition** : If there are no tasks in that state for that app
+
+**Code** : `200 OK`
+
+**Content** : `[]`
+
 ## Error Responses
 
-**Condition** : If Account already exists for User.
+**Condition** : If either app or state parameter is not sent
 
-**Code** : `303 SEE OTHER`
+**Code** : `404 NOT FOUND`
 
-**Headers** : `Location: http://testserver/api/accounts/123/`
+**Content** :
 
-**Content** : `{}`
+```json
+{
+  "success": false,
+  "message": "/task/a3/all-tasks/APP route not found"
+}
+```
 
 ### Or
 
-**Condition** : If fields are missed.
+**Condition** : If server error.
 
-**Code** : `400 BAD REQUEST`
+**Code** : `500 INTERNAL SERVER ERROR`
 
 **Content example**
 
 ```json
 {
-  "name": ["This field is required."]
+  "success": false,
+  "message": "Internal Server Error"
 }
 ```
 
-# 3. Approve a task from "Doing to Done" state
+# 4. Approve a task from "Doing to Done" state
 
 **URL** : `/task/a3/approve-done-task`
 
@@ -162,7 +334,7 @@ http://localhost:5000/task/a3/all-tasks/APP/Open
 
 **Auth required** : YES
 
-**Permissions required** : Team Lead
+**Permissions required** : Developer (Default)
 
 **Data constraints**
 
@@ -173,7 +345,9 @@ http://localhost:5000/task/a3/all-tasks/APP/Open
 }
 ```
 
-**Data example** All fields must be sent except for planName. Remove field if not used.
+**Data example** All fields must be sent.
+
+http://localhost:5000/task/a3/approve-done-task
 
 ```json
 {
@@ -186,7 +360,7 @@ http://localhost:5000/task/a3/all-tasks/APP/Open
 
 ## Success Response
 
-**Condition** : If everything is OK.
+**Condition** : If task successfully promoted.
 
 **Code** : `201 CREATED`
 
@@ -194,81 +368,77 @@ http://localhost:5000/task/a3/all-tasks/APP/Open
 
 ```json
 {
-  "id": 123,
-  "name": "Build something project dot com",
-  "url": "http://testserver/api/accounts/123/"
+  "message": "Task updated from Doing to Done"
 }
 ```
 
 ## Error Responses
 
+<!-- Task Permissions -->
+
 **Condition** : If Task ID does not exist.
 
-**Code** : `303 SEE OTHER`
-
-**Headers** : `Location: http://testserver/api/accounts/123/`
-
-**Content** : `{}`
-
-### Or
-
-**Condition** : If fields are missed.
-
 **Code** : `400 BAD REQUEST`
 
-**Content example**
+**Content** :
 
 ```json
 {
-  "name": ["This field is required."]
+  "success": false,
+  "message": "Invalid Task ID"
 }
 ```
 
 ### Or
 
-**Condition** : If insufficient permissions.
+**Condition** : If Acronym not sent.
 
 **Code** : `400 BAD REQUEST`
 
-**Content example**
+**Content** :
 
 ```json
 {
-  "name": ["This field is required."]
+  "success": false,
+  "message": "Please input an app acronym"
 }
 ```
 
 ### Or
 
-**Condition** : If username and password are not entered.
+**Condition** : If length of acronym is not 3 characters.
 
 **Code** : `400 BAD REQUEST`
 
-**Content example**
+**Content** :
 
 ```json
 {
-  "name": ["This field is required."]
+  "success": false,
+  "message": "Length of acronym must be 3 characters!"
 }
 ```
 
 ### Or
 
-**Condition** : If user does not exist.
+**Condition** : If user does not have permissions to promote task.
 
-**Code** : `400 BAD REQUEST`
+**Code** : `401 UNAUTHORISED`
 
-**Content example**
+**Content** :
 
 ```json
 {
-  "name": ["This field is required."]
+  "success": false,
+  "message": "Insufficient permissions"
 }
 ```
 
 ### Or
 
-**Condition** : If user is inactive.
+<!-- Task Progression -->
+
+**Condition** : If current state of the task is not `Doing`.
 
 **Code** : `400 BAD REQUEST`
 
@@ -276,20 +446,22 @@ http://localhost:5000/task/a3/all-tasks/APP/Open
 
 ```json
 {
-  "name": ["This field is required."]
+  "success": false,
+  "message": "Current state is not Doing!"
 }
 ```
 
 ### Or
 
-**Condition** : If password is invalid.
+**Condition** : If server error.
 
-**Code** : `400 BAD REQUEST`
+**Code** : `500 INTERNAL SERVER ERROR`
 
 **Content example**
 
 ```json
 {
-  "name": ["This field is required."]
+  "success": false,
+  "message": "Internal Server Error"
 }
 ```

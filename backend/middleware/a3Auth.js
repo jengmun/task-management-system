@@ -21,7 +21,7 @@ const a3Login = (req, res, next) => {
     username,
     (err, result) => {
       if (err) {
-        return next(new ErrorHandler("Error logging in", 500));
+        return next(new ErrorHandler());
       }
 
       // Step 1 - check if user is valid
@@ -56,11 +56,11 @@ const a3CheckTaskPermissions = catchAsyncErrors(async (req, res, next) => {
     action = "create";
   } else {
     const state = await checkState(taskID);
-    if (state === "Closed") {
-      return next(new ErrorHandler("Task is closed", 500));
-    } else {
-      action = state.toLowerCase();
-    }
+    action = state.toLowerCase();
+  }
+
+  if (!action) {
+    return next(new ErrorHandler("Invalid Task ID", 400));
   }
 
   if (!acronym) {

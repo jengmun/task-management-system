@@ -8,7 +8,7 @@ const catchAsyncErrors = require("../middleware/catchAsyncErrors");
 // ================= ASSIGNMENT 3 ================= //
 
 const a3Login = (req, res, next) => {
-  const { username, password } = req.body;
+  const { username, password } = req.params;
 
   if (!username || !password) {
     return next(
@@ -89,7 +89,7 @@ const a3CheckTaskPermissions = catchAsyncErrors(async (req, res, next) => {
   console.log("Permitted Group: ", permittedGroup);
   const isPermitted = await checkGroup(
     "accounts_groups",
-    req.body.username,
+    req.params.username,
     "group_name",
     permittedGroup,
     acronym

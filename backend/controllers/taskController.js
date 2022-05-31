@@ -686,7 +686,7 @@ exports.a3CreateTask = catchAsyncErrors(async (req, res, next) => {
       req.body.planName ? req.body.planName : null,
       req.body.acronym.toUpperCase(),
       "Open",
-      req.body.username,
+      req.params.username,
     ],
     (err) => {
       if (err) {
@@ -819,7 +819,7 @@ exports.a3CreateNotes = catchAsyncErrors(async (req, res, next) => {
   }
 
   db.query("UPDATE tasks SET owner = ? WHERE task_id = ?", [
-    req.body.username,
+    req.params.username,
     taskID,
   ]),
     (err, results) => {
@@ -850,11 +850,11 @@ exports.a3CreateNotes = catchAsyncErrors(async (req, res, next) => {
 
   if (existingNotes) {
     newNotes = [
-      { details, timestamp, creator: req.body.username, state },
+      { details, timestamp, creator: req.params.username, state },
       ...parsedNotes,
     ];
   } else {
-    newNotes = [{ details, timestamp, creator: req.body.username, state }];
+    newNotes = [{ details, timestamp, creator: req.params.username, state }];
   }
 
   db.query(

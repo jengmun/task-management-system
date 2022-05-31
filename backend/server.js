@@ -12,7 +12,13 @@ const hpp = require("hpp");
 
 const app = express();
 
-app.use(session({ secret: process.env.SESSION_SECRET }));
+app.use(
+  session({
+    secret: process.env.SESSION_SECRET,
+    resave: false,
+    saveUninitialized: true,
+  })
+);
 app.use(
   cors({
     origin: "http://localhost:3000",
@@ -73,5 +79,5 @@ app.use(hpp());
 // Connect to port and DB
 
 app.listen(process.env.PORT, () => {
-  console.log(`Connected to http://localhost:${process.env.PORT}`);
+  console.log(`Connected to http://host.docker.internal:${process.env.PORT}`);
 });

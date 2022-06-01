@@ -784,7 +784,7 @@ exports.a3TaskStateProgression = catchAsyncErrors(async (req, res, next) => {
       sendEmail(
         approver.email,
         `${acronym}: Task promoted to Done`,
-        `Task ${taskID} of Application ${acronym} has been promoted to Done by ${req.session.username}.`
+        `Task ${taskID} of Application ${acronym} has been promoted to Done by ${req.params.username}.`
       );
     }
   }
@@ -812,10 +812,6 @@ exports.a3CreateNotes = catchAsyncErrors(async (req, res, next) => {
 
   if (!details) {
     return next(new ErrorHandler("Please enter some notes", 400));
-  }
-
-  if (!taskID) {
-    taskID = req.params.task;
   }
 
   db.query("UPDATE tasks SET owner = ? WHERE task_id = ?", [

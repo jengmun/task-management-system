@@ -67,8 +67,9 @@ const checkTaskPermissions = catchAsyncErrors(async (req, res, next) => {
       (err, results) => {
         if (err) {
           reject(err);
+        } else {
+          resolve(results[0][`permit_${action}`]);
         }
-        resolve(results[0][`permit_${action}`]);
       }
     );
   });

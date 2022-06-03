@@ -8,8 +8,7 @@ const checkState = (taskID) => {
       (err, results) => {
         if (err) {
           reject(err);
-        }
-        if (results && results.length) {
+        } else if (results && results.length) {
           resolve(results[0].state);
         } else {
           resolve("");

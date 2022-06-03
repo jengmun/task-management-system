@@ -13,8 +13,7 @@ const checkGroup = (table, username, field, group_name, acronym) => {
     db.query(sql, parameters, (err, result) => {
       if (err) {
         reject(err);
-      }
-      if (result.length) {
+      } else if (result.length) {
         resolve(true);
       } else {
         resolve(false);

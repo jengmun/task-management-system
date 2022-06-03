@@ -11,9 +11,7 @@ const a3Login = (req, res, next) => {
   const { username, password } = req.params;
 
   if (!username || !password) {
-    return next(
-      new ErrorHandler("Please enter all authentication details", 400)
-    );
+    return next(new ErrorHandler("Error 101", 400));
   }
 
   db.query(
@@ -26,12 +24,12 @@ const a3Login = (req, res, next) => {
 
       // Step 1 - check if user is valid
       if (!result || !result.length) {
-        return next(new ErrorHandler("Invalid user", 401));
+        return next(new ErrorHandler("Error 104", 401));
       }
 
       // Step 2 - check if user is active
       if (result[0].status !== "Active") {
-        return next(new ErrorHandler("Inactive user", 401));
+        return next(new ErrorHandler("Error 105", 401));
       }
 
       argon2.verify(result[0].password, password).then((argon2Match) => {
@@ -40,7 +38,7 @@ const a3Login = (req, res, next) => {
           // Step 4 - Evaluate
           next();
         } else {
-          return next(new ErrorHandler("Invalid password", 400));
+          return next(new ErrorHandler("Error 103", 400));
         }
       });
     }
@@ -49,6 +47,7 @@ const a3Login = (req, res, next) => {
 
 const a3CheckTaskPermissions = catchAsyncErrors(async (req, res, next) => {
   // const listOfActions = ["create", "open", "todo", "doing", "done"];
+
   const { taskID, acronym } = req.body;
   let action;
 
@@ -60,17 +59,15 @@ const a3CheckTaskPermissions = catchAsyncErrors(async (req, res, next) => {
   }
 
   if (!action) {
-    return next(new ErrorHandler("Invalid Task ID", 400));
+    return next(new ErrorHandler("Error 301", 400));
   }
 
   if (!acronym) {
-    return next(new ErrorHandler("Please input an app acronym", 400));
+    return next(new ErrorHandler("Error 305", 400));
   }
 
   if (acronym.length !== 3) {
-    return next(
-      new ErrorHandler("Length of acronym must be 3 characters!", 400)
-    );
+    return next(new ErrorHandler("Error 303", 400));
   }
 
   const permittedGroup = await new Promise((resolve, reject) => {
@@ -80,8 +77,11 @@ const a3CheckTaskPermissions = catchAsyncErrors(async (req, res, next) => {
       (err, results) => {
         if (err) {
           reject(err);
+        } else if (results.length) {
+          resolve(results[0][`permit_${action}`]);
+        } else {
+          reject(new ErrorHandler("Error 303", 400));
         }
-        resolve(results[0][`permit_${action}`]);
       }
     );
   });
@@ -99,7 +99,7 @@ const a3CheckTaskPermissions = catchAsyncErrors(async (req, res, next) => {
   if (isPermitted) {
     next();
   } else {
-    return next(new ErrorHandler("Insufficient permissions", 401));
+    return next(new ErrorHandler("Error 200", 401));
   }
 });
 

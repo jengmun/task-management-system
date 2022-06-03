@@ -95,13 +95,13 @@ router.post("/is-group", isGroup);
 // ================= ASSIGNMENT 3 ================= //
 
 router.get(
-  "/a3/all-tasks/:username/:password/:app/:state",
+  "/a3/get-tasks-by-state/:username/:password/:app/:state",
   a3Login,
   a3AllAppTasksByState
 );
 
 router.post(
-  "/a3/:username/:password/create-task",
+  "/a3/create-task/:username/:password",
   a3Login,
   a3CheckTaskPermissions,
   a3CreateTask,
@@ -109,7 +109,7 @@ router.post(
 );
 
 router.post(
-  "/a3/:username/:password/approve-done-task",
+  "/a3/approve-done-task/:username/:password",
   a3Login,
   a3CheckTaskPermissions,
   a3TaskStateProgression,

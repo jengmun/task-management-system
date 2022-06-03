@@ -328,8 +328,9 @@ exports.hasPermissions = catchAsyncErrors(async (req, res, next) => {
       (err, results) => {
         if (err) {
           reject(err);
+        } else {
+          resolve(results[0]);
         }
-        resolve(results[0]);
       }
     );
   });
@@ -394,8 +395,7 @@ exports.taskStateProgression = catchAsyncErrors(async (req, res, next) => {
       (err, results) => {
         if (err) {
           reject(err);
-        }
-        if (results.length) {
+        } else if (results.length) {
           resolve(results[0]);
         } else {
           resolve({ state: "", creator: "", owner: "" });
@@ -447,8 +447,9 @@ exports.taskStateProgression = catchAsyncErrors(async (req, res, next) => {
         (err, results) => {
           if (err) {
             reject(err);
+          } else {
+            resolve(results[0].permit_done);
           }
-          resolve(results[0].permit_done);
         }
       );
     });
@@ -460,9 +461,10 @@ exports.taskStateProgression = catchAsyncErrors(async (req, res, next) => {
         (err, results) => {
           if (err) {
             reject(err);
+          } else {
+            console.log(results);
+            resolve(results);
           }
-          console.log(results);
-          resolve(results);
         }
       );
     });
@@ -617,8 +619,28 @@ exports.isGroup = catchAsyncErrors(async (req, res, next) => {
 
 // ================= ASSIGNMENT 3 ================= //
 
-exports.a3AllAppTasksByState = (req, res, next) => {
+exports.a3AllAppTasksByState = catchAsyncErrors(async (req, res, next) => {
   const { app, state } = req.params;
+
+  if (!listOfStates.includes(state)) {
+    return next(new ErrorHandler("Error 304", 400));
+  }
+
+  await new Promise((resolve, reject) => {
+    db.query(
+      "SELECT acronym FROM applications WHERE acronym = ?",
+      app,
+      (err, results) => {
+        if (err) {
+          reject(new ErrorHandler("Error 500", 500));
+        } else if (!results.length) {
+          reject(new ErrorHandler("Error 303", 400));
+        } else {
+          resolve(true);
+        }
+      }
+    );
+  });
 
   db.query(
     "SELECT * FROM tasks WHERE acronym = ? AND state = ?",
@@ -630,7 +652,7 @@ exports.a3AllAppTasksByState = (req, res, next) => {
       res.json(results);
     }
   );
-};
+});
 
 exports.a3CreateTask = catchAsyncErrors(async (req, res, next) => {
   if (req.body.planName) {
@@ -653,14 +675,12 @@ exports.a3CreateTask = catchAsyncErrors(async (req, res, next) => {
     });
 
     if (!validPlan) {
-      return next(new ErrorHandler("No valid open plan found!", 400));
+      return next(new ErrorHandler("Error 302", 400));
     }
   }
 
   if (!req.body.taskName || !req.body.description) {
-    return next(
-      new ErrorHandler("Please input both task name and description!", 400)
-    );
+    return next(new ErrorHandler("Error 305", 400));
   }
 
   const runningNumber = await new Promise((resolve, reject) => {
@@ -720,8 +740,7 @@ exports.a3TaskStateProgression = catchAsyncErrors(async (req, res, next) => {
       (err, results) => {
         if (err) {
           reject(err);
-        }
-        if (results.length) {
+        } else if (results.length) {
           resolve(results[0]);
         } else {
           resolve({ state: "" });
@@ -734,7 +753,7 @@ exports.a3TaskStateProgression = catchAsyncErrors(async (req, res, next) => {
   console.log("currentState: ", currentState);
 
   if (currentState !== "Doing") {
-    return next(new ErrorHandler("Current state is not Doing!", 400));
+    return next(new ErrorHandler("Error 401", 400));
   }
 
   const newState = listOfStates[listOfStates.indexOf(currentState) + 1];
@@ -760,8 +779,9 @@ exports.a3TaskStateProgression = catchAsyncErrors(async (req, res, next) => {
         (err, results) => {
           if (err) {
             reject(err);
+          } else {
+            resolve(results[0].permit_done);
           }
-          resolve(results[0].permit_done);
         }
       );
     });
@@ -773,9 +793,10 @@ exports.a3TaskStateProgression = catchAsyncErrors(async (req, res, next) => {
         (err, results) => {
           if (err) {
             reject(err);
+          } else {
+            console.log(results);
+            resolve(results);
           }
-          console.log(results);
-          resolve(results);
         }
       );
     });
@@ -807,7 +828,7 @@ exports.a3CreateNotes = catchAsyncErrors(async (req, res, next) => {
   }
 
   if (state === "Closed") {
-    return next(new ErrorHandler("Task is closed!", 500));
+    return next(new ErrorHandler("Error 401", 500));
   }
 
   if (!details) {

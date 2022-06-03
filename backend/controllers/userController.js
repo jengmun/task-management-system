@@ -382,8 +382,9 @@ exports.assignPM = catchAsyncErrors(async (req, res, next) => {
       (err, results) => {
         if (err) {
           reject(err);
+        } else {
+          resolve(results);
         }
-        resolve(results);
       }
     );
   });
@@ -429,7 +430,9 @@ exports.adminPasswordReset = catchAsyncErrors(async (req, res, next) => {
       [req.body.username, req.body.email],
       (err, results) => {
         if (err) reject(err);
-        resolve(results);
+        else {
+          resolve(results);
+        }
       }
     );
   });
@@ -476,13 +479,15 @@ exports.userPasswordReset = catchAsyncErrors(async (req, res, next) => {
       username,
       (err, result) => {
         if (err) reject(err);
-        argon2.verify(result[0].password, oldPassword).then((argon2Match) => {
-          if (!argon2Match) {
-            resolve(false);
-          } else {
-            resolve(true);
-          }
-        });
+        else {
+          argon2.verify(result[0].password, oldPassword).then((argon2Match) => {
+            if (!argon2Match) {
+              resolve(false);
+            } else {
+              resolve(true);
+            }
+          });
+        }
       }
     );
   });

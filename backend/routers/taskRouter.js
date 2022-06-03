@@ -109,7 +109,7 @@ router.post(
 );
 
 router.post(
-  "/a3/approve-done-task/:username/:password",
+  "/a3/promote-task-2-done/:username/:password",
   a3Login,
   a3CheckTaskPermissions,
   a3TaskStateProgression,

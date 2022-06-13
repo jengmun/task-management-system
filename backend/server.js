@@ -33,6 +33,8 @@ db.connect((err) => {
   console.log("Connected to database!");
 });
 
+app.use(require("sanitize").middleware);
+
 // Routers
 const userRouter = require("./routers/userRouter");
 app.use("/user", userRouter);
@@ -41,7 +43,7 @@ app.use("/task", taskRouter);
 
 // Handling Unhandled Routes - Placed below all other routes
 app.all("*", (req, res, next) => {
-  next(new ErrorHandler(`${req.originalUrl} route not found`, 404));
+  next(new ErrorHandler("Error 402", 404));
 });
 
 // Global error handler
@@ -77,7 +79,6 @@ app.use(helmet());
 app.use(hpp());
 
 // Connect to port and DB
-
 app.listen(process.env.PORT, () => {
   console.log(`Connected to http://host.docker.internal:${process.env.PORT}`);
 });

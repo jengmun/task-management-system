@@ -3,7 +3,7 @@ const mysql = require("mysql");
 const database = "nodelogin";
 
 const db = mysql.createConnection({
-  host: "host.docker.internal",
+  host: "localhost",
   user: "root",
   password: process.env.DB_PASSWORD,
   database,

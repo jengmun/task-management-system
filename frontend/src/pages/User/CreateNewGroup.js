@@ -1,6 +1,6 @@
 import { useState } from "react";
 import handlePostRequest from "../../hooks/handlePostRequest";
-import { Button, Card, TextField, Typography } from "@mui/material";
+import { Button, Card, TextField } from "@mui/material";
 import CustomSnackbar from "../../components/CustomSnackbar";
 
 const CreateNewGroup = (props) => {

@@ -2,7 +2,6 @@ import React, { useContext } from "react";
 import { NavLink, useLocation } from "react-router-dom";
 import LoginContext from "../context/login-context";
 import handleGetRequest from "../hooks/handleGetRequest";
-import { useTheme } from "@mui/material/styles";
 import { List, ListItem, Button } from "@mui/material";
 import HomeRoundedIcon from "@mui/icons-material/HomeRounded";
 import AccountCircleRoundedIcon from "@mui/icons-material/AccountCircleRounded";

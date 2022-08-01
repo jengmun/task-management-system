@@ -12,7 +12,6 @@ import GroupsRoundedIcon from "@mui/icons-material/GroupsRounded";
 
 const Nav = () => {
   const loginContext = useContext(LoginContext);
-  const theme = useTheme();
 
   return (
     <List

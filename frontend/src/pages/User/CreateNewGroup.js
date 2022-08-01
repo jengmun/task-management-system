@@ -14,7 +14,7 @@ const CreateNewGroup = (props) => {
     setSeverity(severity);
   };
 
-  const handleCloseSnackbar = (event, reason) => {
+  const handleCloseSnackbar = (_event, reason) => {
     if (reason === "clickaway") {
       return;
     }

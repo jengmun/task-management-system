@@ -4,7 +4,7 @@ import { useState } from "react";
 import CustomSnackbar from "../../components/CustomSnackbar";
 import handlePostRequest from "../../hooks/handlePostRequest";
 
-const ResetPassword = () => {
+const ForgotPassword = () => {
   // ------------- Snackbar -------------
   const [message, setMessage] = useState("");
   const [openSnackbar, setOpenSnackbar] = useState(false);
@@ -73,4 +73,4 @@ const ResetPassword = () => {
   );
 };
 
-export default ResetPassword;
+export default ForgotPassword;

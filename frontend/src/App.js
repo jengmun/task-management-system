@@ -1,7 +1,6 @@
 import { useEffect, useState } from "react";
 import { BrowserRouter, Redirect, Route, Switch } from "react-router-dom";
 import Cookies from "js-cookie";
-import "./App.css";
 import AdminRoute from "./ProtectedRoutes/AdminRoute";
 import LoginContext from "./context/login-context";
 import handleGetRequest from "./hooks/handleGetRequest";
